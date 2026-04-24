@@ -8,7 +8,7 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
 .header{padding:1.2rem 1rem 0;}
 .header h1{font-family:'Instrument Serif',serif;font-size:clamp(22px,5vw,28px);font-weight:400;color:var(--ink);letter-spacing:-0.02em;line-height:1;}
 .header h1 em{font-style:italic;color:var(--muted);}
-.tabs{display:flex;padding:1rem 1rem 0;border-bottom:1.5px solid var(--border);}
+.tabs{display:flex;padding:1rem 1rem 0;border-bottom:1.5px solid var(--border);overflow-x:auto;}
 .tab{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:6px 0 10px;margin-right:20px;cursor:pointer;color:var(--muted);border:none;border-bottom:2px solid transparent;margin-bottom:-1.5px;background:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
 .tab.active{color:var(--ink);border-bottom-color:var(--ink);}
 .page{display:none;padding:1rem;}
@@ -22,14 +22,14 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
 .color-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.2rem;}
 .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.15s;-webkit-tap-highlight-color:transparent;}
 .color-swatch.selected{border-color:var(--ink);transform:scale(1.1);}
-.habits{display:flex;flex-direction:column;gap:10px;}
+.habits-list{display:flex;flex-direction:column;gap:10px;}
 .habit-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1rem;}
 .habit-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .color-pip{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.habit-name{font-size:15px;font-weight:400;color:var(--ink);flex:1;}
+.habit-name-label{font-size:15px;font-weight:400;color:var(--ink);flex:1;}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px 6px;line-height:1;-webkit-tap-highlight-color:transparent;}
 .grid{display:flex;gap:3px;flex-wrap:wrap;}
-.day-cell{width:clamp(22px,7vw,26px);height:clamp(22px,7vw,26px);border-radius:5px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.15s,border-color 0.15s;}
+.day-cell{width:clamp(22px,7vw,26px);height:clamp(22px,7vw,26px);border-radius:5px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
 .day-cell.done{border:none;}
 .day-cell.today{box-shadow:0 0 0 2px var(--ink);}
 .day-cell.future{opacity:0.25;pointer-events:none;}
@@ -39,7 +39,7 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
 .stat-label{font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
 .stat-val{font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);}
 .empty{text-align:center;padding:2.5rem 0;color:var(--muted);font-size:14px;}
-.month-nav{display:flex;align-items:center;margin-bottom:1.2rem;background:white;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;}
+.month-nav{display:flex;align-items:center;margin-bottom:1rem;background:white;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;}
 .month-nav button{font-family:'DM Sans',sans-serif;background:none;border:none;padding:10px 16px;cursor:pointer;color:var(--ink);font-size:18px;line-height:1;-webkit-tap-highlight-color:transparent;}
 .month-nav button:active{background:var(--cream);}
 .month-nav span{flex:1;text-align:center;font-size:14px;font-weight:500;color:var(--ink);}
@@ -57,34 +57,44 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
 .bar-track{flex:1;height:7px;background:#f0ece6;border-radius:4px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:4px;}
 .bar-pct{font-size:12px;font-weight:500;color:var(--muted);min-width:30px;text-align:right;}
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,28vw,140px),1fr));gap:12px;}
-.cat-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;}
-.cat-name{font-size:11px;font-weight:500;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
-.cat-pct{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);}
-.cat-sub{font-size:10px;color:var(--muted);text-align:center;}
-.cat-mood{font-size:10px;font-style:italic;color:var(--muted);text-align:center;}
+.viz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,28vw,140px),1fr));gap:12px;}
+.viz-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.viz-name{font-size:11px;font-weight:500;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.viz-pct{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);}
+.viz-sub{font-size:10px;color:var(--muted);text-align:center;}
+.viz-mood{font-size:10px;font-style:italic;color:var(--muted);text-align:center;min-height:14px;}
 .pct-bar{width:80%;height:4px;background:#f0ece6;border-radius:2px;overflow:hidden;margin-top:2px;}
 .pct-bar-fill{height:100%;border-radius:2px;}
+.theme-toggle{display:flex;gap:6px;margin-bottom:1rem;background:var(--cream);border-radius:12px;padding:4px;}
+.theme-btn{flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:7px 6px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;white-space:nowrap;}
+.theme-btn.active{background:white;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
 </style>
 
 <div class="ht">
-  <div class="header"><h1>my habits <em>— cozy cats</em></h1></div>
+  <div class="header"><h1>my <em>habit tracker</em></h1></div>
   <div class="tabs">
-    <button class="tab active" onclick="showTab('cats')">Cats</button>
+    <button class="tab active" onclick="showTab('viz')">Progress</button>
     <button class="tab" onclick="showTab('dashboard')">Dashboard</button>
     <button class="tab" onclick="showTab('habits')">Habits</button>
   </div>
 
-  <div class="page active" id="page-cats">
+  <!-- PROGRESS (viz) -->
+  <div class="page active" id="page-viz">
     <div class="month-nav">
-      <button onclick="changeMonth('cats',-1)">&#8592;</button>
-      <span id="cats-month-label"></span>
-      <button onclick="changeMonth('cats',1)">&#8594;</button>
+      <button onclick="changeMonth('viz',-1)">&#8592;</button>
+      <span id="viz-month-label"></span>
+      <button onclick="changeMonth('viz',1)">&#8594;</button>
     </div>
-    <div id="cats-empty" class="empty" style="display:none;">Add habits to wake up your cats!</div>
-    <div class="cat-grid" id="cat-grid"></div>
+    <div class="theme-toggle">
+      <button class="theme-btn active" onclick="setTheme('cats',this)">🐱 Cozy Cats</button>
+      <button class="theme-btn" onclick="setTheme('castles',this)">🏰 Castles</button>
+      <button class="theme-btn" onclick="setTheme('muscle',this)">💪 Getting Stronger</button>
+    </div>
+    <div id="viz-empty" class="empty" style="display:none;">Add habits in the Habits tab to see your progress!</div>
+    <div class="viz-grid" id="viz-grid"></div>
   </div>
 
+  <!-- DASHBOARD -->
   <div class="page" id="page-dashboard">
     <div class="month-nav">
       <button onclick="changeMonth('dash',-1)">&#8592;</button>
@@ -92,16 +102,11 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
       <button onclick="changeMonth('dash',1)">&#8594;</button>
     </div>
     <div class="dash-grid" id="dash-summary"></div>
-    <div style="margin-bottom:1.2rem;">
-      <div class="section-label">Today</div>
-      <div id="dash-today"></div>
-    </div>
-    <div>
-      <div class="section-label" id="dash-month-progress-label"></div>
-      <div id="dash-bars"></div>
-    </div>
+    <div style="margin-bottom:1.2rem;"><div class="section-label">Today</div><div id="dash-today"></div></div>
+    <div><div class="section-label" id="dash-progress-label"></div><div id="dash-bars"></div></div>
   </div>
 
+  <!-- HABITS -->
   <div class="page" id="page-habits">
     <div class="section-label">New habit</div>
     <div class="add-row">
@@ -111,7 +116,7 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
     <div class="section-label">Pick a color</div>
     <div class="color-grid" id="color-grid"></div>
     <div class="section-label">Your habits</div>
-    <div class="habits" id="habits-list">
+    <div class="habits-list" id="habits-list">
       <div class="empty" id="empty-msg">No habits yet — add one above!</div>
     </div>
   </div>
@@ -120,20 +125,27 @@ body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-a
 <script>
 const COLORS=['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff5fa0','#00c9b1','#ff7f50','#a29bfe','#fd79a8','#00b894','#e17055','#74b9ff','#55efc4','#fdcb6e','#e84393','#0984e3','#fab1a0','#81ecec','#ff6348','#2ed573','#eccc68','#a4b0be'];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MOODS=['just woke up...','stretching a little','warming up','getting comfy','all curled up','peak cozy mode'];
-let selectedColor=COLORS[0];
-const TODAY=new Date();TODAY.setHours(0,0,0,0);
-let catsYear=TODAY.getFullYear(),catsMonth=TODAY.getMonth();
-let dashYear=TODAY.getFullYear(),dashMonth=TODAY.getMonth();
-let activeTab='cats';
+const CAT_MOODS=['just woke up...','stretching a little','warming up','getting comfy','all curled up','peak cozy mode zzz'];
+const CASTLE_MOODS=['clearing land...','laying stones','walls rising','towers going up','adding the spires','a magnificent castle!'];
+const MUSCLE_MOODS=['day one 💭','feeling it 🥵','gains loading...','getting swole 💪','seriously jacked','absolute unit 🏆'];
+
+let selectedColor=COLORS[0], activeTab='viz', vizTheme='cats';
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+let vizYear=TODAY.getFullYear(), vizMonth=TODAY.getMonth();
+let dashYear=TODAY.getFullYear(), dashMonth=TODAY.getMonth();
 let habits=[];
-try{habits=JSON.parse(localStorage.getItem('ht_v7')||'[]');}catch(e){}
-function save(){try{localStorage.setItem('ht_v7',JSON.stringify(habits));}catch(e){}}
+try{habits=JSON.parse(localStorage.getItem('ht_v8')||'[]');}catch(e){}
+function save(){try{localStorage.setItem('ht_v8',JSON.stringify(habits));}catch(e){}}
 function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const todayKey=dateKey(TODAY);
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
-function monthCompletions(h,y,m){let c=0,t=daysInMonth(y,m);for(let i=1;i<=t;i++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');if(h.done[k])c++;}return{count:c,total:t};}
+function monthComp(h,y,m){let c=0,t=daysInMonth(y,m);for(let i=1;i<=t;i++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');if(h.done[k])c++;}return{count:c,total:t};}
 
+// Color helpers
+function darken(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.max(0,v-a).toString(16).padStart(2,'0')).join('');}
+function lighten(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.min(255,v+a).toString(16).padStart(2,'0')).join('');}
+
+// Build color swatches
 const cg=document.getElementById('color-grid');
 COLORS.forEach((c,i)=>{
   const s=document.createElement('div');
@@ -145,206 +157,565 @@ COLORS.forEach((c,i)=>{
 
 function showTab(tab){
   activeTab=tab;
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['cats','dashboard','habits'][i]===tab));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['viz','dashboard','habits'][i]===tab));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
   renderActive();
 }
-
 function renderActive(){
-  if(activeTab==='cats') renderCats();
+  if(activeTab==='viz') renderViz();
   else if(activeTab==='dashboard') renderDashboard();
   else renderHabits();
 }
-
+function setTheme(t,btn){
+  vizTheme=t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderViz();
+}
 function changeMonth(view,dir){
-  if(view==='cats'){catsMonth+=dir;if(catsMonth>11){catsMonth=0;catsYear++;}if(catsMonth<0){catsMonth=11;catsYear--;}renderCats();}
+  if(view==='viz'){vizMonth+=dir;if(vizMonth>11){vizMonth=0;vizYear++;}if(vizMonth<0){vizMonth=11;vizYear--;}renderViz();}
   else{dashMonth+=dir;if(dashMonth>11){dashMonth=0;dashYear++;}if(dashMonth<0){dashMonth=11;dashYear--;}renderDashboard();}
 }
 
 document.getElementById('habit-input').addEventListener('keydown',e=>{if(e.key==='Enter')addHabit();});
 
 function addHabit(){
-  const name=document.getElementById('habit-input').value.trim();if(!name)return;
-  habits.push({id:Date.now(),name,color:selectedColor,done:{}});
-  document.getElementById('habit-input').value='';
-  save();renderActive();
+  const inp=document.getElementById('habit-input');
+  const name=inp.value.trim(); if(!name) return;
+  const h={id:Date.now(),name,color:selectedColor,done:{}};
+  habits.push(h);
+  inp.value='';
+  save();
+  // Instant add to habits tab DOM
+  const list=document.getElementById('habits-list');
+  const empty=document.getElementById('empty-msg');
+  if(empty) empty.style.display='none';
+  const card=buildHabitCard(h);
+  list.insertAdjacentHTML('beforeend',card);
+  // Also refresh viz/dash if active
+  if(activeTab==='viz') renderViz();
+  else if(activeTab==='dashboard') renderDashboard();
 }
 
 function deleteHabit(id){
   habits=habits.filter(x=>x.id!==id);
-  save();renderActive();
+  save();
+  // Remove card from DOM instantly
+  const card=document.querySelector(`[data-habit-id="${id}"]`);
+  if(card) card.remove();
+  const list=document.getElementById('habits-list');
+  if(habits.length===0){
+    const empty=document.getElementById('empty-msg');
+    if(empty){empty.style.display='block';list.appendChild(empty);}
+  }
+  if(activeTab==='viz') renderViz();
+  else if(activeTab==='dashboard') renderDashboard();
 }
 
-// Toggle a day cell IN PLACE — no full re-render
-function toggleDay(id, key, el, color){
-  const h=habits.find(x=>x.id===id);if(!h)return;
-  h.done[key]=!h.done[key];
-  save();
+function toggleDay(id,key,el,color){
+  const h=habits.find(x=>x.id===id); if(!h) return;
+  h.done[key]=!h.done[key]; save();
   const done=h.done[key];
-  if(done){
-    el.style.background=color;
-    el.style.border='none';
-    el.textContent='';
-    el.classList.add('done');
-  } else {
-    el.style.background='';
-    el.style.border='';
-    el.textContent=key.slice(-2).replace(/^0/,'');
-    el.classList.remove('done');
-  }
-  // Update this card's stat numbers in place
+  if(done){el.style.background=color;el.style.borderColor='transparent';el.textContent='';el.classList.add('done');}
+  else{el.style.background='';el.style.borderColor='';el.textContent=parseInt(key.slice(-2)).toString();el.classList.remove('done');}
   const card=el.closest('.habit-card');
   if(card){
-    const y=TODAY.getFullYear(),m=TODAY.getMonth(),mDaysTotal=daysInMonth(y,m);
-    const{count}=monthCompletions(h,y,m),pct=Math.round(count/mDaysTotal*100);
+    const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=daysInMonth(y,m);
+    const{count}=monthComp(h,y,m),pct=Math.round(count/mt*100);
     const vals=card.querySelectorAll('.stat-val');
-    if(vals[0])vals[0].textContent=count+'/'+mDaysTotal;
+    if(vals[0])vals[0].textContent=count+'/'+mt;
     if(vals[1])vals[1].textContent=pct+'%';
   }
 }
-
 function toggleTodayDash(id){
-  const h=habits.find(x=>x.id===id);if(!h)return;
-  h.done[todayKey]=!h.done[todayKey];
-  save();renderDashboard();
+  const h=habits.find(x=>x.id===id); if(!h) return;
+  h.done[todayKey]=!h.done[todayKey]; save(); renderDashboard();
 }
 
-function darken(hex,amt){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.max(0,v-amt).toString(16).padStart(2,'0')).join('');}
-function lighten(hex,amt){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.min(255,v+amt).toString(16).padStart(2,'0')).join('');}
-
-function drawCat(pct,color,size){
-  const s=size||100;
+// ─── CAT DRAWING ───────────────────────────────────────────────────────────
+function drawCat(pct,color){
   const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-  const dark=darken(color,40),mid=darken(color,15),light=lighten(color,45),nose='#e88888',eye='#1a1612';
-  let svg=`<svg width="${s}" height="${s}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  const mid=darken(color,20), light=lighten(color,48), vlight=lighten(color,65);
+  const eye='#1a1612', nose='#f4a0a0', shine='rgba(255,255,255,0.85)';
+  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+
   if(stage===0){
-    svg+=`<path d="M52 82 Q80 85 78 70 Q76 58 62 62" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="50" cy="72" rx="20" ry="18" fill="${color}"/>`;
-    svg+=`<ellipse cx="50" cy="46" rx="17" ry="16" fill="${color}"/>`;
-    svg+=`<polygon points="36,36 32,22 44,32" fill="${color}"/><polygon points="64,36 68,22 56,32" fill="${color}"/>`;
-    svg+=`<polygon points="37,34 34,25 43,32" fill="${light}"/><polygon points="63,34 66,25 57,32" fill="${light}"/>`;
-    svg+=`<line x1="38" y1="42" x2="33" y2="38" stroke="${mid}" stroke-width="1.2" stroke-linecap="round"/>`;
-    svg+=`<line x1="36" y1="46" x2="30" y2="44" stroke="${mid}" stroke-width="1.2" stroke-linecap="round"/>`;
-    svg+=`<line x1="62" y1="42" x2="67" y2="38" stroke="${mid}" stroke-width="1.2" stroke-linecap="round"/>`;
-    svg+=`<line x1="64" y1="46" x2="70" y2="44" stroke="${mid}" stroke-width="1.2" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="43" cy="46" rx="4.5" ry="5" fill="white"/><ellipse cx="57" cy="46" rx="4.5" ry="5" fill="white"/>`;
-    svg+=`<ellipse cx="43" cy="47" rx="2.8" ry="3.5" fill="${eye}"/><ellipse cx="57" cy="47" rx="2.8" ry="3.5" fill="${eye}"/>`;
-    svg+=`<circle cx="44" cy="46" r="0.9" fill="white"/><circle cx="58" cy="46" r="0.9" fill="white"/>`;
-    svg+=`<ellipse cx="50" cy="52" rx="2" ry="1.4" fill="${nose}"/>`;
-    svg+=`<path d="M47 54 Q50 57 53 54" fill="none" stroke="${mid}" stroke-width="1" stroke-linecap="round"/>`;
-    svg+=`<line x1="32" y1="51" x2="47" y2="53" stroke="${mid}" stroke-width="0.8" opacity="0.7"/><line x1="32" y1="54" x2="47" y2="54" stroke="${mid}" stroke-width="0.8" opacity="0.7"/>`;
-    svg+=`<line x1="68" y1="51" x2="53" y2="53" stroke="${mid}" stroke-width="0.8" opacity="0.7"/><line x1="68" y1="54" x2="53" y2="54" stroke="${mid}" stroke-width="0.8" opacity="0.7"/>`;
-    svg+=`<ellipse cx="38" cy="87" rx="7" ry="4" fill="${mid}"/><ellipse cx="62" cy="87" rx="7" ry="4" fill="${mid}"/>`;
+    // Sitting upright, wide-awake, collar, tail curled at feet
+    // tail
+    s+=`<path d="M54 82 Q82 84 80 68 Q78 55 63 60" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    // body
+    s+=`<ellipse cx="50" cy="71" rx="20" ry="18" fill="${color}"/>`;
+    // belly patch
+    s+=`<ellipse cx="50" cy="74" rx="11" ry="12" fill="${light}"/>`;
+    // head
+    s+=`<ellipse cx="50" cy="45" rx="18" ry="17" fill="${color}"/>`;
+    // ears
+    s+=`<polygon points="35,34 30,18 45,31" fill="${color}"/><polygon points="65,34 70,18 55,31" fill="${color}"/>`;
+    s+=`<polygon points="36,33 32,21 44,31" fill="${light}"/><polygon points="64,33 68,21 56,31" fill="${light}"/>`;
+    // forehead stripe
+    s+=`<path d="M46 32 Q50 28 54 32" fill="none" stroke="${mid}" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>`;
+    // cheek tufts
+    s+=`<ellipse cx="34" cy="47" rx="5" ry="3.5" fill="${light}" opacity="0.7"/><ellipse cx="66" cy="47" rx="5" ry="3.5" fill="${light}" opacity="0.7"/>`;
+    // eyes open big
+    s+=`<ellipse cx="43" cy="45" rx="5" ry="5.5" fill="white"/><ellipse cx="57" cy="45" rx="5" ry="5.5" fill="white"/>`;
+    s+=`<ellipse cx="43" cy="46" rx="3" ry="3.8" fill="${eye}"/><ellipse cx="57" cy="46" rx="3" ry="3.8" fill="${eye}"/>`;
+    s+=`<circle cx="44.5" cy="44.5" r="1.1" fill="${shine}"/><circle cx="58.5" cy="44.5" r="1.1" fill="${shine}"/>`;
+    // nose + mouth
+    s+=`<ellipse cx="50" cy="52" rx="2.2" ry="1.6" fill="${nose}"/>`;
+    s+=`<path d="M47.5 54 Q50 57 52.5 54" fill="none" stroke="${mid}" stroke-width="1.1" stroke-linecap="round"/>`;
+    // whiskers
+    s+=`<line x1="30" y1="51" x2="46" y2="53" stroke="${mid}" stroke-width="0.9" opacity="0.6"/><line x1="30" y1="54" x2="46" y2="54.5" stroke="${mid}" stroke-width="0.9" opacity="0.6"/>`;
+    s+=`<line x1="70" y1="51" x2="54" y2="53" stroke="${mid}" stroke-width="0.9" opacity="0.6"/><line x1="70" y1="54" x2="54" y2="54.5" stroke="${mid}" stroke-width="0.9" opacity="0.6"/>`;
+    // collar
+    s+=`<path d="M33 56 Q50 62 67 56" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="60" r="2.5" fill="#ffd93d"/>`;
+    // paws
+    s+=`<ellipse cx="37" cy="87" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="87" rx="8" ry="4.5" fill="${mid}"/>`;
+    s+=`<ellipse cx="35" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="39" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
+    s+=`<ellipse cx="61" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="65" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
+
   } else if(stage===1){
-    svg+=`<path d="M52 83 Q78 86 76 72 Q74 60 61 63" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="50" cy="72" rx="20" ry="17" fill="${color}"/><ellipse cx="50" cy="47" rx="17" ry="16" fill="${color}"/>`;
-    svg+=`<polygon points="36,37 32,23 44,33" fill="${color}"/><polygon points="64,37 68,23 56,33" fill="${color}"/>`;
-    svg+=`<polygon points="37,35 34,26 43,33" fill="${light}"/><polygon points="63,35 66,26 57,33" fill="${light}"/>`;
-    svg+=`<ellipse cx="43" cy="47" rx="4.5" ry="4" fill="white"/><ellipse cx="57" cy="47" rx="4.5" ry="4" fill="white"/>`;
-    svg+=`<ellipse cx="43" cy="48" rx="2.8" ry="2.5" fill="${eye}"/><ellipse cx="57" cy="48" rx="2.8" ry="2.5" fill="${eye}"/>`;
-    svg+=`<path d="M38.5 44 Q43 42 47.5 44" fill="${color}"/><path d="M52.5 44 Q57 42 61.5 44" fill="${color}"/>`;
-    svg+=`<ellipse cx="50" cy="53" rx="2" ry="1.4" fill="${nose}"/>`;
-    svg+=`<path d="M47 55 Q50 57.5 53 55" fill="none" stroke="${mid}" stroke-width="1" stroke-linecap="round"/>`;
-    svg+=`<line x1="32" y1="52" x2="47" y2="54" stroke="${mid}" stroke-width="0.8" opacity="0.6"/><line x1="32" y1="55" x2="47" y2="55" stroke="${mid}" stroke-width="0.8" opacity="0.6"/>`;
-    svg+=`<line x1="68" y1="52" x2="53" y2="54" stroke="${mid}" stroke-width="0.8" opacity="0.6"/><line x1="68" y1="55" x2="53" y2="55" stroke="${mid}" stroke-width="0.8" opacity="0.6"/>`;
-    svg+=`<ellipse cx="38" cy="87" rx="7" ry="4" fill="${mid}"/><ellipse cx="62" cy="87" rx="7" ry="4" fill="${mid}"/>`;
+    // Sitting, half-lidded, yawning slightly
+    s+=`<path d="M54 83 Q80 86 78 71 Q76 58 62 62" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="72" rx="20" ry="17" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="75" rx="11" ry="11" fill="${light}"/>`;
+    s+=`<ellipse cx="50" cy="47" rx="18" ry="17" fill="${color}"/>`;
+    s+=`<polygon points="35,35 30,19 45,32" fill="${color}"/><polygon points="65,35 70,19 55,32" fill="${color}"/>`;
+    s+=`<polygon points="36,34 32,22 44,32" fill="${light}"/><polygon points="64,34 68,22 56,32" fill="${light}"/>`;
+    s+=`<ellipse cx="34" cy="49" rx="5" ry="3.5" fill="${light}" opacity="0.7"/><ellipse cx="66" cy="49" rx="5" ry="3.5" fill="${light}" opacity="0.7"/>`;
+    // half-lidded
+    s+=`<ellipse cx="43" cy="47" rx="5" ry="4.5" fill="white"/><ellipse cx="57" cy="47" rx="5" ry="4.5" fill="white"/>`;
+    s+=`<ellipse cx="43" cy="48" rx="3" ry="3" fill="${eye}"/><ellipse cx="57" cy="48" rx="3" ry="3" fill="${eye}"/>`;
+    s+=`<path d="M38 44.5 Q43 42.5 48 44.5" fill="${color}"/><path d="M52 44.5 Q57 42.5 62 44.5" fill="${color}"/>`;
+    s+=`<circle cx="44" cy="46.5" r="0.9" fill="${shine}"/><circle cx="58" cy="46.5" r="0.9" fill="${shine}"/>`;
+    s+=`<ellipse cx="50" cy="54" rx="2.2" ry="1.6" fill="${nose}"/>`;
+    s+=`<path d="M47.5 56 Q50 59 52.5 56" fill="none" stroke="${mid}" stroke-width="1.1" stroke-linecap="round"/>`;
+    s+=`<line x1="30" y1="53" x2="46" y2="55" stroke="${mid}" stroke-width="0.9" opacity="0.5"/><line x1="30" y1="56" x2="46" y2="56.5" stroke="${mid}" stroke-width="0.9" opacity="0.5"/>`;
+    s+=`<line x1="70" y1="53" x2="54" y2="55" stroke="${mid}" stroke-width="0.9" opacity="0.5"/><line x1="70" y1="56" x2="54" y2="56.5" stroke="${mid}" stroke-width="0.9" opacity="0.5"/>`;
+    s+=`<path d="M33 58 Q50 64 67 58" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="62" r="2.5" fill="#ffd93d"/>`;
+    s+=`<ellipse cx="37" cy="87" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="87" rx="8" ry="4.5" fill="${mid}"/>`;
+    s+=`<ellipse cx="35" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="39" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
+    s+=`<ellipse cx="61" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="65" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
+
   } else if(stage===2){
-    svg+=`<path d="M54 82 Q76 87 74 74 Q72 63 60 65" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="50" cy="73" rx="21" ry="16" fill="${color}"/><ellipse cx="50" cy="50" rx="16" ry="15" fill="${color}"/>`;
-    svg+=`<polygon points="37,41 33,27 44,37" fill="${color}"/><polygon points="63,41 67,27 56,37" fill="${color}"/>`;
-    svg+=`<polygon points="38,39 35,29 43,37" fill="${light}"/><polygon points="62,39 65,29 57,37" fill="${light}"/>`;
-    svg+=`<ellipse cx="43" cy="50" rx="4.5" ry="2.5" fill="white"/><ellipse cx="57" cy="50" rx="4.5" ry="2.5" fill="white"/>`;
-    svg+=`<ellipse cx="43" cy="50.5" rx="2.8" ry="1.5" fill="${eye}"/><ellipse cx="57" cy="50.5" rx="2.8" ry="1.5" fill="${eye}"/>`;
-    svg+=`<path d="M38.5 47.5 Q43 46 47.5 47.5" fill="${color}"/><path d="M52.5 47.5 Q57 46 61.5 47.5" fill="${color}"/>`;
-    svg+=`<ellipse cx="50" cy="56" rx="2" ry="1.3" fill="${nose}"/>`;
-    svg+=`<line x1="33" y1="55" x2="47" y2="57" stroke="${mid}" stroke-width="0.8" opacity="0.5"/><line x1="67" y1="55" x2="53" y2="57" stroke="${mid}" stroke-width="0.8" opacity="0.5"/>`;
-    svg+=`<ellipse cx="38" cy="87" rx="6" ry="3.5" fill="${mid}"/><ellipse cx="62" cy="87" rx="6" ry="3.5" fill="${mid}"/>`;
+    // Hunched, drowsy, eyes slitted
+    s+=`<path d="M55 81 Q78 86 75 73 Q72 62 61 64" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="73" rx="22" ry="16" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="76" rx="12" ry="10" fill="${light}"/>`;
+    s+=`<ellipse cx="50" cy="50" rx="17" ry="16" fill="${color}"/>`;
+    s+=`<polygon points="36,40 31,24 45,37" fill="${color}"/><polygon points="64,40 69,24 55,37" fill="${color}"/>`;
+    s+=`<polygon points="37,39 33,26 44,37" fill="${light}"/><polygon points="63,39 67,26 56,37" fill="${light}"/>`;
+    // narrow slits
+    s+=`<ellipse cx="43" cy="50" rx="5" ry="2.5" fill="white"/><ellipse cx="57" cy="50" rx="5" ry="2.5" fill="white"/>`;
+    s+=`<ellipse cx="43" cy="50.5" rx="3" ry="1.5" fill="${eye}"/><ellipse cx="57" cy="50.5" rx="3" ry="1.5" fill="${eye}"/>`;
+    s+=`<path d="M38 47.5 Q43 46 48 47.5" fill="${color}"/><path d="M52 47.5 Q57 46 62 47.5" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="56" rx="2" ry="1.4" fill="${nose}"/>`;
+    s+=`<line x1="31" y1="55" x2="47" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/><line x1="69" y1="55" x2="53" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/>`;
+    s+=`<path d="M34 59 Q50 65 66 59" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="63" r="2.5" fill="#ffd93d"/>`;
+    s+=`<ellipse cx="37" cy="87" rx="7" ry="4" fill="${mid}"/><ellipse cx="63" cy="87" rx="7" ry="4" fill="${mid}"/>`;
+
   } else if(stage===3){
-    svg+=`<path d="M56 75 Q75 80 72 68 Q70 59 60 62" fill="none" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
-    svg+=`<rect x="24" y="62" width="52" height="26" rx="14" fill="${color}"/>`;
-    svg+=`<ellipse cx="50" cy="54" rx="16" ry="14" fill="${color}"/>`;
-    svg+=`<polygon points="37,43 33,30 44,41" fill="${color}"/><polygon points="63,43 67,30 56,41" fill="${color}"/>`;
-    svg+=`<polygon points="38,42 35,32 43,41" fill="${light}"/><polygon points="62,42 65,32 57,41" fill="${light}"/>`;
-    svg+=`<path d="M38.5 53 Q43 51 47.5 53" fill="none" stroke="${eye}" stroke-width="1.8" stroke-linecap="round"/>`;
-    svg+=`<path d="M52.5 53 Q57 51 61.5 53" fill="none" stroke="${eye}" stroke-width="1.8" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="50" cy="58" rx="1.8" ry="1.2" fill="${nose}"/>`;
-    svg+=`<line x1="33" y1="57" x2="47" y2="59" stroke="${mid}" stroke-width="0.7" opacity="0.5"/><line x1="67" y1="57" x2="53" y2="59" stroke="${mid}" stroke-width="0.7" opacity="0.5"/>`;
-    svg+=`<ellipse cx="38" cy="88" rx="5" ry="3" fill="${mid}"/><ellipse cx="62" cy="88" rx="5" ry="3" fill="${mid}"/>`;
+    // Loaf — legs tucked, eyes squinting, tiny smile
+    s+=`<path d="M57 74 Q77 79 74 67 Q71 58 61 61" fill="none" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
+    // loaf body
+    s+=`<rect x="22" y="62" width="56" height="27" rx="15" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="89" rx="24" ry="6" fill="${mid}" opacity="0.3"/>`;
+    // belly
+    s+=`<ellipse cx="50" cy="75" rx="18" ry="10" fill="${light}"/>`;
+    // head
+    s+=`<ellipse cx="50" cy="53" rx="17" ry="15" fill="${color}"/>`;
+    s+=`<polygon points="36,43 31,27 45,40" fill="${color}"/><polygon points="64,43 69,27 55,40" fill="${color}"/>`;
+    s+=`<polygon points="37,42 33,29 44,40" fill="${light}"/><polygon points="63,42 67,29 56,40" fill="${light}"/>`;
+    s+=`<path d="M38 52 Q43 50 48 52" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<path d="M52 52 Q57 50 62 52" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="58" rx="2" ry="1.4" fill="${nose}"/>`;
+    s+=`<path d="M47.5 60 Q50 62.5 52.5 60" fill="none" stroke="${mid}" stroke-width="1" stroke-linecap="round"/>`;
+    s+=`<line x1="31" y1="57" x2="47" y2="59" stroke="${mid}" stroke-width="0.8" opacity="0.4"/><line x1="69" y1="57" x2="53" y2="59" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
+    // tiny toe beans peeking
+    s+=`<ellipse cx="34" cy="89" rx="5" ry="3" fill="${mid}"/><ellipse cx="66" cy="89" rx="5" ry="3" fill="${mid}"/>`;
+    s+=`<ellipse cx="33" cy="89" rx="2" ry="1.8" fill="${light}"/><ellipse cx="35.5" cy="89" rx="2" ry="1.8" fill="${light}"/>`;
+    s+=`<ellipse cx="65" cy="89" rx="2" ry="1.8" fill="${light}"/><ellipse cx="67.5" cy="89" rx="2" ry="1.8" fill="${light}"/>`;
+
   } else if(stage===4){
-    svg+=`<ellipse cx="50" cy="80" rx="30" ry="10" fill="${lighten(color,55)}"/>`;
-    svg+=`<ellipse cx="50" cy="70" rx="24" ry="18" fill="${color}"/>`;
-    svg+=`<path d="M26 70 Q18 88 38 88 Q58 88 62 76" fill="none" stroke="${mid}" stroke-width="5.5" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="60" cy="57" rx="14" ry="13" fill="${color}"/>`;
-    svg+=`<polygon points="52,47 50,35 60,46" fill="${color}"/><polygon points="68,48 72,36 62,47" fill="${color}"/>`;
-    svg+=`<polygon points="53,46 51,37 59,46" fill="${light}"/><polygon points="67,47 70,38 63,47" fill="${light}"/>`;
-    svg+=`<path d="M55 57 Q60 55 65 57" fill="none" stroke="${eye}" stroke-width="1.8" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="67" cy="57" rx="3.5" ry="3.5" fill="white"/><ellipse cx="67.5" cy="57.5" rx="2" ry="2.2" fill="${eye}"/>`;
-    svg+=`<circle cx="68" cy="56.5" r="0.7" fill="white"/>`;
-    svg+=`<ellipse cx="57" cy="62" rx="1.6" ry="1.1" fill="${nose}"/>`;
+    // Curled on cushion, one eye open, tail around body
+    s+=`<ellipse cx="50" cy="82" rx="32" ry="10" fill="${vlight}"/>`;
+    // cushion dots
+    s+=`<circle cx="30" cy="82" r="2" fill="${light}"/><circle cx="50" cy="86" r="2" fill="${light}"/><circle cx="70" cy="82" r="2" fill="${light}"/>`;
+    s+=`<ellipse cx="50" cy="70" rx="25" ry="19" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="74" rx="16" ry="12" fill="${light}"/>`;
+    s+=`<path d="M25 70 Q15 90 40 90 Q60 90 64 76" fill="none" stroke="${mid}" stroke-width="5.5" stroke-linecap="round"/>`;
+    // tail tip
+    s+=`<circle cx="64" cy="76" r="4" fill="${light}"/>`;
+    // head tucked
+    s+=`<ellipse cx="61" cy="56" rx="15" ry="14" fill="${color}"/>`;
+    s+=`<polygon points="51,46 49,33 61,44" fill="${color}"/><polygon points="70,47 74,34 63,45" fill="${color}"/>`;
+    s+=`<polygon points="52,45 50,35 60,44" fill="${light}"/><polygon points="69,46 72,36 63,45" fill="${light}"/>`;
+    // one eye closed, one open
+    s+=`<path d="M54 56 Q59 54 64 56" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="67" cy="55" rx="4" ry="4" fill="white"/><ellipse cx="67.5" cy="55.5" rx="2.3" ry="2.5" fill="${eye}"/>`;
+    s+=`<circle cx="68.5" cy="54.5" r="0.8" fill="${shine}"/>`;
+    s+=`<ellipse cx="59" cy="61" rx="1.8" ry="1.3" fill="${nose}"/>`;
+
   } else {
-    svg+=`<ellipse cx="50" cy="80" rx="33" ry="12" fill="${lighten(color,55)}"/>`;
-    svg+=`<ellipse cx="50" cy="68" rx="26" ry="22" fill="${color}"/>`;
-    svg+=`<path d="M24 68 Q16 90 42 90 Q64 90 66 74 Q67 62 56 60" fill="none" stroke="${mid}" stroke-width="6" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="58" cy="52" rx="13" ry="12" fill="${color}"/>`;
-    svg+=`<polygon points="50,43 49,32 58,43" fill="${color}"/><polygon points="66,44 70,33 61,44" fill="${color}"/>`;
-    svg+=`<polygon points="51,42 50,34 57,43" fill="${light}"/><polygon points="65,43 69,35 62,44" fill="${light}"/>`;
-    svg+=`<path d="M51 52 Q55.5 50 60 52" fill="none" stroke="${eye}" stroke-width="1.8" stroke-linecap="round"/>`;
-    svg+=`<path d="M61 52 Q65 50 69 52" fill="none" stroke="${eye}" stroke-width="1.8" stroke-linecap="round"/>`;
-    svg+=`<ellipse cx="58" cy="57" rx="1.6" ry="1.1" fill="${nose}"/>`;
-    svg+=`<text x="76" y="36" font-family="DM Sans,sans-serif" font-size="8" fill="${mid}" opacity="0.8">z</text>`;
-    svg+=`<text x="81" y="28" font-family="DM Sans,sans-serif" font-size="10" fill="${mid}" opacity="0.6">z</text>`;
-    svg+=`<text x="87" y="20" font-family="DM Sans,sans-serif" font-size="12" fill="${mid}" opacity="0.4">z</text>`;
+    // Stage 5 — tight donut, both eyes shut, blanket, Zzz
+    s+=`<ellipse cx="50" cy="83" rx="34" ry="11" fill="${vlight}"/>`;
+    s+=`<circle cx="28" cy="83" r="2.5" fill="${light}"/><circle cx="50" cy="88" r="2.5" fill="${light}"/><circle cx="72" cy="83" r="2.5" fill="${light}"/>`;
+    // blanket
+    s+=`<ellipse cx="50" cy="75" rx="30" ry="20" fill="${darken(color,8)}" opacity="0.5"/>`;
+    s+=`<ellipse cx="50" cy="68" rx="27" ry="23" fill="${color}"/>`;
+    s+=`<ellipse cx="50" cy="72" rx="18" ry="15" fill="${light}"/>`;
+    s+=`<path d="M23 68 Q14 92 44 91 Q66 91 68 75 Q69 62 57 59" fill="none" stroke="${mid}" stroke-width="6" stroke-linecap="round"/>`;
+    s+=`<circle cx="57" cy="59" r="5" fill="${light}"/>`;
+    s+=`<ellipse cx="59" cy="51" rx="14" ry="13" fill="${color}"/>`;
+    s+=`<polygon points="50,42 48,30 59,41" fill="${color}"/><polygon points="67,43 71,31 62,42" fill="${color}"/>`;
+    s+=`<polygon points="51,41 49,32 58,41" fill="${light}"/><polygon points="66,42 70,33 62,42" fill="${light}"/>`;
+    s+=`<path d="M50 51 Q55 49 60 51" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<path d="M61 51 Q65.5 49 70 51" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="58" cy="56" rx="1.8" ry="1.3" fill="${nose}"/>`;
+    // heart above
+    s+=`<path d="M45 20 Q45 16 49 17 Q50 14 51 17 Q55 16 55 20 Q55 24 50 27 Q45 24 45 20 Z" fill="${mid}" opacity="0.5"/>`;
+    s+=`<text x="68" y="32" font-size="9" fill="${mid}" opacity="0.75" font-family="sans-serif">z</text>`;
+    s+=`<text x="74" y="23" font-size="11" fill="${mid}" opacity="0.55" font-family="sans-serif">z</text>`;
+    s+=`<text x="80" y="14" font-size="13" fill="${mid}" opacity="0.35" font-family="sans-serif">z</text>`;
   }
-  return svg+'</svg>';
+  return s+'</svg>';
 }
 
-function renderCats(){
-  document.getElementById('cats-month-label').textContent=MONTHS[catsMonth]+' '+catsYear;
-  const grid=document.getElementById('cat-grid'),empty=document.getElementById('cats-empty');
+// ─── CASTLE DRAWING ─────────────────────────────────────────────────────────
+function drawCastle(pct,color){
+  const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
+  const dark=darken(color,30), mid=darken(color,12), light=lighten(color,40), sky=lighten(color,62);
+  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  // ground
+  s+=`<ellipse cx="50" cy="93" rx="38" ry="6" fill="${light}" opacity="0.5"/>`;
+  // grass
+  s+=`<rect x="12" y="88" width="76" height="5" rx="2" fill="#7ec850" opacity="0.6"/>`;
+
+  if(stage===0){
+    // Just a dirt mound
+    s+=`<ellipse cx="50" cy="88" rx="22" ry="6" fill="#b5a07a"/>`;
+    s+=`<path d="M34 88 Q50 78 66 88" fill="#c9b48a"/>`;
+    // stakes/markers
+    s+=`<line x1="38" y1="78" x2="38" y2="90" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<line x1="62" y1="78" x2="62" y2="90" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<line x1="36" y1="79" x2="40" y2="79" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<line x1="60" y1="79" x2="64" y2="79" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
+  } else if(stage===1){
+    // Foundation blocks
+    s+=`<rect x="26" y="78" width="48" height="12" rx="2" fill="${dark}"/>`;
+    s+=`<rect x="28" y="80" width="14" height="8" rx="1" fill="${mid}"/><rect x="44" y="80" width="12" height="8" rx="1" fill="${mid}"/><rect x="58" y="80" width="14" height="8" rx="1" fill="${mid}"/>`;
+    s+=`<line x1="26" y1="84" x2="74" y2="84" stroke="${dark}" stroke-width="1" opacity="0.4"/>`;
+  } else if(stage===2){
+    // Low walls
+    s+=`<rect x="22" y="66" width="56" height="24" rx="2" fill="${dark}"/>`;
+    // stone lines
+    for(let r=0;r<3;r++)for(let c=0;c<4;c++){const ox=c%2===0?0:7;s+=`<rect x="${24+c*13+ox}" y="${68+r*7}" width="10" height="5" rx="1" fill="${mid}" opacity="0.85"/>`;}
+    // gate arch
+    s+=`<rect x="43" y="76" width="14" height="14" rx="1" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="76" rx="7" ry="5" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="76" rx="5.5" ry="3.5" fill="#1a1612" opacity="0.7"/>`;
+    // battlements
+    for(let i=0;i<5;i++){s+=`<rect x="${24+i*12}" y="62" width="7" height="6" rx="1" fill="${mid}"/>`;}
+  } else if(stage===3){
+    // Tall walls + gate + side towers starting
+    s+=`<rect x="20" y="52" width="60" height="38" rx="2" fill="${dark}"/>`;
+    for(let r=0;r<4;r++)for(let c=0;c<5;c++){const ox=c%2===0?0:6;s+=`<rect x="${22+c*11+ox}" y="${54+r*8}" width="9" height="6" rx="1" fill="${mid}" opacity="0.8"/>`;}
+    s+=`<rect x="42" y="68" width="16" height="22" rx="1" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="68" rx="8" ry="6" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="68" rx="6" ry="4" fill="#1a1612" opacity="0.7"/>`;
+    // portcullis
+    for(let i=0;i<3;i++){s+=`<line x1="${44+i*4}" y1="68" x2="${44+i*4}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.5"/>`;}
+    // battlements
+    for(let i=0;i<6;i++){s+=`<rect x="${22+i*10}" y="47" width="7" height="7" rx="1" fill="${mid}"/>`;}
+    // side tower stubs
+    s+=`<rect x="10" y="60" width="14" height="30" rx="2" fill="${dark}"/>`;
+    s+=`<rect x="76" y="60" width="14" height="30" rx="2" fill="${dark}"/>`;
+    for(let i=0;i<2;i++){s+=`<rect x="${12+i*6}" y="56" width="5" height="6" rx="1" fill="${mid}"/>`;}
+    for(let i=0;i<2;i++){s+=`<rect x="${78+i*6}" y="56" width="5" height="6" rx="1" fill="${mid}"/>`;}
+    s+=`<circle cx="17" cy="74" r="3" fill="${light}" opacity="0.7"/>`;
+    s+=`<circle cx="83" cy="74" r="3" fill="${light}" opacity="0.7"/>`;
+  } else if(stage===4){
+    // Full castle, round towers with conical roofs
+    // main wall
+    s+=`<rect x="22" y="50" width="56" height="40" rx="2" fill="${dark}"/>`;
+    for(let r=0;r<4;r++)for(let c=0;c<4;c++){const ox=c%2===0?0:7;s+=`<rect x="${24+c*12+ox}" y="${52+r*8}" width="10" height="6" rx="1" fill="${mid}" opacity="0.8"/>`;}
+    for(let i=0;i<7;i++){s+=`<rect x="${22+i*8}" y="45" width="6" height="7" rx="1" fill="${mid}"/>`;}
+    // gate
+    s+=`<rect x="42" y="65" width="16" height="25" rx="1" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="65" rx="8" ry="6" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="65" rx="6" ry="4.5" fill="#1a1612" opacity="0.75"/>`;
+    for(let i=0;i<3;i++){s+=`<line x1="${44+i*4}" y1="65" x2="${44+i*4}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.45"/>`;}
+    // side towers
+    s+=`<rect x="8" y="52" width="18" height="38" rx="3" fill="${dark}"/>`;
+    s+=`<rect x="74" y="52" width="18" height="38" rx="3" fill="${dark}"/>`;
+    s+=`<polygon points="8,52 17,32 26,52" fill="${mid}"/>`;
+    s+=`<polygon points="74,52 83,32 92,52" fill="${mid}"/>`;
+    s+=`<line x1="17" y1="32" x2="17" y2="26" stroke="${darken(color,40)}" stroke-width="1.5"/><circle cx="17" cy="25" r="2.5" fill="${darken(color,40)}"/>`;
+    s+=`<line x1="83" y1="32" x2="83" y2="26" stroke="${darken(color,40)}" stroke-width="1.5"/><circle cx="83" cy="25" r="2.5" fill="${darken(color,40)}"/>`;
+    for(let i=0;i<2;i++){s+=`<rect x="${10+i*7}" y="48" width="5" height="6" rx="1" fill="${mid}"/>`;}
+    for(let i=0;i<2;i++){s+=`<rect x="${76+i*7}" y="48" width="5" height="6" rx="1" fill="${mid}"/>`;}
+    s+=`<circle cx="17" cy="70" r="4" fill="${light}" opacity="0.65"/>`;
+    s+=`<circle cx="83" cy="70" r="4" fill="${light}" opacity="0.65"/>`;
+  } else {
+    // Stage 5 — Grand castle, banners, moat hint, sun
+    s+=`<circle cx="80" cy="18" r="10" fill="#ffd93d" opacity="0.3"/>`;
+    s+=`<circle cx="80" cy="18" r="7" fill="#ffd93d" opacity="0.5"/>`;
+    // main keep
+    s+=`<rect x="26" y="42" width="48" height="48" rx="2" fill="${dark}"/>`;
+    for(let r=0;r<5;r++)for(let c=0;c<3;c++){const ox=c%2===0?0:8;s+=`<rect x="${28+c*14+ox}" y="${44+r*8}" width="12" height="6" rx="1" fill="${mid}" opacity="0.75"/>`;}
+    for(let i=0;i<7;i++){s+=`<rect x="${26+i*7}" y="36" width="5" height="8" rx="1" fill="${mid}"/>`;}
+    // gate
+    s+=`<rect x="41" y="60" width="18" height="30" rx="2" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="60" rx="9" ry="7" fill="${dark}"/>`;
+    s+=`<ellipse cx="50" cy="60" rx="7" ry="5" fill="#1a1612" opacity="0.8"/>`;
+    for(let i=0;i<3;i++){s+=`<line x1="${43+i*5}" y1="60" x2="${43+i*5}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.45"/>`;}
+    // drawbridge
+    s+=`<rect x="41" y="88" width="18" height="4" rx="1" fill="#b5a07a"/>`;
+    for(let i=0;i<3;i++){s+=`<line x1="${43+i*6}" y1="88" x2="${43+i*6}" y2="92" stroke="#8B6914" stroke-width="1" opacity="0.6"/>`;}
+    // moat
+    s+=`<ellipse cx="50" cy="94" rx="36" ry="4" fill="${sky}" opacity="0.5"/>`;
+    // towers
+    s+=`<rect x="6" y="44" width="22" height="46" rx="3" fill="${dark}"/>`;
+    s+=`<rect x="72" y="44" width="22" height="46" rx="3" fill="${dark}"/>`;
+    s+=`<polygon points="6,44 17,18 28,44" fill="${mid}"/>`;
+    s+=`<polygon points="72,44 83,18 94,44" fill="${mid}"/>`;
+    // banners
+    s+=`<line x1="17" y1="18" x2="17" y2="10" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
+    s+=`<polygon points="17,10 25,13 17,16" fill="${darken(color,20)}"/>`;
+    s+=`<line x1="83" y1="18" x2="83" y2="10" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
+    s+=`<polygon points="83,10 91,13 83,16" fill="${darken(color,20)}"/>`;
+    // center tower banner
+    s+=`<line x1="50" y1="36" x2="50" y2="28" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
+    s+=`<polygon points="50,28 58,31 50,34" fill="${color}"/>`;
+    for(let i=0;i<2;i++){s+=`<rect x="${8+i*9}" y="40" width="6" height="6" rx="1" fill="${mid}"/>`;}
+    for(let i=0;i<2;i++){s+=`<rect x="${74+i*9}" y="40" width="6" height="6" rx="1" fill="${mid}"/>`;}
+    s+=`<circle cx="17" cy="64" r="5" fill="${light}" opacity="0.7"/>`;
+    s+=`<circle cx="83" cy="64" r="5" fill="${light}" opacity="0.7"/>`;
+    // windows
+    s+=`<ellipse cx="40" cy="52" rx="3" ry="4" fill="${light}" opacity="0.7"/><ellipse cx="60" cy="52" rx="3" ry="4" fill="${light}" opacity="0.7"/>`;
+    s+=`<ellipse cx="40" cy="65" rx="3" ry="4" fill="${light}" opacity="0.6"/><ellipse cx="60" cy="65" rx="3" ry="4" fill="${light}" opacity="0.6"/>`;
+  }
+  return s+'</svg>';
+}
+
+// ─── MUSCLE DRAWING ──────────────────────────────────────────────────────────
+function drawMuscle(pct,color,gender){
+  const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
+  const dark=darken(color,25), mid=darken(color,10), light=lighten(color,45), skin='#f4c89a', skinD='#e0a870';
+  const isFem = gender==='f';
+  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  // floor
+  s+=`<rect x="10" y="90" width="80" height="3" rx="1.5" fill="${light}" opacity="0.5"/>`;
+
+  // Body widths per stage: 0=slim,1=slightly wider,2=medium,3=wide,4=wider,5=absolute unit
+  const bw=[9,11,13,16,19,23][stage];
+  const bh=[20,21,22,23,24,25][stage];
+  const hw=9, by=62, hy=42;
+  // arm muscle size
+  const am=[0,1,2,4,6,8][stage];
+
+  // legs
+  const lw=[4,4,5,6,7,8][stage];
+  s+=`<rect x="${50-lw-1}" y="${by+bh}" width="${lw*2}" height="18" rx="${lw}" fill="${skinD}"/>`;
+  s+=`<rect x="${50+lw/2}" y="${by+bh}" width="${lw*2}" height="18" rx="${lw}" fill="${skinD}"/>`;
+  // shoes
+  s+=`<ellipse cx="${50-lw}" cy="${by+bh+19}" rx="${lw+2}" ry="3" fill="${dark}"/>`;
+  s+=`<ellipse cx="${50+lw*1.5}" cy="${by+bh+19}" rx="${lw+2}" ry="3" fill="${dark}"/>`;
+
+  // body (shirt)
+  s+=`<rect x="${50-bw}" y="${by}" width="${bw*2}" height="${bh}" rx="${isFem?8:6}" fill="${color}"/>`;
+
+  // female silhouette
+  if(isFem&&stage>=1){
+    s+=`<ellipse cx="${50-bw+3}" cy="${by+6}" rx="4" ry="3" fill="${mid}" opacity="0.4"/>`;
+    s+=`<ellipse cx="${50+bw-3}" cy="${by+6}" rx="4" ry="3" fill="${mid}" opacity="0.4"/>`;
+  }
+
+  // arms
+  const ay=by+4;
+  if(stage===0){
+    // stick arms
+    s+=`<line x1="${50-bw}" y1="${ay}" x2="${50-bw-8}" y2="${ay+14}" stroke="${skin}" stroke-width="4" stroke-linecap="round"/>`;
+    s+=`<line x1="${50+bw}" y1="${ay}" x2="${50+bw+8}" y2="${ay+14}" stroke="${skin}" stroke-width="4" stroke-linecap="round"/>`;
+  } else if(stage<=2){
+    // slightly muscled
+    s+=`<ellipse cx="${50-bw-5}" cy="${ay+7}" rx="${3+am}" ry="${6+am}" fill="${skin}"/>`;
+    s+=`<ellipse cx="${50+bw+5}" cy="${ay+7}" rx="${3+am}" ry="${6+am}" fill="${skin}"/>`;
+    s+=`<line x1="${50-bw-5}" y1="${ay+13}" x2="${50-bw-4}" y2="${ay+20}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
+    s+=`<line x1="${50+bw+5}" y1="${ay+13}" x2="${50+bw+4}" y2="${ay+20}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
+  } else {
+    // flexing!
+    const flex=stage>=4;
+    const lax=50-bw-(5+am), rax=50+bw+(5+am);
+    s+=`<ellipse cx="${lax}" cy="${ay+5}" rx="${4+am}" ry="${7+am}" fill="${skin}"/>`;
+    s+=`<ellipse cx="${rax}" cy="${ay+5}" rx="${4+am}" ry="${7+am}" fill="${skin}"/>`;
+    if(flex){
+      // arms raised flexing
+      s+=`<ellipse cx="${50-bw-8}" cy="${ay-2}" rx="${5+am}" ry="${5+am}" fill="${skin}"/>`;
+      s+=`<ellipse cx="${50+bw+8}" cy="${ay-2}" rx="${5+am}" ry="${5+am}" fill="${skin}"/>`;
+      // bicep line
+      s+=`<path d="M${50-bw-12} ${ay+1} Q${50-bw-9} ${ay-7} ${50-bw-4} ${ay+2}" fill="none" stroke="${skinD}" stroke-width="1.5" opacity="0.7"/>`;
+      s+=`<path d="M${50+bw+12} ${ay+1} Q${50+bw+9} ${ay-7} ${50+bw+4} ${ay+2}" fill="none" stroke="${skinD}" stroke-width="1.5" opacity="0.7"/>`;
+    } else {
+      s+=`<line x1="${lax}" y1="${ay+12}" x2="${lax+2}" y2="${ay+22}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
+      s+=`<line x1="${rax}" y1="${ay+12}" x2="${rax-2}" y2="${ay+22}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
+    }
+    // muscles on shirt
+    if(stage>=3){
+      s+=`<ellipse cx="${50-5}" cy="${by+8}" rx="5" ry="6" fill="${mid}" opacity="0.35"/>`;
+      s+=`<ellipse cx="${50+5}" cy="${by+8}" rx="5" ry="6" fill="${mid}" opacity="0.35"/>`;
+      s+=`<ellipse cx="${50-5}" cy="${by+18}" rx="4" ry="5" fill="${mid}" opacity="0.25"/>`;
+      s+=`<ellipse cx="${50+5}" cy="${by+18}" rx="4" ry="5" fill="${mid}" opacity="0.25"/>`;
+    }
+  }
+
+  // neck
+  s+=`<rect x="46" y="${hy+hw*1.8}" width="8" height="6" rx="3" fill="${skin}"/>`;
+  // head
+  s+=`<ellipse cx="50" cy="${hy}" rx="${hw}" ry="${hw*1.1}" fill="${skin}"/>`;
+  // hair
+  if(isFem){
+    s+=`<ellipse cx="50" cy="${hy-hw*0.8}" rx="${hw}" ry="${hw*0.5}" fill="${dark}"/>`;
+    s+=`<path d="M${50-hw} ${hy} Q${50-hw-4} ${hy+8} ${50-hw-2} ${hy+14}" fill="none" stroke="${dark}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<path d="M${50+hw} ${hy} Q${50+hw+4} ${hy+8} ${50+hw+2} ${hy+14}" fill="none" stroke="${dark}" stroke-width="3.5" stroke-linecap="round"/>`;
+  } else {
+    s+=`<ellipse cx="50" cy="${hy-hw*0.85}" rx="${hw}" ry="${hw*0.45}" fill="${dark}"/>`;
+    if(stage>=3){
+      // beard stubble
+      s+=`<ellipse cx="50" cy="${hy+hw*0.5}" rx="6" ry="4" fill="${skinD}" opacity="0.5"/>`;
+    }
+  }
+  // eyes
+  const eyeOpen=stage<5;
+  if(eyeOpen){
+    s+=`<circle cx="46.5" cy="${hy}" r="${1.5}" fill="#333"/>`;
+    s+=`<circle cx="53.5" cy="${hy}" r="${1.5}" fill="#333"/>`;
+    s+=`<circle cx="47" cy="${hy-0.4}" r="0.6" fill="white"/>`;
+    s+=`<circle cx="54" cy="${hy-0.4}" r="0.6" fill="white"/>`;
+    // expression changes with stage
+    if(stage<=1){
+      // neutral/tired
+      s+=`<path d="M47 ${hy+5} Q50 ${hy+6} 53 ${hy+5}" fill="none" stroke="${skinD}" stroke-width="1" stroke-linecap="round"/>`;
+    } else if(stage<=3){
+      // determined
+      s+=`<path d="M47 ${hy+4} Q50 ${hy+6.5} 53 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.2" stroke-linecap="round"/>`;
+    } else {
+      // big grin
+      s+=`<path d="M46 ${hy+4} Q50 ${hy+8} 54 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.5" stroke-linecap="round"/>`;
+      s+=`<path d="M46 ${hy+4} Q50 ${hy+8} 54 ${hy+4}" fill="${light}" opacity="0.4"/>`;
+    }
+    // eyebrows more intense with stage
+    const brow=stage>=3?2:1;
+    s+=`<line x1="44" y1="${hy-4-brow}" x2="49" y2="${hy-3-brow}" stroke="${dark}" stroke-width="${1+brow*0.3}" stroke-linecap="round"/>`;
+    s+=`<line x1="56" y1="${hy-4-brow}" x2="51" y2="${hy-3-brow}" stroke="${dark}" stroke-width="${1+brow*0.3}" stroke-linecap="round"/>`;
+  } else {
+    // stage 5 — triumphant eyes closed
+    s+=`<path d="M44 ${hy} Q46.5 ${hy-2} 49 ${hy}" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>`;
+    s+=`<path d="M51 ${hy} Q53.5 ${hy-2} 56 ${hy}" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>`;
+    s+=`<path d="M46 ${hy+4} Q50 ${hy+9} 54 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.5" stroke-linecap="round"/>`;
+  }
+  // accessories per stage
+  if(stage===0){
+    // water bottle
+    s+=`<rect x="64" y="75" width="7" height="13" rx="2" fill="${light}"/>`;
+    s+=`<rect x="65" y="73" width="5" height="3" rx="1" fill="${mid}"/>`;
+    s+=`<line x1="65" y1="79" x2="70" y2="79" stroke="${mid}" stroke-width="0.8" opacity="0.5"/>`;
+  } else if(stage===1){
+    // dumbbell
+    s+=`<line x1="58" y1="80" x2="70" y2="80" stroke="#888" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<rect x="56" y="77" width="4" height="6" rx="1" fill="#666"/><rect x="68" y="77" width="4" height="6" rx="1" fill="#666"/>`;
+  } else if(stage===2){
+    // bigger dumbbell
+    s+=`<line x1="57" y1="78" x2="71" y2="78" stroke="#777" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<rect x="54" y="74" width="5" height="8" rx="1" fill="#555"/><rect x="69" y="74" width="5" height="8" rx="1" fill="#555"/>`;
+  } else if(stage===3||stage===4){
+    // barbell
+    s+=`<line x1="20" y1="30" x2="80" y2="30" stroke="#888" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<rect x="14" y="24" width="8" height="12" rx="2" fill="#555"/><rect x="78" y="24" width="8" height="12" rx="2" fill="#555"/>`;
+    s+=`<rect x="20" y="25" width="6" height="10" rx="1.5" fill="#777"/><rect x="74" y="25" width="6" height="10" rx="1.5" fill="#777"/>`;
+    if(stage===4){
+      s+=`<rect x="8" y="23" width="7" height="14" rx="2" fill="#444"/><rect x="85" y="23" width="7" height="14" rx="2" fill="#444"/>`;
+    }
+  } else if(stage===5){
+    // trophy!
+    s+=`<rect x="42" y="8" width="16" height="12" rx="3" fill="#ffd93d"/>`;
+    s+=`<rect x="46" y="18" width="8" height="5" rx="1" fill="#e6c435"/>`;
+    s+=`<rect x="42" y="22" width="16" height="3" rx="1" fill="#e6c435"/>`;
+    s+=`<path d="M42 10 Q36 10 36 16 Q36 20 42 20" fill="none" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<path d="M58 10 Q64 10 64 16 Q64 20 58 20" fill="none" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<text x="47" y="17" font-size="7" fill="white" font-weight="bold" font-family="sans-serif">1st</text>`;
+  }
+  // sweat drops on higher stages
+  if(stage>=2&&stage<=4){
+    s+=`<path d="M${72} ${hy-4} Q${73} ${hy-8} ${74} ${hy-4}" fill="${light}" opacity="${0.3+stage*0.1}"/>`;
+    if(stage>=3)s+=`<path d="M${27} ${hy-2} Q${26} ${hy-6} ${25} ${hy-2}" fill="${light}" opacity="0.5"/>`;
+  }
+  return s+'</svg>';
+}
+
+function drawViz(pct,color,theme,idx){
+  if(theme==='cats') return drawCat(pct,color);
+  if(theme==='castles') return drawCastle(pct,color);
+  // alternate male/female for muscle
+  return drawMuscle(pct,color,idx%2===0?'m':'f');
+}
+
+function getVizMoods(theme){
+  if(theme==='cats') return CAT_MOODS;
+  if(theme==='castles') return CASTLE_MOODS;
+  return MUSCLE_MOODS;
+}
+
+function renderViz(){
+  document.getElementById('viz-month-label').textContent=MONTHS[vizMonth]+' '+vizYear;
+  const grid=document.getElementById('viz-grid'),empty=document.getElementById('viz-empty');
   if(habits.length===0){empty.style.display='block';grid.innerHTML='';return;}
   empty.style.display='none';
-  const isFuture=(catsYear>TODAY.getFullYear())||(catsYear===TODAY.getFullYear()&&catsMonth>TODAY.getMonth());
-  grid.innerHTML=habits.map(h=>{
-    const{count,total}=monthCompletions(h,catsYear,catsMonth);
+  const isFuture=(vizYear>TODAY.getFullYear())||(vizYear===TODAY.getFullYear()&&vizMonth>TODAY.getMonth());
+  const moods=getVizMoods(vizTheme);
+  grid.innerHTML=habits.map((h,i)=>{
+    const{count,total}=monthComp(h,vizYear,vizMonth);
     const pct=isFuture?0:count/total;
     const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-    return`<div class="cat-card">${drawCat(pct,h.color,100)}<div class="cat-name" title="${h.name}">${h.name}</div><div class="cat-pct">${isFuture?'—':Math.round(pct*100)+'%'}</div><div class="cat-sub">${isFuture?'future':count+' / '+total+' days'}</div><div class="cat-mood">${MOODS[stage]}</div><div class="pct-bar"><div class="pct-bar-fill" style="width:${Math.round(pct*100)}%;background:${h.color};"></div></div></div>`;
+    return`<div class="viz-card">${drawViz(pct,h.color,vizTheme,i)}<div class="viz-name" title="${h.name}">${h.name}</div><div class="viz-pct">${isFuture?'—':Math.round(pct*100)+'%'}</div><div class="viz-sub">${isFuture?'future':count+' / '+total+' days'}</div><div class="viz-mood">${moods[stage]}</div><div class="pct-bar"><div class="pct-bar-fill" style="width:${Math.round(pct*100)}%;background:${h.color};"></div></div></div>`;
   }).join('');
 }
 
 function renderDashboard(){
   document.getElementById('dash-month-label').textContent=MONTHS[dashMonth]+' '+dashYear;
-  document.getElementById('dash-month-progress-label').textContent=MONTHS[dashMonth]+' progress';
+  document.getElementById('dash-progress-label').textContent=MONTHS[dashMonth]+' progress';
   const doneToday=habits.filter(h=>h.done[todayKey]).length,total=habits.length;
   const mDaysTotal=daysInMonth(dashYear,dashMonth);
-  const mCount=habits.reduce((s,h)=>s+monthCompletions(h,dashYear,dashMonth).count,0);
-  const mPossible=habits.length*mDaysTotal;
-  document.getElementById('dash-summary').innerHTML=`<div class="dash-card"><div class="dash-val">${total}</div><div class="dash-label">Habits</div></div><div class="dash-card"><div class="dash-val">${doneToday}/${total}</div><div class="dash-label">Today</div></div><div class="dash-card"><div class="dash-val">${mPossible>0?Math.round(mCount/mPossible*100):0}%</div><div class="dash-label">${MONTHS[dashMonth].slice(0,3)} rate</div></div>`;
-  const isThisMonth=dashYear===TODAY.getFullYear()&&dashMonth===TODAY.getMonth();
-  if(habits.length===0){document.getElementById('dash-today').innerHTML='<div style="color:var(--muted);font-size:13px;padding:0.5rem 0 1rem;">No habits yet.</div>';document.getElementById('dash-bars').innerHTML='';return;}
-  document.getElementById('dash-today').innerHTML=isThisMonth?habits.map(h=>{const done=h.done[todayKey];return`<div class="today-item${done?' checked':''}" onclick="toggleTodayDash(${h.id})"><div class="check-circle" style="${done?'background:'+h.color:''}">${done?'&#10003;':''}</div><span class="today-name">${h.name}</span></div>`;}).join(''):'<div style="color:var(--muted);font-size:13px;padding:0.5rem 0 1rem;">Go to the current month to check off today\'s habits.</div>';
-  document.getElementById('dash-bars').innerHTML=habits.map(h=>{const{count}=monthCompletions(h,dashYear,dashMonth),pct=Math.round(count/mDaysTotal*100);return`<div class="bar-row"><div class="color-pip" style="background:${h.color};width:9px;height:9px;border-radius:50%;flex-shrink:0;"></div><div style="font-size:13px;color:var(--ink);width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${h.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${h.color};"></div></div><div class="bar-pct">${pct}%</div></div>`;}).join('');
+  const mCount=habits.reduce((s,h)=>s+monthComp(h,dashYear,dashMonth).count,0);
+  const mPoss=habits.length*mDaysTotal;
+  document.getElementById('dash-summary').innerHTML=`<div class="dash-card"><div class="dash-val">${total}</div><div class="dash-label">Habits</div></div><div class="dash-card"><div class="dash-val">${doneToday}/${total}</div><div class="dash-label">Today</div></div><div class="dash-card"><div class="dash-val">${mPoss>0?Math.round(mCount/mPoss*100):0}%</div><div class="dash-label">${MONTHS[dashMonth].slice(0,3)} rate</div></div>`;
+  const isNow=dashYear===TODAY.getFullYear()&&dashMonth===TODAY.getMonth();
+  if(!habits.length){document.getElementById('dash-today').innerHTML='<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">No habits yet.</div>';document.getElementById('dash-bars').innerHTML='';return;}
+  document.getElementById('dash-today').innerHTML=isNow?habits.map(h=>{const done=h.done[todayKey];return`<div class="today-item${done?' checked':''}" onclick="toggleTodayDash(${h.id})"><div class="check-circle" style="${done?'background:'+h.color:''}">${done?'&#10003;':''}</div><span class="today-name">${h.name}</span></div>`;}).join(''):'<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">Go to current month to check off today.</div>';
+  document.getElementById('dash-bars').innerHTML=habits.map(h=>{const{count}=monthComp(h,dashYear,dashMonth),pct=Math.round(count/mDaysTotal*100);return`<div class="bar-row"><div class="color-pip" style="background:${h.color};width:9px;height:9px;border-radius:50%;flex-shrink:0;"></div><div style="font-size:13px;color:var(--ink);width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${h.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${h.color};"></div></div><div class="bar-pct">${pct}%</div></div>`;}).join('');
+}
+
+function buildHabitCard(h){
+  const days=[]; for(let i=27;i>=0;i--){const d=new Date(TODAY);d.setDate(TODAY.getDate()-i);days.push(d);}
+  const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=daysInMonth(y,m);
+  const{count}=monthComp(h,y,m),pct=Math.round(count/mt*100);
+  const cells=days.map(d=>{
+    const key=dateKey(d),isToday=d.getTime()===TODAY.getTime(),isFuture=d>TODAY,done=h.done[key];
+    let cls='day-cell';if(done)cls+=' done';if(isToday)cls+=' today';if(isFuture)cls+=' future';
+    return`<div class="${cls}" style="${done?'background:'+h.color:''}" onclick="toggleDay(${h.id},'${key}',this,'${h.color}')" title="${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}">${!done?d.getDate():''}</div>`;
+  }).join('');
+  return`<div class="habit-card" data-habit-id="${h.id}"><div class="habit-head"><div class="color-pip" style="background:${h.color}"></div><span class="habit-name-label">${h.name}</span><button class="del-btn" onclick="deleteHabit(${h.id})">&#x2715;</button></div><div class="month-lbl">Last 28 days — tap to toggle</div><div class="grid">${cells}</div><div class="stats-row"><div class="stat"><div class="stat-label">This month</div><div class="stat-val">${count}/${mt}</div></div><div class="stat"><div class="stat-label">Monthly rate</div><div class="stat-val">${pct}%</div></div></div></div>`;
 }
 
 function renderHabits(){
   const list=document.getElementById('habits-list'),empty=document.getElementById('empty-msg');
-  if(habits.length===0){list.innerHTML='';list.appendChild(empty);empty.style.display='block';return;}
+  if(!habits.length){list.innerHTML='';list.appendChild(empty);empty.style.display='block';return;}
   empty.style.display='none';
-  const days=[];for(let i=27;i>=0;i--){const d=new Date(TODAY);d.setDate(TODAY.getDate()-i);days.push(d);}
-  const y=TODAY.getFullYear(),m=TODAY.getMonth(),mDaysTotal=daysInMonth(y,m);
-  list.innerHTML=habits.map(h=>{
-    const{count}=monthCompletions(h,y,m),pct=Math.round(count/mDaysTotal*100);
-    const cells=days.map(d=>{
-      const key=dateKey(d),isToday=d.getTime()===TODAY.getTime(),isFuture=d>TODAY,done=h.done[key];
-      let cls='day-cell';if(done)cls+=' done';if(isToday)cls+=' today';if(isFuture)cls+=' future';
-      const dayNum=d.getDate();
-      // Pass element reference directly via onclick
-      return`<div class="${cls}" style="${done?'background:'+h.color:''}" onclick="toggleDay(${h.id},'${key}',this,'${h.color}')" title="${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}">${!done?dayNum:''}</div>`;
-    }).join('');
-    return`<div class="habit-card"><div class="habit-head"><div class="color-pip" style="background:${h.color}"></div><span class="habit-name">${h.name}</span><button class="del-btn" onclick="deleteHabit(${h.id})">&#x2715;</button></div><div class="month-lbl">Last 28 days — tap to toggle</div><div class="grid">${cells}</div><div class="stats-row"><div class="stat"><div class="stat-label">This month</div><div class="stat-val">${count}/${mDaysTotal}</div></div><div class="stat"><div class="stat-label">Monthly rate</div><div class="stat-val">${pct}%</div></div></div></div>`;
-  }).join('');
+  list.innerHTML=habits.map(h=>buildHabitCard(h)).join('');
 }
 
-renderCats();renderDashboard();renderHabits();
+renderViz(); renderDashboard(); renderHabits();
 </script>
