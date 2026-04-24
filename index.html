@@ -1,721 +1,1189 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<title>my habit tracker</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--cream:#faf8f4;--ink:#1a1612;--muted:#8a7f74;--border:#e8e2d9;--card:white;}
-body{font-family:'DM Sans',sans-serif;background:transparent;-webkit-text-size-adjust:100%;}
-.ht{max-width:680px;width:100%;}
-.header{padding:1.2rem 1rem 0;}
-.header h1{font-family:'Instrument Serif',serif;font-size:clamp(22px,5vw,28px);font-weight:400;color:var(--ink);letter-spacing:-0.02em;line-height:1;}
-.header h1 em{font-style:italic;color:var(--muted);}
-.tabs{display:flex;padding:1rem 1rem 0;border-bottom:1.5px solid var(--border);overflow-x:auto;}
-.tab{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:6px 0 10px;margin-right:20px;cursor:pointer;color:var(--muted);border:none;border-bottom:2px solid transparent;margin-bottom:-1.5px;background:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#faf8f4;--bg2:#f0ebe3;--card:#ffffff;--ink:#1a1612;--muted:#8a7f74;--border:#e2dbd0;--sh:rgba(0,0,0,0.06);
+}
+.dark{
+  --bg:#141210;--bg2:#1e1a17;--card:#252018;--ink:#f0e8de;--muted:#9a8f82;--border:#3a322a;--sh:rgba(0,0,0,0.3);
+}
+html,body{height:100%;background:var(--bg);transition:background 0.3s;}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;}
+#root{min-height:100vh;background:var(--bg);transition:background 0.3s,color 0.3s;}
+.ht{max-width:680px;margin:0 auto;width:100%;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1rem 0;}
+.topbar h1{font-family:'Instrument Serif',serif;font-size:clamp(20px,5vw,26px);font-weight:400;color:var(--ink);letter-spacing:-0.02em;}
+.topbar h1 em{font-style:italic;color:var(--muted);}
+.dark-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border:1.5px solid var(--border);border-radius:20px;background:var(--bg2);color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;}
+.tabs{display:flex;padding:1rem 1rem 0;border-bottom:1.5px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{font-size:11px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;padding:6px 0 10px;margin-right:18px;cursor:pointer;color:var(--muted);border:none;border-bottom:2px solid transparent;margin-bottom:-1.5px;background:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
 .tab.active{color:var(--ink);border-bottom-color:var(--ink);}
 .page{display:none;padding:1rem;}
 .page.active{display:block;}
-.section-label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.slabel{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
 .add-row{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
-.add-row input{flex:1;font-family:'DM Sans',sans-serif;font-size:16px;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;background:white;color:var(--ink);outline:none;min-width:0;}
+.add-row input{flex:1;font-family:'DM Sans',sans-serif;font-size:16px;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--ink);outline:none;min-width:0;}
 .add-row input:focus{border-color:var(--ink);}
 .add-row input::placeholder{color:var(--muted);}
-.add-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:11px 16px;border:none;border-radius:12px;background:var(--ink);color:white;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
-.color-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.2rem;}
-.color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.15s;-webkit-tap-highlight-color:transparent;}
-.color-swatch.selected{border-color:var(--ink);transform:scale(1.1);}
-.habits-list{display:flex;flex-direction:column;gap:10px;}
-.habit-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1rem;}
-.habit-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.color-pip{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.habit-name-label{font-size:15px;font-weight:400;color:var(--ink);flex:1;}
-.del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px 6px;line-height:1;-webkit-tap-highlight-color:transparent;}
-.grid{display:flex;gap:3px;flex-wrap:wrap;}
-.day-cell{width:clamp(22px,7vw,26px);height:clamp(22px,7vw,26px);border-radius:5px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.15s;}
-.day-cell.done{border:none;}
-.day-cell.today{box-shadow:0 0 0 2px var(--ink);}
-.day-cell.future{opacity:0.25;pointer-events:none;}
-.month-lbl{font-size:11px;color:var(--muted);margin-bottom:6px;}
-.stats-row{display:flex;gap:8px;margin-top:12px;}
-.stat{background:var(--cream);border-radius:10px;padding:8px 10px;flex:1;}
-.stat-label{font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
-.stat-val{font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);}
+.add-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:11px 16px;border:none;border-radius:12px;background:var(--ink);color:var(--bg);cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.color-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1.2rem;}
+.cswatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform 0.15s;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.cswatch.sel{border-color:var(--ink);transform:scale(1.1);}
+.hlist{display:flex;flex-direction:column;gap:10px;}
+.hcard{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1rem;}
+.hhead{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cpip{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.hname{font-size:15px;font-weight:400;color:var(--ink);flex:1;}
+.dbtn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px 6px;-webkit-tap-highlight-color:transparent;}
+.dgrid{display:flex;gap:3px;flex-wrap:wrap;}
+.dcell{width:clamp(22px,7vw,26px);height:clamp(22px,7vw,26px);border-radius:5px;border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.12s;}
+.dcell.done{border:none;}
+.dcell.today{box-shadow:0 0 0 2px var(--ink);}
+.dcell.future{opacity:0.25;pointer-events:none;}
+.mlbl{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.srow{display:flex;gap:8px;margin-top:12px;}
+.sstat{background:var(--bg2);border-radius:10px;padding:8px 10px;flex:1;}
+.sstat-lbl{font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+.sstat-val{font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);}
 .empty{text-align:center;padding:2.5rem 0;color:var(--muted);font-size:14px;}
-.month-nav{display:flex;align-items:center;margin-bottom:1rem;background:white;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;}
-.month-nav button{font-family:'DM Sans',sans-serif;background:none;border:none;padding:10px 16px;cursor:pointer;color:var(--ink);font-size:18px;line-height:1;-webkit-tap-highlight-color:transparent;}
-.month-nav button:active{background:var(--cream);}
-.month-nav span{flex:1;text-align:center;font-size:14px;font-weight:500;color:var(--ink);}
-.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.2rem;}
-.dash-card{background:white;border:1.5px solid var(--border);border-radius:14px;padding:12px;}
-.dash-val{font-family:'Instrument Serif',serif;font-size:26px;color:var(--ink);line-height:1;margin-bottom:3px;}
-.dash-label{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);}
-.today-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:white;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;margin-bottom:6px;-webkit-tap-highlight-color:transparent;}
-.today-item:active{background:var(--cream);}
-.check-circle{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;}
-.today-item.checked .check-circle{border:none;color:white;}
-.today-name{font-size:14px;color:var(--ink);flex:1;}
-.bar-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
-.bar-row:last-child{border-bottom:none;}
-.bar-track{flex:1;height:7px;background:#f0ece6;border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;}
-.bar-pct{font-size:12px;font-weight:500;color:var(--muted);min-width:30px;text-align:right;}
-.viz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,28vw,140px),1fr));gap:12px;}
-.viz-card{background:white;border:1.5px solid var(--border);border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;}
-.viz-name{font-size:11px;font-weight:500;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
-.viz-pct{font-family:'Instrument Serif',serif;font-size:18px;color:var(--ink);}
-.viz-sub{font-size:10px;color:var(--muted);text-align:center;}
-.viz-mood{font-size:10px;font-style:italic;color:var(--muted);text-align:center;min-height:14px;}
-.pct-bar{width:80%;height:4px;background:#f0ece6;border-radius:2px;overflow:hidden;margin-top:2px;}
-.pct-bar-fill{height:100%;border-radius:2px;}
-.theme-toggle{display:flex;gap:6px;margin-bottom:1rem;background:var(--cream);border-radius:12px;padding:4px;}
-.theme-btn{flex:1;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:7px 6px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;white-space:nowrap;}
-.theme-btn.active{background:white;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.mnav{display:flex;align-items:center;margin-bottom:1rem;background:var(--card);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;}
+.mnav button{font-family:'DM Sans',sans-serif;background:none;border:none;padding:10px 16px;cursor:pointer;color:var(--ink);font-size:18px;line-height:1;-webkit-tap-highlight-color:transparent;}
+.mnav span{flex:1;text-align:center;font-size:14px;font-weight:500;color:var(--ink);}
+.dgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1.2rem;}
+.dcard{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px;}
+.dval{font-family:'Instrument Serif',serif;font-size:26px;color:var(--ink);line-height:1;margin-bottom:3px;}
+.dlbl{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);}
+.titem{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;margin-bottom:6px;-webkit-tap-highlight-color:transparent;}
+.ccirc{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;}
+.titem.chk .ccirc{border:none;color:#fff;}
+.tname{font-size:14px;color:var(--ink);flex:1;}
+.brow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);}
+.brow:last-child{border-bottom:none;}
+.btrack{flex:1;height:7px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;}
+.bpct{font-size:12px;font-weight:500;color:var(--muted);min-width:30px;text-align:right;}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(96px,26vw,126px),1fr));gap:10px;}
+.vcard{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:10px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color 0.2s;}
+.vname{font-size:11px;font-weight:500;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.vpct{font-family:'Instrument Serif',serif;font-size:17px;color:var(--ink);}
+.vsub{font-size:10px;color:var(--muted);text-align:center;}
+.vmood{font-size:10px;font-style:italic;color:var(--muted);text-align:center;min-height:13px;}
+.pbar{width:80%;height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-top:2px;}
+.pbfill{height:100%;border-radius:2px;}
+.ttoggle{display:flex;gap:4px;margin-bottom:1rem;background:var(--bg2);border-radius:12px;padding:4px;flex-wrap:wrap;}
+.tbtn{flex:1;min-width:48px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;padding:5px 2px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.15s;white-space:nowrap;text-align:center;}
+.tbtn.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px var(--sh);}
+.svg-wrap{width:86px;height:86px;display:flex;align-items:center;justify-content:center;}
+/* last month */
+.lm-summary{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+.lm-summary-icon{font-size:22px;flex-shrink:0;}
+.lm-summary-text{font-size:13px;color:var(--ink);flex:1;line-height:1.5;}
+.lm-summary-text span{font-weight:500;}
+.lm-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1rem 1.2rem;display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.lm-left{flex:1;min-width:0;}
+.lm-name{font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;}
+.lm-bars{display:flex;flex-direction:column;gap:5px;}
+.lm-bar-row{display:flex;align-items:center;gap:6px;}
+.lm-bar-lbl{font-size:10px;color:var(--muted);width:24px;flex-shrink:0;}
+.lm-track{flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+.lm-fill{height:100%;border-radius:3px;}
+.lm-pct{font-size:11px;color:var(--muted);min-width:30px;text-align:right;}
+.lm-right{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;width:56px;}
+.trend-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;}
+.trend-up{background:#dcfce7;}
+.dark .trend-up{background:#0d2410;}
+.trend-same{background:var(--bg2);}
+.trend-down{background:#fee2e2;}
+.dark .trend-down{background:#2a0d0d;}
+.trend-lbl{font-size:9px;font-weight:500;color:var(--muted);text-align:center;line-height:1.3;}
+.trend-diff{font-size:12px;font-weight:500;}
+.diff-up{color:#16a34a;}
+.diff-same{color:var(--muted);}
+.diff-down{color:#dc2626;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-5px) rotate(1.5deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes wobble{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes drift{0%,100%{transform:translateX(0) translateY(0)}33%{transform:translateX(3px) translateY(-4px)}66%{transform:translateX(-2px) translateY(-6px)}}
+@keyframes wiggle{0%,100%{transform:rotate(-2deg)}25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.af{animation:float 3s ease-in-out infinite;display:inline-block;}
+.ab{animation:bob 2s ease-in-out infinite;display:inline-block;}
+.aw{animation:wobble 2.5s ease-in-out infinite;transform-origin:bottom center;display:inline-block;}
+.abr{animation:breathe 2.5s ease-in-out infinite;display:inline-block;}
+.ad{animation:drift 4s ease-in-out infinite;display:inline-block;}
+.awg{animation:wiggle 2s ease-in-out infinite;display:inline-block;}
+.apu{animation:pulse 2s ease-in-out infinite;display:inline-block;}
 </style>
-
+</head>
+<body>
+<div id="root">
 <div class="ht">
-  <div class="header"><h1>my <em>habit tracker</em></h1></div>
+  <div class="topbar">
+    <h1>my <em>habit tracker</em></h1>
+    <button class="dark-btn" id="dark-btn" onclick="toggleDark()">☽ dark</button>
+  </div>
   <div class="tabs">
     <button class="tab active" onclick="showTab('viz')">Progress</button>
-    <button class="tab" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="tab" onclick="showTab('dash')">Dashboard</button>
+    <button class="tab" onclick="showTab('lastmonth')">Last month</button>
     <button class="tab" onclick="showTab('habits')">Habits</button>
   </div>
 
-  <!-- PROGRESS (viz) -->
+  <!-- PROGRESS -->
   <div class="page active" id="page-viz">
-    <div class="month-nav">
-      <button onclick="changeMonth('viz',-1)">&#8592;</button>
-      <span id="viz-month-label"></span>
-      <button onclick="changeMonth('viz',1)">&#8594;</button>
+    <div class="mnav"><button onclick="chMo('viz',-1)">&#8592;</button><span id="viz-mo"></span><button onclick="chMo('viz',1)">&#8594;</button></div>
+    <div class="ttoggle">
+      <button class="tbtn active" onclick="setTheme('cats',this)">🐱</button>
+      <button class="tbtn" onclick="setTheme('fairy',this)">✨</button>
+      <button class="tbtn" onclick="setTheme('jelly',this)">🪼</button>
+      <button class="tbtn" onclick="setTheme('balloon',this)">🎈</button>
+      <button class="tbtn" onclick="setTheme('ghost',this)">👻</button>
+      <button class="tbtn" onclick="setTheme('cloud',this)">⛅</button>
+      <button class="tbtn" onclick="setTheme('planet',this)">🪐</button>
+      <button class="tbtn" onclick="setTheme('dragon',this)">🐉</button>
+      <button class="tbtn" onclick="setTheme('potion',this)">🧪</button>
+      <button class="tbtn" onclick="setTheme('house',this)">🏚️</button>
+      <button class="tbtn" onclick="setTheme('book',this)">📖</button>
+      <button class="tbtn" onclick="setTheme('crystal',this)">💎</button>
+      <button class="tbtn" onclick="setTheme('witch',this)">🧙</button>
     </div>
-    <div class="theme-toggle">
-      <button class="theme-btn active" onclick="setTheme('cats',this)">🐱 Cozy Cats</button>
-      <button class="theme-btn" onclick="setTheme('castles',this)">🏰 Castles</button>
-      <button class="theme-btn" onclick="setTheme('muscle',this)">💪 Getting Stronger</button>
-    </div>
-    <div id="viz-empty" class="empty" style="display:none;">Add habits in the Habits tab to see your progress!</div>
-    <div class="viz-grid" id="viz-grid"></div>
+    <div id="viz-empty" class="empty" style="display:none">Add habits to see your progress!</div>
+    <div class="vgrid" id="viz-grid"></div>
   </div>
 
   <!-- DASHBOARD -->
-  <div class="page" id="page-dashboard">
-    <div class="month-nav">
-      <button onclick="changeMonth('dash',-1)">&#8592;</button>
-      <span id="dash-month-label"></span>
-      <button onclick="changeMonth('dash',1)">&#8594;</button>
-    </div>
-    <div class="dash-grid" id="dash-summary"></div>
-    <div style="margin-bottom:1.2rem;"><div class="section-label">Today</div><div id="dash-today"></div></div>
-    <div><div class="section-label" id="dash-progress-label"></div><div id="dash-bars"></div></div>
+  <div class="page" id="page-dash">
+    <div class="mnav"><button onclick="chMo('dash',-1)">&#8592;</button><span id="dash-mo"></span><button onclick="chMo('dash',1)">&#8594;</button></div>
+    <div class="dgrid2" id="dash-summary"></div>
+    <div style="margin-bottom:1.2rem"><div class="slabel">Today</div><div id="dash-today"></div></div>
+    <div><div class="slabel" id="dash-plbl"></div><div id="dash-bars"></div></div>
+  </div>
+
+  <!-- LAST MONTH -->
+  <div class="page" id="page-lastmonth">
+    <div id="lm-summary-box"></div>
+    <div id="lm-empty" class="empty" style="display:none">No habits yet!</div>
+    <div id="lm-list"></div>
   </div>
 
   <!-- HABITS -->
   <div class="page" id="page-habits">
-    <div class="section-label">New habit</div>
-    <div class="add-row">
-      <input type="text" id="habit-input" placeholder="e.g. Morning walk, Read…" maxlength="40"/>
-      <button class="add-btn" onclick="addHabit()">+ Add</button>
-    </div>
-    <div class="section-label">Pick a color</div>
-    <div class="color-grid" id="color-grid"></div>
-    <div class="section-label">Your habits</div>
-    <div class="habits-list" id="habits-list">
-      <div class="empty" id="empty-msg">No habits yet — add one above!</div>
-    </div>
+    <div class="slabel">New habit</div>
+    <div class="add-row"><input type="text" id="hinput" placeholder="e.g. Morning walk, Read…" maxlength="40"/><button class="add-btn" onclick="addHabit()">+ Add</button></div>
+    <div class="slabel">Pick a color</div>
+    <div class="color-grid" id="cgrid"></div>
+    <div class="slabel">Your habits</div>
+    <div class="hlist" id="hlist"><div class="empty" id="hempty">No habits yet — add one above!</div></div>
   </div>
+</div>
 </div>
 
 <script>
-const COLORS=['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff5fa0','#00c9b1','#ff7f50','#a29bfe','#fd79a8','#00b894','#e17055','#74b9ff','#55efc4','#fdcb6e','#e84393','#0984e3','#fab1a0','#81ecec','#ff6348','#2ed573','#eccc68','#a4b0be'];
-const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const CAT_MOODS=['just woke up...','stretching a little','warming up','getting comfy','all curled up','peak cozy mode zzz'];
-const CASTLE_MOODS=['clearing land...','laying stones','walls rising','towers going up','adding the spires','a magnificent castle!'];
-const MUSCLE_MOODS=['day one 💭','feeling it 🥵','gains loading...','getting swole 💪','seriously jacked','absolute unit 🏆'];
+const COLS=['#ff6b6b','#ff8e53','#ffb347','#ffd93d','#c8e63c','#6bcb77','#2ed573','#00c9b1','#00b4d8','#4d96ff','#748ffc','#a29bfe','#c77dff','#e040fb','#ff5fa0','#fd79a8','#ff6348','#e84393','#00b894','#0984e3','#6c5ce7','#fab1a0','#81ecec','#ffeaa7','#dfe6e9','#b2bec3','#636e72','#fdcb6e','#55efc4','#ff9ff3'];
+const MOS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MOODS={
+  cats:['wide awake!','stretching...','warming up','getting comfy','all curled up','peak cozy zzz'],
+  fairy:['a shimmer...','wings appear!','wand & glow','fairy dust!','wings lit up!','radiant! ✦'],
+  jelly:['a tiny speck','a little bell','growing up!','tentacles!','glowing!','magnificent!'],
+  balloon:['deflated...','inflating!','lifting off!','in the sky!','cloud level!','soaring free!'],
+  ghost:['barely there','a faint wisp','taking shape','getting bold!','so friendly!','fully here!'],
+  cloud:['stormy & sad','still cloudy','brightening!','sun peeking!','rainbow!','pure sunshine!'],
+  planet:['bare rock...','ocean forms','land appears','lush world!','with rings!','magical! ✦'],
+  dragon:['cozy egg...','cracking!','hatched!','wings out!','fire breath!','full glory! ✦'],
+  potion:['empty vial','a drop...','brewing!','bubbling!','almost full!','pure magic! ✦'],
+  house:['dark & spooky','lights off...','one light!','glowing!','cheery!','bright & happy!'],
+  book:['dusty & shut','a glimmer...','pages glow','crackling!','sparking!','pure magic! ✦'],
+  crystal:['dull shard','a little glow','growing!','cluster!','sparkling!','fairy ring! ✦'],
+  witch:['apprentice...','with a broom!','riding high!','casting spells!','two wands!','fully powerful!']
+};
+const ANIMS={cats:'ab',fairy:'af',jelly:'ab',balloon:'ad',ghost:'af',cloud:'aw',planet:'abr',dragon:'awg',potion:'ab',house:'abr',book:'apu',crystal:'abr',witch:'af'};
 
-let selectedColor=COLORS[0], activeTab='viz', vizTheme='cats';
-const TODAY=new Date(); TODAY.setHours(0,0,0,0);
-let vizYear=TODAY.getFullYear(), vizMonth=TODAY.getMonth();
-let dashYear=TODAY.getFullYear(), dashMonth=TODAY.getMonth();
+let selCol=COLS[0],activeTab='viz',theme='cats',isDark=false;
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+let vizY=TODAY.getFullYear(),vizM=TODAY.getMonth();
+let dashY=TODAY.getFullYear(),dashM=TODAY.getMonth();
 let habits=[];
-try{habits=JSON.parse(localStorage.getItem('ht_v8')||'[]');}catch(e){}
-function save(){try{localStorage.setItem('ht_v8',JSON.stringify(habits));}catch(e){}}
-function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-const todayKey=dateKey(TODAY);
-function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
-function monthComp(h,y,m){let c=0,t=daysInMonth(y,m);for(let i=1;i<=t;i++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');if(h.done[k])c++;}return{count:c,total:t};}
+try{habits=JSON.parse(localStorage.getItem('ht_final2')||'[]');}catch(e){}
+function save(){try{localStorage.setItem('ht_final2',JSON.stringify(habits));}catch(e){}}
+function dk(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const TK=dk(TODAY);
+function dim(y,m){return new Date(y,m+1,0).getDate();}
+function mcomp(h,y,m){let c=0,t=dim(y,m);for(let i=1;i<=t;i++){const k=y+'-'+String(m+1).padStart(2,'0')+'-'+String(i).padStart(2,'0');if(h.done[k])c++;}return{c,t};}
+function drk(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.max(0,v-a).toString(16).padStart(2,'0')).join('');}
+function lgt(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.min(255,v+a).toString(16).padStart(2,'0')).join('');}
+function stg(p){return p===0?0:p<0.2?1:p<0.4?2:p<0.6?3:p<0.8?4:5;}
 
-// Color helpers
-function darken(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.max(0,v-a).toString(16).padStart(2,'0')).join('');}
-function lighten(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return'#'+[r,g,b].map(v=>Math.min(255,v+a).toString(16).padStart(2,'0')).join('');}
+function toggleDark(){
+  isDark=!isDark;
+  document.getElementById('root').classList.toggle('dark',isDark);
+  document.body.classList.toggle('dark',isDark);
+  document.getElementById('dark-btn').textContent=isDark?'☀ light':'☽ dark';
+}
 
-// Build color swatches
-const cg=document.getElementById('color-grid');
-COLORS.forEach((c,i)=>{
-  const s=document.createElement('div');
-  s.className='color-swatch'+(i===0?' selected':'');
-  s.style.background=c;
-  s.onclick=()=>{selectedColor=c;document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('selected'));s.classList.add('selected');};
-  cg.appendChild(s);
-});
+// Color swatches
+const cg=document.getElementById('cgrid');
+COLS.forEach((c,i)=>{const s=document.createElement('div');s.className='cswatch'+(i===0?' sel':'');s.style.background=c;s.onclick=()=>{selCol=c;document.querySelectorAll('.cswatch').forEach(x=>x.classList.remove('sel'));s.classList.add('sel');};cg.appendChild(s);});
 
-function showTab(tab){
-  activeTab=tab;
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['viz','dashboard','habits'][i]===tab));
+function showTab(t){
+  activeTab=t;
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['viz','dash','lastmonth','habits'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
+  document.getElementById('page-'+t).classList.add('active');
   renderActive();
 }
 function renderActive(){
-  if(activeTab==='viz') renderViz();
-  else if(activeTab==='dashboard') renderDashboard();
+  if(activeTab==='viz')renderViz();
+  else if(activeTab==='dash')renderDash();
+  else if(activeTab==='lastmonth')renderLastMonth();
   else renderHabits();
 }
-function setTheme(t,btn){
-  vizTheme=t;
-  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderViz();
+function setTheme(t,btn){theme=t;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderViz();}
+function chMo(v,d){
+  if(v==='viz'){vizM+=d;if(vizM>11){vizM=0;vizY++;}if(vizM<0){vizM=11;vizY--;}renderViz();}
+  else{dashM+=d;if(dashM>11){dashM=0;dashY++;}if(dashM<0){dashM=11;dashY--;}renderDash();}
 }
-function changeMonth(view,dir){
-  if(view==='viz'){vizMonth+=dir;if(vizMonth>11){vizMonth=0;vizYear++;}if(vizMonth<0){vizMonth=11;vizYear--;}renderViz();}
-  else{dashMonth+=dir;if(dashMonth>11){dashMonth=0;dashYear++;}if(dashMonth<0){dashMonth=11;dashYear--;}renderDashboard();}
-}
-
-document.getElementById('habit-input').addEventListener('keydown',e=>{if(e.key==='Enter')addHabit();});
+document.getElementById('hinput').addEventListener('keydown',e=>{if(e.key==='Enter')addHabit();});
 
 function addHabit(){
-  const inp=document.getElementById('habit-input');
-  const name=inp.value.trim(); if(!name) return;
-  const h={id:Date.now(),name,color:selectedColor,done:{}};
-  habits.push(h);
-  inp.value='';
-  save();
-  // Instant add to habits tab DOM
-  const list=document.getElementById('habits-list');
-  const empty=document.getElementById('empty-msg');
-  if(empty) empty.style.display='none';
-  const card=buildHabitCard(h);
-  list.insertAdjacentHTML('beforeend',card);
-  // Also refresh viz/dash if active
-  if(activeTab==='viz') renderViz();
-  else if(activeTab==='dashboard') renderDashboard();
+  const inp=document.getElementById('hinput'),name=inp.value.trim();
+  if(!name)return;
+  const h={id:Date.now(),name,color:selCol,done:{}};
+  habits.push(h);inp.value='';save();
+  document.getElementById('hempty').style.display='none';
+  document.getElementById('hlist').insertAdjacentHTML('beforeend',buildCard(h));
+  renderActive();
+}
+function delHabit(id){
+  habits=habits.filter(x=>x.id!==id);save();
+  const el=document.querySelector(`[data-hid="${id}"]`);if(el)el.remove();
+  if(!habits.length){const e=document.getElementById('hempty');if(e){e.style.display='block';document.getElementById('hlist').appendChild(e);}}
+  if(activeTab!=='habits')renderActive();
+}
+function togDay(id,key,el,col){
+  const h=habits.find(x=>x.id===id);if(!h)return;
+  h.done[key]=!h.done[key];save();
+  if(h.done[key]){el.style.background=col;el.style.borderColor='transparent';el.textContent='';el.classList.add('done');}
+  else{el.style.background='';el.style.borderColor='';el.textContent=parseInt(key.slice(-2));el.classList.remove('done');}
+  const card=el.closest('.hcard');
+  if(card){const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=dim(y,m);const{c}=mcomp(h,y,m),p=Math.round(c/mt*100);const vs=card.querySelectorAll('.sstat-val');if(vs[0])vs[0].textContent=c+'/'+mt;if(vs[1])vs[1].textContent=p+'%';}
+  if(activeTab==='viz')renderViz();
+  else if(activeTab==='dash')renderDash();
+  else if(activeTab==='lastmonth')renderLastMonth();
+}
+function togToday(id){
+  const h=habits.find(x=>x.id===id);if(!h)return;
+  h.done[TK]=!h.done[TK];save();
+  renderDash();
+  if(activeTab==='viz')renderViz();
 }
 
-function deleteHabit(id){
-  habits=habits.filter(x=>x.id!==id);
-  save();
-  // Remove card from DOM instantly
-  const card=document.querySelector(`[data-habit-id="${id}"]`);
-  if(card) card.remove();
-  const list=document.getElementById('habits-list');
-  if(habits.length===0){
-    const empty=document.getElementById('empty-msg');
-    if(empty){empty.style.display='block';list.appendChild(empty);}
+// ─── SHARED HELPERS ───────────────────────────────────────────────
+function face(cx,cy,sz,mood,col){
+  const ex=cx-sz*0.32,ex2=cx+sz*0.32,ey=cy-sz*0.06;let s='';const sw=Math.max(0.8,sz*0.1);
+  if(mood==='sleepy'){
+    s+=`<path d="M${ex-sz*0.16} ${ey} Q${ex} ${ey-sz*0.15} ${ex+sz*0.16} ${ey}" fill="none" stroke="#222" stroke-width="${sw}" stroke-linecap="round"/>`;
+    s+=`<path d="M${ex2-sz*0.16} ${ey} Q${ex2} ${ey-sz*0.15} ${ex2+sz*0.16} ${ey}" fill="none" stroke="#222" stroke-width="${sw}" stroke-linecap="round"/>`;
+    s+=`<path d="M${cx-sz*0.2} ${cy+sz*0.28} Q${cx} ${cy+sz*0.2} ${cx+sz*0.2} ${cy+sz*0.28}" fill="none" stroke="#222" stroke-width="${sw*0.85}" stroke-linecap="round"/>`;
+  } else if(mood==='neutral'){
+    s+=`<circle cx="${ex}" cy="${ey}" r="${sz*0.12}" fill="#222"/>`;
+    s+=`<circle cx="${ex2}" cy="${ey}" r="${sz*0.12}" fill="#222"/>`;
+    s+=`<circle cx="${ex+sz*0.05}" cy="${ey-sz*0.05}" r="${sz*0.05}" fill="rgba(255,255,255,0.7)"/>`;
+    s+=`<circle cx="${ex2+sz*0.05}" cy="${ey-sz*0.05}" r="${sz*0.05}" fill="rgba(255,255,255,0.7)"/>`;
+    s+=`<path d="M${cx-sz*0.2} ${cy+sz*0.3} Q${cx} ${cy+sz*0.38} ${cx+sz*0.2} ${cy+sz*0.3}" fill="none" stroke="#222" stroke-width="${sw*0.85}" stroke-linecap="round"/>`;
+  } else if(mood==='happy'){
+    s+=`<circle cx="${ex}" cy="${ey}" r="${sz*0.13}" fill="#222"/>`;
+    s+=`<circle cx="${ex2}" cy="${ey}" r="${sz*0.13}" fill="#222"/>`;
+    s+=`<circle cx="${ex+sz*0.06}" cy="${ey-sz*0.06}" r="${sz*0.055}" fill="rgba(255,255,255,0.8)"/>`;
+    s+=`<circle cx="${ex2+sz*0.06}" cy="${ey-sz*0.06}" r="${sz*0.055}" fill="rgba(255,255,255,0.8)"/>`;
+    s+=`<path d="M${cx-sz*0.25} ${cy+sz*0.27} Q${cx} ${cy+sz*0.5} ${cx+sz*0.25} ${cy+sz*0.27}" fill="none" stroke="#222" stroke-width="${sw}" stroke-linecap="round"/>`;
+    s+=`<circle cx="${ex-sz*0.18}" cy="${cy+sz*0.16}" r="${sz*0.13}" fill="#ffb3c6" opacity="0.45"/>`;
+    s+=`<circle cx="${ex2+sz*0.18}" cy="${cy+sz*0.16}" r="${sz*0.13}" fill="#ffb3c6" opacity="0.45"/>`;
+  } else {
+    s+=`<circle cx="${ex}" cy="${ey}" r="${sz*0.15}" fill="#222"/>`;
+    s+=`<circle cx="${ex2}" cy="${ey}" r="${sz*0.15}" fill="#222"/>`;
+    s+=`<circle cx="${ex+sz*0.07}" cy="${ey-sz*0.07}" r="${sz*0.065}" fill="rgba(255,255,255,0.85)"/>`;
+    s+=`<circle cx="${ex2+sz*0.07}" cy="${ey-sz*0.07}" r="${sz*0.065}" fill="rgba(255,255,255,0.85)"/>`;
+    s+=`<path d="M${cx-sz*0.3} ${cy+sz*0.22} Q${cx} ${cy+sz*0.54} ${cx+sz*0.3} ${cy+sz*0.22}" fill="${lgt(col,55)}" stroke="#222" stroke-width="${sw}" stroke-linecap="round"/>`;
+    s+=`<circle cx="${ex-sz*0.22}" cy="${cy+sz*0.17}" r="${sz*0.14}" fill="#ffb3c6" opacity="0.5"/>`;
+    s+=`<circle cx="${ex2+sz*0.22}" cy="${cy+sz*0.17}" r="${sz*0.14}" fill="#ffb3c6" opacity="0.5"/>`;
   }
-  if(activeTab==='viz') renderViz();
-  else if(activeTab==='dashboard') renderDashboard();
+  return s;
 }
+const FM=['sleepy','sleepy','neutral','happy','happy','excited'];
+function spk(x,y,c){return`<circle cx="${x}" cy="${y}" r="1.8" fill="${c}" opacity="0.7"/><line x1="${x}" y1="${y-3.5}" x2="${x}" y2="${y+3.5}" stroke="${c}" stroke-width="0.9" opacity="0.55"/><line x1="${x-3.5}" y1="${y}" x2="${x+3.5}" y2="${y}" stroke="${c}" stroke-width="0.9" opacity="0.55"/>`;}
 
-function toggleDay(id,key,el,color){
-  const h=habits.find(x=>x.id===id); if(!h) return;
-  h.done[key]=!h.done[key]; save();
-  const done=h.done[key];
-  if(done){el.style.background=color;el.style.borderColor='transparent';el.textContent='';el.classList.add('done');}
-  else{el.style.background='';el.style.borderColor='';el.textContent=parseInt(key.slice(-2)).toString();el.classList.remove('done');}
-  const card=el.closest('.habit-card');
-  if(card){
-    const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=daysInMonth(y,m);
-    const{count}=monthComp(h,y,m),pct=Math.round(count/mt*100);
-    const vals=card.querySelectorAll('.stat-val');
-    if(vals[0])vals[0].textContent=count+'/'+mt;
-    if(vals[1])vals[1].textContent=pct+'%';
-  }
-}
-function toggleTodayDash(id){
-  const h=habits.find(x=>x.id===id); if(!h) return;
-  h.done[todayKey]=!h.done[todayKey]; save(); renderDashboard();
-}
-
-// ─── CAT DRAWING ───────────────────────────────────────────────────────────
-function drawCat(pct,color){
-  const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-  const mid=darken(color,20), light=lighten(color,48), vlight=lighten(color,65);
-  const eye='#1a1612', nose='#f4a0a0', shine='rgba(255,255,255,0.85)';
-  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
-
-  if(stage===0){
-    // Sitting upright, wide-awake, collar, tail curled at feet
-    // tail
-    s+=`<path d="M54 82 Q82 84 80 68 Q78 55 63 60" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    // body
-    s+=`<ellipse cx="50" cy="71" rx="20" ry="18" fill="${color}"/>`;
-    // belly patch
-    s+=`<ellipse cx="50" cy="74" rx="11" ry="12" fill="${light}"/>`;
-    // head
-    s+=`<ellipse cx="50" cy="45" rx="18" ry="17" fill="${color}"/>`;
-    // ears
-    s+=`<polygon points="35,34 30,18 45,31" fill="${color}"/><polygon points="65,34 70,18 55,31" fill="${color}"/>`;
-    s+=`<polygon points="36,33 32,21 44,31" fill="${light}"/><polygon points="64,33 68,21 56,31" fill="${light}"/>`;
-    // forehead stripe
-    s+=`<path d="M46 32 Q50 28 54 32" fill="none" stroke="${mid}" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>`;
-    // cheek tufts
-    s+=`<ellipse cx="34" cy="47" rx="5" ry="3.5" fill="${light}" opacity="0.7"/><ellipse cx="66" cy="47" rx="5" ry="3.5" fill="${light}" opacity="0.7"/>`;
-    // eyes open big
-    s+=`<ellipse cx="43" cy="45" rx="5" ry="5.5" fill="white"/><ellipse cx="57" cy="45" rx="5" ry="5.5" fill="white"/>`;
-    s+=`<ellipse cx="43" cy="46" rx="3" ry="3.8" fill="${eye}"/><ellipse cx="57" cy="46" rx="3" ry="3.8" fill="${eye}"/>`;
-    s+=`<circle cx="44.5" cy="44.5" r="1.1" fill="${shine}"/><circle cx="58.5" cy="44.5" r="1.1" fill="${shine}"/>`;
-    // nose + mouth
-    s+=`<ellipse cx="50" cy="52" rx="2.2" ry="1.6" fill="${nose}"/>`;
-    s+=`<path d="M47.5 54 Q50 57 52.5 54" fill="none" stroke="${mid}" stroke-width="1.1" stroke-linecap="round"/>`;
-    // whiskers
-    s+=`<line x1="30" y1="51" x2="46" y2="53" stroke="${mid}" stroke-width="0.9" opacity="0.6"/><line x1="30" y1="54" x2="46" y2="54.5" stroke="${mid}" stroke-width="0.9" opacity="0.6"/>`;
-    s+=`<line x1="70" y1="51" x2="54" y2="53" stroke="${mid}" stroke-width="0.9" opacity="0.6"/><line x1="70" y1="54" x2="54" y2="54.5" stroke="${mid}" stroke-width="0.9" opacity="0.6"/>`;
-    // collar
-    s+=`<path d="M33 56 Q50 62 67 56" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
-    s+=`<circle cx="50" cy="60" r="2.5" fill="#ffd93d"/>`;
-    // paws
-    s+=`<ellipse cx="37" cy="87" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="87" rx="8" ry="4.5" fill="${mid}"/>`;
-    s+=`<ellipse cx="35" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="39" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
-    s+=`<ellipse cx="61" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="65" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
-
-  } else if(stage===1){
-    // Sitting, half-lidded, yawning slightly
-    s+=`<path d="M54 83 Q80 86 78 71 Q76 58 62 62" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    s+=`<ellipse cx="50" cy="72" rx="20" ry="17" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="75" rx="11" ry="11" fill="${light}"/>`;
-    s+=`<ellipse cx="50" cy="47" rx="18" ry="17" fill="${color}"/>`;
-    s+=`<polygon points="35,35 30,19 45,32" fill="${color}"/><polygon points="65,35 70,19 55,32" fill="${color}"/>`;
-    s+=`<polygon points="36,34 32,22 44,32" fill="${light}"/><polygon points="64,34 68,22 56,32" fill="${light}"/>`;
-    s+=`<ellipse cx="34" cy="49" rx="5" ry="3.5" fill="${light}" opacity="0.7"/><ellipse cx="66" cy="49" rx="5" ry="3.5" fill="${light}" opacity="0.7"/>`;
-    // half-lidded
-    s+=`<ellipse cx="43" cy="47" rx="5" ry="4.5" fill="white"/><ellipse cx="57" cy="47" rx="5" ry="4.5" fill="white"/>`;
-    s+=`<ellipse cx="43" cy="48" rx="3" ry="3" fill="${eye}"/><ellipse cx="57" cy="48" rx="3" ry="3" fill="${eye}"/>`;
-    s+=`<path d="M38 44.5 Q43 42.5 48 44.5" fill="${color}"/><path d="M52 44.5 Q57 42.5 62 44.5" fill="${color}"/>`;
-    s+=`<circle cx="44" cy="46.5" r="0.9" fill="${shine}"/><circle cx="58" cy="46.5" r="0.9" fill="${shine}"/>`;
-    s+=`<ellipse cx="50" cy="54" rx="2.2" ry="1.6" fill="${nose}"/>`;
-    s+=`<path d="M47.5 56 Q50 59 52.5 56" fill="none" stroke="${mid}" stroke-width="1.1" stroke-linecap="round"/>`;
-    s+=`<line x1="30" y1="53" x2="46" y2="55" stroke="${mid}" stroke-width="0.9" opacity="0.5"/><line x1="30" y1="56" x2="46" y2="56.5" stroke="${mid}" stroke-width="0.9" opacity="0.5"/>`;
-    s+=`<line x1="70" y1="53" x2="54" y2="55" stroke="${mid}" stroke-width="0.9" opacity="0.5"/><line x1="70" y1="56" x2="54" y2="56.5" stroke="${mid}" stroke-width="0.9" opacity="0.5"/>`;
-    s+=`<path d="M33 58 Q50 64 67 58" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
-    s+=`<circle cx="50" cy="62" r="2.5" fill="#ffd93d"/>`;
-    s+=`<ellipse cx="37" cy="87" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="87" rx="8" ry="4.5" fill="${mid}"/>`;
-    s+=`<ellipse cx="35" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="39" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
-    s+=`<ellipse cx="61" cy="87" rx="3" ry="2.5" fill="${light}"/><ellipse cx="65" cy="87" rx="3" ry="2.5" fill="${light}"/>`;
-
-  } else if(stage===2){
-    // Hunched, drowsy, eyes slitted
-    s+=`<path d="M55 81 Q78 86 75 73 Q72 62 61 64" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
-    s+=`<ellipse cx="50" cy="73" rx="22" ry="16" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="76" rx="12" ry="10" fill="${light}"/>`;
-    s+=`<ellipse cx="50" cy="50" rx="17" ry="16" fill="${color}"/>`;
-    s+=`<polygon points="36,40 31,24 45,37" fill="${color}"/><polygon points="64,40 69,24 55,37" fill="${color}"/>`;
-    s+=`<polygon points="37,39 33,26 44,37" fill="${light}"/><polygon points="63,39 67,26 56,37" fill="${light}"/>`;
-    // narrow slits
-    s+=`<ellipse cx="43" cy="50" rx="5" ry="2.5" fill="white"/><ellipse cx="57" cy="50" rx="5" ry="2.5" fill="white"/>`;
-    s+=`<ellipse cx="43" cy="50.5" rx="3" ry="1.5" fill="${eye}"/><ellipse cx="57" cy="50.5" rx="3" ry="1.5" fill="${eye}"/>`;
-    s+=`<path d="M38 47.5 Q43 46 48 47.5" fill="${color}"/><path d="M52 47.5 Q57 46 62 47.5" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="56" rx="2" ry="1.4" fill="${nose}"/>`;
-    s+=`<line x1="31" y1="55" x2="47" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/><line x1="69" y1="55" x2="53" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/>`;
-    s+=`<path d="M34 59 Q50 65 66 59" fill="none" stroke="${darken(color,30)}" stroke-width="3.5" stroke-linecap="round"/>`;
-    s+=`<circle cx="50" cy="63" r="2.5" fill="#ffd93d"/>`;
-    s+=`<ellipse cx="37" cy="87" rx="7" ry="4" fill="${mid}"/><ellipse cx="63" cy="87" rx="7" ry="4" fill="${mid}"/>`;
-
-  } else if(stage===3){
-    // Loaf — legs tucked, eyes squinting, tiny smile
+// ─── CAT ──────────────────────────────────────────────────────────
+function drawCat(pct,col){
+  const st=stg(pct),mid=drk(col,20),lt=lgt(col,48),vlt=lgt(col,68);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  const mood=FM[st];
+  if(st===0){
+    s+=`<ellipse cx="50" cy="73" rx="20" ry="19" fill="${col}"/>`;s+=`<ellipse cx="50" cy="77" rx="12" ry="12" fill="${lt}"/>`;
+    s+=`<path d="M54 82 Q80 84 78 69 Q76 57 63 61" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="45" rx="18" ry="17" fill="${col}"/>`;
+    s+=`<polygon points="34,33 29,17 44,30" fill="${col}"/><polygon points="66,33 71,17 56,30" fill="${col}"/>`;
+    s+=`<polygon points="35,32 31,20 43,30" fill="${lt}"/><polygon points="65,32 69,20 57,30" fill="${lt}"/>`;
+    s+=face(50,46,20,mood,col);
+    s+=`<line x1="30" y1="50" x2="45" y2="52" stroke="${mid}" stroke-width="0.9" opacity="0.55"/><line x1="30" y1="53" x2="45" y2="53.5" stroke="${mid}" stroke-width="0.9" opacity="0.55"/>`;
+    s+=`<line x1="70" y1="50" x2="55" y2="52" stroke="${mid}" stroke-width="0.9" opacity="0.55"/><line x1="70" y1="53" x2="55" y2="53.5" stroke="${mid}" stroke-width="0.9" opacity="0.55"/>`;
+    s+=`<path d="M34 57 Q50 63 66 57" fill="none" stroke="${drk(col,28)}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="61" r="2.5" fill="#ffd93d"/>`;
+    s+=`<ellipse cx="37" cy="89" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="89" rx="8" ry="4.5" fill="${mid}"/>`;
+    s+=`<ellipse cx="35" cy="89" rx="3" ry="2.5" fill="${lt}"/><ellipse cx="39" cy="89" rx="3" ry="2.5" fill="${lt}"/>`;
+    s+=`<ellipse cx="61" cy="89" rx="3" ry="2.5" fill="${lt}"/><ellipse cx="65" cy="89" rx="3" ry="2.5" fill="${lt}"/>`;
+  } else if(st===1){
+    s+=`<path d="M54 83 Q79 86 77 72 Q75 60 62 63" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="73" rx="20" ry="18" fill="${col}"/><ellipse cx="50" cy="77" rx="12" ry="11" fill="${lt}"/>`;
+    s+=`<ellipse cx="50" cy="47" rx="18" ry="17" fill="${col}"/>`;
+    s+=`<polygon points="34,35 29,19 44,32" fill="${col}"/><polygon points="66,35 71,19 56,32" fill="${col}"/>`;
+    s+=`<polygon points="35,34 31,22 43,32" fill="${lt}"/><polygon points="65,34 69,22 57,32" fill="${lt}"/>`;
+    s+=face(50,48,20,mood,col);
+    s+=`<line x1="30" y1="52" x2="45" y2="54" stroke="${mid}" stroke-width="0.9" opacity="0.5"/><line x1="70" y1="52" x2="55" y2="54" stroke="${mid}" stroke-width="0.9" opacity="0.5"/>`;
+    s+=`<path d="M34 58 Q50 64 66 58" fill="none" stroke="${drk(col,28)}" stroke-width="3.2" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="62" r="2.3" fill="#ffd93d"/>`;
+    s+=`<ellipse cx="37" cy="89" rx="8" ry="4.5" fill="${mid}"/><ellipse cx="63" cy="89" rx="8" ry="4.5" fill="${mid}"/>`;
+  } else if(st===2){
+    s+=`<path d="M55 82 Q77 86 74 73 Q71 62 61 64" fill="none" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="74" rx="22" ry="17" fill="${col}"/><ellipse cx="50" cy="78" rx="13" ry="10" fill="${lt}"/>`;
+    s+=`<ellipse cx="50" cy="51" rx="17" ry="16" fill="${col}"/>`;
+    s+=`<polygon points="35,41 30,25 44,38" fill="${col}"/><polygon points="65,41 70,25 56,38" fill="${col}"/>`;
+    s+=`<polygon points="36,40 32,27 43,38" fill="${lt}"/><polygon points="64,40 68,27 57,38" fill="${lt}"/>`;
+    s+=face(50,51,18,mood,col);
+    s+=`<line x1="31" y1="55" x2="46" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/><line x1="69" y1="55" x2="54" y2="57" stroke="${mid}" stroke-width="0.9" opacity="0.45"/>`;
+    s+=`<path d="M34 60 Q50 66 66 60" fill="none" stroke="${drk(col,28)}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="64" r="2.2" fill="#ffd93d"/>`;
+    s+=`<ellipse cx="37" cy="89" rx="7" ry="4" fill="${mid}"/><ellipse cx="63" cy="89" rx="7" ry="4" fill="${mid}"/>`;
+  } else if(st===3){
     s+=`<path d="M57 74 Q77 79 74 67 Q71 58 61 61" fill="none" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
-    // loaf body
-    s+=`<rect x="22" y="62" width="56" height="27" rx="15" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="89" rx="24" ry="6" fill="${mid}" opacity="0.3"/>`;
-    // belly
-    s+=`<ellipse cx="50" cy="75" rx="18" ry="10" fill="${light}"/>`;
-    // head
-    s+=`<ellipse cx="50" cy="53" rx="17" ry="15" fill="${color}"/>`;
-    s+=`<polygon points="36,43 31,27 45,40" fill="${color}"/><polygon points="64,43 69,27 55,40" fill="${color}"/>`;
-    s+=`<polygon points="37,42 33,29 44,40" fill="${light}"/><polygon points="63,42 67,29 56,40" fill="${light}"/>`;
-    s+=`<path d="M38 52 Q43 50 48 52" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<path d="M52 52 Q57 50 62 52" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<ellipse cx="50" cy="58" rx="2" ry="1.4" fill="${nose}"/>`;
-    s+=`<path d="M47.5 60 Q50 62.5 52.5 60" fill="none" stroke="${mid}" stroke-width="1" stroke-linecap="round"/>`;
-    s+=`<line x1="31" y1="57" x2="47" y2="59" stroke="${mid}" stroke-width="0.8" opacity="0.4"/><line x1="69" y1="57" x2="53" y2="59" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
-    // tiny toe beans peeking
-    s+=`<ellipse cx="34" cy="89" rx="5" ry="3" fill="${mid}"/><ellipse cx="66" cy="89" rx="5" ry="3" fill="${mid}"/>`;
-    s+=`<ellipse cx="33" cy="89" rx="2" ry="1.8" fill="${light}"/><ellipse cx="35.5" cy="89" rx="2" ry="1.8" fill="${light}"/>`;
-    s+=`<ellipse cx="65" cy="89" rx="2" ry="1.8" fill="${light}"/><ellipse cx="67.5" cy="89" rx="2" ry="1.8" fill="${light}"/>`;
-
-  } else if(stage===4){
-    // Curled on cushion, one eye open, tail around body
-    s+=`<ellipse cx="50" cy="82" rx="32" ry="10" fill="${vlight}"/>`;
-    // cushion dots
-    s+=`<circle cx="30" cy="82" r="2" fill="${light}"/><circle cx="50" cy="86" r="2" fill="${light}"/><circle cx="70" cy="82" r="2" fill="${light}"/>`;
-    s+=`<ellipse cx="50" cy="70" rx="25" ry="19" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="74" rx="16" ry="12" fill="${light}"/>`;
-    s+=`<path d="M25 70 Q15 90 40 90 Q60 90 64 76" fill="none" stroke="${mid}" stroke-width="5.5" stroke-linecap="round"/>`;
-    // tail tip
-    s+=`<circle cx="64" cy="76" r="4" fill="${light}"/>`;
-    // head tucked
-    s+=`<ellipse cx="61" cy="56" rx="15" ry="14" fill="${color}"/>`;
-    s+=`<polygon points="51,46 49,33 61,44" fill="${color}"/><polygon points="70,47 74,34 63,45" fill="${color}"/>`;
-    s+=`<polygon points="52,45 50,35 60,44" fill="${light}"/><polygon points="69,46 72,36 63,45" fill="${light}"/>`;
-    // one eye closed, one open
-    s+=`<path d="M54 56 Q59 54 64 56" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<ellipse cx="67" cy="55" rx="4" ry="4" fill="white"/><ellipse cx="67.5" cy="55.5" rx="2.3" ry="2.5" fill="${eye}"/>`;
-    s+=`<circle cx="68.5" cy="54.5" r="0.8" fill="${shine}"/>`;
-    s+=`<ellipse cx="59" cy="61" rx="1.8" ry="1.3" fill="${nose}"/>`;
-
+    s+=`<rect x="22" y="63" width="56" height="27" rx="15" fill="${col}"/>`;s+=`<ellipse cx="50" cy="76" rx="19" ry="11" fill="${lt}"/>`;
+    s+=`<ellipse cx="50" cy="54" rx="17" ry="15" fill="${col}"/>`;
+    s+=`<polygon points="35,43 30,27 44,40" fill="${col}"/><polygon points="65,43 70,27 56,40" fill="${col}"/>`;
+    s+=`<polygon points="36,42 32,29 43,40" fill="${lt}"/><polygon points="64,42 68,29 57,40" fill="${lt}"/>`;
+    s+=face(50,54,17,mood,col);
+    s+=`<ellipse cx="35" cy="90" rx="5" ry="3" fill="${mid}"/><ellipse cx="65" cy="90" rx="5" ry="3" fill="${mid}"/>`;
+  } else if(st===4){
+    s+=`<ellipse cx="50" cy="83" rx="33" ry="10" fill="${vlt}"/>`;
+    s+=`<ellipse cx="50" cy="71" rx="25" ry="19" fill="${col}"/><ellipse cx="50" cy="75" rx="16" ry="12" fill="${lt}"/>`;
+    s+=`<path d="M25 71 Q15 91 40 91 Q60 91 64 77" fill="none" stroke="${mid}" stroke-width="5.5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="61" cy="57" rx="15" ry="14" fill="${col}"/>`;
+    s+=`<polygon points="50,47 48,34 60,45" fill="${col}"/><polygon points="71,48 75,35 63,46" fill="${col}"/>`;
+    s+=`<polygon points="51,46 49,36 59,45" fill="${lt}"/><polygon points="70,47 73,37 63,46" fill="${lt}"/>`;
+    s+=face(61,57,15,mood,col);
   } else {
-    // Stage 5 — tight donut, both eyes shut, blanket, Zzz
-    s+=`<ellipse cx="50" cy="83" rx="34" ry="11" fill="${vlight}"/>`;
-    s+=`<circle cx="28" cy="83" r="2.5" fill="${light}"/><circle cx="50" cy="88" r="2.5" fill="${light}"/><circle cx="72" cy="83" r="2.5" fill="${light}"/>`;
-    // blanket
-    s+=`<ellipse cx="50" cy="75" rx="30" ry="20" fill="${darken(color,8)}" opacity="0.5"/>`;
-    s+=`<ellipse cx="50" cy="68" rx="27" ry="23" fill="${color}"/>`;
-    s+=`<ellipse cx="50" cy="72" rx="18" ry="15" fill="${light}"/>`;
-    s+=`<path d="M23 68 Q14 92 44 91 Q66 91 68 75 Q69 62 57 59" fill="none" stroke="${mid}" stroke-width="6" stroke-linecap="round"/>`;
-    s+=`<circle cx="57" cy="59" r="5" fill="${light}"/>`;
-    s+=`<ellipse cx="59" cy="51" rx="14" ry="13" fill="${color}"/>`;
-    s+=`<polygon points="50,42 48,30 59,41" fill="${color}"/><polygon points="67,43 71,31 62,42" fill="${color}"/>`;
-    s+=`<polygon points="51,41 49,32 58,41" fill="${light}"/><polygon points="66,42 70,33 62,42" fill="${light}"/>`;
-    s+=`<path d="M50 51 Q55 49 60 51" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<path d="M61 51 Q65.5 49 70 51" fill="none" stroke="${eye}" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<ellipse cx="58" cy="56" rx="1.8" ry="1.3" fill="${nose}"/>`;
-    // heart above
-    s+=`<path d="M45 20 Q45 16 49 17 Q50 14 51 17 Q55 16 55 20 Q55 24 50 27 Q45 24 45 20 Z" fill="${mid}" opacity="0.5"/>`;
-    s+=`<text x="68" y="32" font-size="9" fill="${mid}" opacity="0.75" font-family="sans-serif">z</text>`;
-    s+=`<text x="74" y="23" font-size="11" fill="${mid}" opacity="0.55" font-family="sans-serif">z</text>`;
-    s+=`<text x="80" y="14" font-size="13" fill="${mid}" opacity="0.35" font-family="sans-serif">z</text>`;
+    s+=`<ellipse cx="50" cy="84" rx="35" ry="11" fill="${vlt}"/>`;
+    s+=`<ellipse cx="50" cy="70" rx="27" ry="23" fill="${col}"/><ellipse cx="50" cy="74" rx="18" ry="15" fill="${lt}"/>`;
+    s+=`<path d="M22 70 Q13 93 44 92 Q66 92 68 76 Q69 63 57 60" fill="none" stroke="${mid}" stroke-width="6" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="59" cy="52" rx="14" ry="13" fill="${col}"/>`;
+    s+=`<polygon points="49,43 47,31 58,42" fill="${col}"/><polygon points="67,44 71,32 62,43" fill="${col}"/>`;
+    s+=`<polygon points="50,42 48,33 57,42" fill="${lt}"/><polygon points="66,43 70,34 62,43" fill="${lt}"/>`;
+    s+=face(59,52,14,mood,col);
+    s+=`<path d="M44 21 Q44 17 48 18 Q50 15 52 18 Q56 17 56 21 Q56 25 50 28 Q44 25 44 21 Z" fill="${lt}" opacity="0.55"/>`;
+    s+=spk(68,30,lgt(col,25))+spk(76,20,lgt(col,25));
   }
   return s+'</svg>';
 }
 
-// ─── CASTLE DRAWING ─────────────────────────────────────────────────────────
-function drawCastle(pct,color){
-  const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-  const dark=darken(color,30), mid=darken(color,12), light=lighten(color,40), sky=lighten(color,62);
-  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
-  // ground
-  s+=`<ellipse cx="50" cy="93" rx="38" ry="6" fill="${light}" opacity="0.5"/>`;
-  // grass
-  s+=`<rect x="12" y="88" width="76" height="5" rx="2" fill="#7ec850" opacity="0.6"/>`;
-
-  if(stage===0){
-    // Just a dirt mound
-    s+=`<ellipse cx="50" cy="88" rx="22" ry="6" fill="#b5a07a"/>`;
-    s+=`<path d="M34 88 Q50 78 66 88" fill="#c9b48a"/>`;
-    // stakes/markers
-    s+=`<line x1="38" y1="78" x2="38" y2="90" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<line x1="62" y1="78" x2="62" y2="90" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<line x1="36" y1="79" x2="40" y2="79" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
-    s+=`<line x1="60" y1="79" x2="64" y2="79" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
-  } else if(stage===1){
-    // Foundation blocks
-    s+=`<rect x="26" y="78" width="48" height="12" rx="2" fill="${dark}"/>`;
-    s+=`<rect x="28" y="80" width="14" height="8" rx="1" fill="${mid}"/><rect x="44" y="80" width="12" height="8" rx="1" fill="${mid}"/><rect x="58" y="80" width="14" height="8" rx="1" fill="${mid}"/>`;
-    s+=`<line x1="26" y1="84" x2="74" y2="84" stroke="${dark}" stroke-width="1" opacity="0.4"/>`;
-  } else if(stage===2){
-    // Low walls
-    s+=`<rect x="22" y="66" width="56" height="24" rx="2" fill="${dark}"/>`;
-    // stone lines
-    for(let r=0;r<3;r++)for(let c=0;c<4;c++){const ox=c%2===0?0:7;s+=`<rect x="${24+c*13+ox}" y="${68+r*7}" width="10" height="5" rx="1" fill="${mid}" opacity="0.85"/>`;}
-    // gate arch
-    s+=`<rect x="43" y="76" width="14" height="14" rx="1" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="76" rx="7" ry="5" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="76" rx="5.5" ry="3.5" fill="#1a1612" opacity="0.7"/>`;
-    // battlements
-    for(let i=0;i<5;i++){s+=`<rect x="${24+i*12}" y="62" width="7" height="6" rx="1" fill="${mid}"/>`;}
-  } else if(stage===3){
-    // Tall walls + gate + side towers starting
-    s+=`<rect x="20" y="52" width="60" height="38" rx="2" fill="${dark}"/>`;
-    for(let r=0;r<4;r++)for(let c=0;c<5;c++){const ox=c%2===0?0:6;s+=`<rect x="${22+c*11+ox}" y="${54+r*8}" width="9" height="6" rx="1" fill="${mid}" opacity="0.8"/>`;}
-    s+=`<rect x="42" y="68" width="16" height="22" rx="1" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="68" rx="8" ry="6" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="68" rx="6" ry="4" fill="#1a1612" opacity="0.7"/>`;
-    // portcullis
-    for(let i=0;i<3;i++){s+=`<line x1="${44+i*4}" y1="68" x2="${44+i*4}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.5"/>`;}
-    // battlements
-    for(let i=0;i<6;i++){s+=`<rect x="${22+i*10}" y="47" width="7" height="7" rx="1" fill="${mid}"/>`;}
-    // side tower stubs
-    s+=`<rect x="10" y="60" width="14" height="30" rx="2" fill="${dark}"/>`;
-    s+=`<rect x="76" y="60" width="14" height="30" rx="2" fill="${dark}"/>`;
-    for(let i=0;i<2;i++){s+=`<rect x="${12+i*6}" y="56" width="5" height="6" rx="1" fill="${mid}"/>`;}
-    for(let i=0;i<2;i++){s+=`<rect x="${78+i*6}" y="56" width="5" height="6" rx="1" fill="${mid}"/>`;}
-    s+=`<circle cx="17" cy="74" r="3" fill="${light}" opacity="0.7"/>`;
-    s+=`<circle cx="83" cy="74" r="3" fill="${light}" opacity="0.7"/>`;
-  } else if(stage===4){
-    // Full castle, round towers with conical roofs
-    // main wall
-    s+=`<rect x="22" y="50" width="56" height="40" rx="2" fill="${dark}"/>`;
-    for(let r=0;r<4;r++)for(let c=0;c<4;c++){const ox=c%2===0?0:7;s+=`<rect x="${24+c*12+ox}" y="${52+r*8}" width="10" height="6" rx="1" fill="${mid}" opacity="0.8"/>`;}
-    for(let i=0;i<7;i++){s+=`<rect x="${22+i*8}" y="45" width="6" height="7" rx="1" fill="${mid}"/>`;}
-    // gate
-    s+=`<rect x="42" y="65" width="16" height="25" rx="1" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="65" rx="8" ry="6" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="65" rx="6" ry="4.5" fill="#1a1612" opacity="0.75"/>`;
-    for(let i=0;i<3;i++){s+=`<line x1="${44+i*4}" y1="65" x2="${44+i*4}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.45"/>`;}
-    // side towers
-    s+=`<rect x="8" y="52" width="18" height="38" rx="3" fill="${dark}"/>`;
-    s+=`<rect x="74" y="52" width="18" height="38" rx="3" fill="${dark}"/>`;
-    s+=`<polygon points="8,52 17,32 26,52" fill="${mid}"/>`;
-    s+=`<polygon points="74,52 83,32 92,52" fill="${mid}"/>`;
-    s+=`<line x1="17" y1="32" x2="17" y2="26" stroke="${darken(color,40)}" stroke-width="1.5"/><circle cx="17" cy="25" r="2.5" fill="${darken(color,40)}"/>`;
-    s+=`<line x1="83" y1="32" x2="83" y2="26" stroke="${darken(color,40)}" stroke-width="1.5"/><circle cx="83" cy="25" r="2.5" fill="${darken(color,40)}"/>`;
-    for(let i=0;i<2;i++){s+=`<rect x="${10+i*7}" y="48" width="5" height="6" rx="1" fill="${mid}"/>`;}
-    for(let i=0;i<2;i++){s+=`<rect x="${76+i*7}" y="48" width="5" height="6" rx="1" fill="${mid}"/>`;}
-    s+=`<circle cx="17" cy="70" r="4" fill="${light}" opacity="0.65"/>`;
-    s+=`<circle cx="83" cy="70" r="4" fill="${light}" opacity="0.65"/>`;
+// ─── FAIRY ────────────────────────────────────────────────────────
+function drawFairy(pct,col){
+  const st=stg(pct),mid=drk(col,25),lt=lgt(col,50),vlt=lgt(col,70),gld='#ffd93d';
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  const mood=FM[st];
+  if(st===0){
+    s+=`<circle cx="50" cy="55" r="8" fill="${lt}" opacity="0.5"/>`;
+    s+=`<circle cx="50" cy="55" r="4" fill="${col}" opacity="0.7"/>`;
+    s+=`<line x1="50" y1="42" x2="50" y2="68" stroke="${col}" stroke-width="1.3" opacity="0.5"/>`;
+    s+=`<line x1="37" y1="55" x2="63" y2="55" stroke="${col}" stroke-width="1.3" opacity="0.5"/>`;
+    s+=`<line x1="41" y1="45" x2="59" y2="65" stroke="${col}" stroke-width="1" opacity="0.4"/>`;
+    s+=`<line x1="59" y1="45" x2="41" y2="65" stroke="${col}" stroke-width="1" opacity="0.4"/>`;
+    s+=face(50,55,9,mood,col);
+  } else if(st===1){
+    s+=`<ellipse cx="38" cy="60" rx="13" ry="8" fill="${lt}" opacity="0.55"/>`;
+    s+=`<ellipse cx="62" cy="60" rx="13" ry="8" fill="${lt}" opacity="0.55"/>`;
+    s+=`<ellipse cx="50" cy="67" rx="7" ry="9" fill="${col}"/>`;
+    s+=`<circle cx="50" cy="55" r="7" fill="#f4c89a"/>`;
+    s+=`<ellipse cx="50" cy="51" rx="8" ry="4" fill="${mid}"/>`;
+    s+=face(50,55,12,mood,'#f4c89a');
+  } else if(st===2){
+    s+=`<path d="M50 58 Q26 46 24 63 Q26 75 50 67 Z" fill="${lt}" opacity="0.6"/>`;
+    s+=`<path d="M50 58 Q74 46 76 63 Q74 75 50 67 Z" fill="${lt}" opacity="0.6"/>`;
+    s+=`<path d="M50 58 Q30 50 28 59 M50 58 Q70 50 72 59" fill="none" stroke="${col}" stroke-width="1.1" opacity="0.5"/>`;
+    s+=`<path d="M44 59 Q50 79 56 59 Q53 71 50 75 Q47 71 44 59 Z" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="61" rx="5" ry="7" fill="${lt}" opacity="0.4"/>`;
+    s+=`<circle cx="50" cy="50" r="8" fill="#f4c89a"/>`;
+    s+=`<ellipse cx="50" cy="46" rx="9" ry="4.5" fill="${mid}"/>`;
+    s+=face(50,50,13,mood,'#f4c89a');
+    s+=`<line x1="62" y1="45" x2="76" y2="33" stroke="${mid}" stroke-width="1.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="77" cy="32" r="4" fill="${gld}"/>`;
+    s+=`<circle cx="81" cy="26" r="1.4" fill="${gld}" opacity="0.7"/><circle cx="74" cy="25" r="1.1" fill="${gld}" opacity="0.6"/>`;
+  } else if(st===3){
+    s+=`<ellipse cx="50" cy="62" rx="26" ry="24" fill="${vlt}" opacity="0.16"/>`;
+    s+=`<path d="M50 57 Q20 40 18 60 Q20 78 50 68 Z" fill="${lt}" opacity="0.58"/>`;
+    s+=`<path d="M50 57 Q80 40 82 60 Q80 78 50 68 Z" fill="${lt}" opacity="0.58"/>`;
+    s+=`<path d="M50 57 Q24 46 22 56 M50 57 Q76 46 78 56" fill="none" stroke="${col}" stroke-width="1.2" opacity="0.5"/>`;
+    s+=`<path d="M43 58 Q50 79 57 58 Q54 70 50 75 Q46 70 43 58 Z" fill="${col}"/>`;
+    s+=`<circle cx="50" cy="48" r="9" fill="#f4c89a"/>`;
+    s+=`<ellipse cx="50" cy="44" rx="10" ry="5" fill="${mid}"/>`;
+    s+=face(50,48,14,mood,'#f4c89a');
+    s+=`<line x1="61" y1="43" x2="77" y2="27" stroke="${mid}" stroke-width="1.6" stroke-linecap="round"/>`;
+    s+=`<circle cx="78" cy="26" r="5" fill="${gld}"/>`;
+    s+=`<circle cx="78" cy="26" r="2.5" fill="white" opacity="0.5"/>`;
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2,sx=78+Math.cos(a)*8,sy=26+Math.sin(a)*8;s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="1.3" fill="${gld}" opacity="${0.4+i%2*0.3}"/>`;}
+  } else if(st===4){
+    s+=`<ellipse cx="50" cy="58" rx="33" ry="30" fill="${vlt}" opacity="0.14"/>`;
+    s+=`<path d="M50 54 Q16 35 13 58 Q16 79 50 68 Z" fill="${lt}" opacity="0.62"/>`;
+    s+=`<path d="M50 54 Q84 35 87 58 Q84 79 50 68 Z" fill="${lt}" opacity="0.62"/>`;
+    s+=`<path d="M50 54 Q20 39 18 52 M50 54 Q80 39 82 52" fill="none" stroke="${col}" stroke-width="1.2" opacity="0.52"/>`;
+    s+=`<path d="M43 56 Q50 81 57 56 Q54 70 50 77 Q46 70 43 56 Z" fill="${col}"/>`;
+    s+=`<circle cx="50" cy="45" r="10" fill="#f4c89a"/>`;
+    s+=`<ellipse cx="50" cy="41" rx="11" ry="5.5" fill="${mid}"/>`;
+    s+=face(50,45,15,mood,'#f4c89a');
+    s+=`<line x1="61" y1="40" x2="80" y2="21" stroke="${mid}" stroke-width="1.8" stroke-linecap="round"/>`;
+    s+=`<circle cx="81" cy="20" r="6" fill="${gld}"/>`;
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r=9+i%2*4,sx=81+Math.cos(a)*r,sy=20+Math.sin(a)*r;s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${1.1+i%2*0.5}" fill="${gld}" opacity="${0.3+i%3*0.15}"/>`;}
   } else {
-    // Stage 5 — Grand castle, banners, moat hint, sun
-    s+=`<circle cx="80" cy="18" r="10" fill="#ffd93d" opacity="0.3"/>`;
-    s+=`<circle cx="80" cy="18" r="7" fill="#ffd93d" opacity="0.5"/>`;
-    // main keep
-    s+=`<rect x="26" y="42" width="48" height="48" rx="2" fill="${dark}"/>`;
-    for(let r=0;r<5;r++)for(let c=0;c<3;c++){const ox=c%2===0?0:8;s+=`<rect x="${28+c*14+ox}" y="${44+r*8}" width="12" height="6" rx="1" fill="${mid}" opacity="0.75"/>`;}
-    for(let i=0;i<7;i++){s+=`<rect x="${26+i*7}" y="36" width="5" height="8" rx="1" fill="${mid}"/>`;}
-    // gate
-    s+=`<rect x="41" y="60" width="18" height="30" rx="2" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="60" rx="9" ry="7" fill="${dark}"/>`;
-    s+=`<ellipse cx="50" cy="60" rx="7" ry="5" fill="#1a1612" opacity="0.8"/>`;
-    for(let i=0;i<3;i++){s+=`<line x1="${43+i*5}" y1="60" x2="${43+i*5}" y2="90" stroke="${dark}" stroke-width="1.5" opacity="0.45"/>`;}
-    // drawbridge
-    s+=`<rect x="41" y="88" width="18" height="4" rx="1" fill="#b5a07a"/>`;
-    for(let i=0;i<3;i++){s+=`<line x1="${43+i*6}" y1="88" x2="${43+i*6}" y2="92" stroke="#8B6914" stroke-width="1" opacity="0.6"/>`;}
-    // moat
-    s+=`<ellipse cx="50" cy="94" rx="36" ry="4" fill="${sky}" opacity="0.5"/>`;
-    // towers
-    s+=`<rect x="6" y="44" width="22" height="46" rx="3" fill="${dark}"/>`;
-    s+=`<rect x="72" y="44" width="22" height="46" rx="3" fill="${dark}"/>`;
-    s+=`<polygon points="6,44 17,18 28,44" fill="${mid}"/>`;
-    s+=`<polygon points="72,44 83,18 94,44" fill="${mid}"/>`;
-    // banners
-    s+=`<line x1="17" y1="18" x2="17" y2="10" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
-    s+=`<polygon points="17,10 25,13 17,16" fill="${darken(color,20)}"/>`;
-    s+=`<line x1="83" y1="18" x2="83" y2="10" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
-    s+=`<polygon points="83,10 91,13 83,16" fill="${darken(color,20)}"/>`;
-    // center tower banner
-    s+=`<line x1="50" y1="36" x2="50" y2="28" stroke="${darken(color,40)}" stroke-width="1.5"/>`;
-    s+=`<polygon points="50,28 58,31 50,34" fill="${color}"/>`;
-    for(let i=0;i<2;i++){s+=`<rect x="${8+i*9}" y="40" width="6" height="6" rx="1" fill="${mid}"/>`;}
-    for(let i=0;i<2;i++){s+=`<rect x="${74+i*9}" y="40" width="6" height="6" rx="1" fill="${mid}"/>`;}
-    s+=`<circle cx="17" cy="64" r="5" fill="${light}" opacity="0.7"/>`;
-    s+=`<circle cx="83" cy="64" r="5" fill="${light}" opacity="0.7"/>`;
-    // windows
-    s+=`<ellipse cx="40" cy="52" rx="3" ry="4" fill="${light}" opacity="0.7"/><ellipse cx="60" cy="52" rx="3" ry="4" fill="${light}" opacity="0.7"/>`;
-    s+=`<ellipse cx="40" cy="65" rx="3" ry="4" fill="${light}" opacity="0.6"/><ellipse cx="60" cy="65" rx="3" ry="4" fill="${light}" opacity="0.6"/>`;
+    for(let i=0;i<10;i++){const a=i/10*Math.PI*2,rx=50+Math.cos(a)*36,ry=54+Math.sin(a)*36;s+=`<line x1="50" y1="54" x2="${rx.toFixed(1)}" y2="${ry.toFixed(1)}" stroke="${lt}" stroke-width="0.8" opacity="0.18"/>`;}
+    s+=`<path d="M50 51 Q10 27 8 53 Q10 77 50 66 Z" fill="${lt}" opacity="0.66"/>`;
+    s+=`<path d="M50 51 Q90 27 92 53 Q90 77 50 66 Z" fill="${lt}" opacity="0.66"/>`;
+    s+=`<path d="M50 51 Q16 34 14 49 M50 51 Q84 34 86 49" fill="none" stroke="${col}" stroke-width="1.3" opacity="0.58"/>`;
+    s+=`<path d="M42 53 Q50 83 58 53 Q54 69 50 77 Q46 69 42 53 Z" fill="${col}"/>`;
+    s+=`<circle cx="50" cy="41" r="11" fill="#f4c89a"/>`;
+    s+=`<ellipse cx="50" cy="36" rx="12" ry="6" fill="${mid}"/>`;
+    s+=face(50,41,16,'excited','#f4c89a');
+    s+=`<line x1="61" y1="36" x2="84" y2="13" stroke="${mid}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<circle cx="85" cy="12" r="7" fill="${gld}"/>`;
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2,r=10+i%2*5,sx=85+Math.cos(a)*r,sy=12+Math.sin(a)*r;s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${1.2+i%2*0.6}" fill="${gld}" opacity="${0.35+i%3*0.15}"/>`;}
+    s+=spk(20,30,lgt(col,25))+spk(78,28,lgt(col,25));
   }
   return s+'</svg>';
 }
 
-// ─── MUSCLE DRAWING ──────────────────────────────────────────────────────────
-function drawMuscle(pct,color,gender){
-  const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-  const dark=darken(color,25), mid=darken(color,10), light=lighten(color,45), skin='#f4c89a', skinD='#e0a870';
-  const isFem = gender==='f';
-  let s=`<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
-  // floor
-  s+=`<rect x="10" y="90" width="80" height="3" rx="1.5" fill="${light}" opacity="0.5"/>`;
-
-  // Body widths per stage: 0=slim,1=slightly wider,2=medium,3=wide,4=wider,5=absolute unit
-  const bw=[9,11,13,16,19,23][stage];
-  const bh=[20,21,22,23,24,25][stage];
-  const hw=9, by=62, hy=42;
-  // arm muscle size
-  const am=[0,1,2,4,6,8][stage];
-
-  // legs
-  const lw=[4,4,5,6,7,8][stage];
-  s+=`<rect x="${50-lw-1}" y="${by+bh}" width="${lw*2}" height="18" rx="${lw}" fill="${skinD}"/>`;
-  s+=`<rect x="${50+lw/2}" y="${by+bh}" width="${lw*2}" height="18" rx="${lw}" fill="${skinD}"/>`;
-  // shoes
-  s+=`<ellipse cx="${50-lw}" cy="${by+bh+19}" rx="${lw+2}" ry="3" fill="${dark}"/>`;
-  s+=`<ellipse cx="${50+lw*1.5}" cy="${by+bh+19}" rx="${lw+2}" ry="3" fill="${dark}"/>`;
-
-  // body (shirt)
-  s+=`<rect x="${50-bw}" y="${by}" width="${bw*2}" height="${bh}" rx="${isFem?8:6}" fill="${color}"/>`;
-
-  // female silhouette
-  if(isFem&&stage>=1){
-    s+=`<ellipse cx="${50-bw+3}" cy="${by+6}" rx="4" ry="3" fill="${mid}" opacity="0.4"/>`;
-    s+=`<ellipse cx="${50+bw-3}" cy="${by+6}" rx="4" ry="3" fill="${mid}" opacity="0.4"/>`;
-  }
-
-  // arms
-  const ay=by+4;
-  if(stage===0){
-    // stick arms
-    s+=`<line x1="${50-bw}" y1="${ay}" x2="${50-bw-8}" y2="${ay+14}" stroke="${skin}" stroke-width="4" stroke-linecap="round"/>`;
-    s+=`<line x1="${50+bw}" y1="${ay}" x2="${50+bw+8}" y2="${ay+14}" stroke="${skin}" stroke-width="4" stroke-linecap="round"/>`;
-  } else if(stage<=2){
-    // slightly muscled
-    s+=`<ellipse cx="${50-bw-5}" cy="${ay+7}" rx="${3+am}" ry="${6+am}" fill="${skin}"/>`;
-    s+=`<ellipse cx="${50+bw+5}" cy="${ay+7}" rx="${3+am}" ry="${6+am}" fill="${skin}"/>`;
-    s+=`<line x1="${50-bw-5}" y1="${ay+13}" x2="${50-bw-4}" y2="${ay+20}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
-    s+=`<line x1="${50+bw+5}" y1="${ay+13}" x2="${50+bw+4}" y2="${ay+20}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
+// ─── JELLYFISH ────────────────────────────────────────────────────
+function drawJelly(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,45),vlt=lgt(col,68);
+  const bws=[8,13,17,21,24,28],bhs=[5,9,12,15,17,20];
+  const bw=bws[st],bh=bhs[st],cx=50,cy=44;
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  if(st===0){
+    s+=`<circle cx="${cx}" cy="${cy+14}" r="10" fill="${lt}" opacity="0.5"/>`;
+    s+=`<circle cx="${cx}" cy="${cy+14}" r="6" fill="${col}" opacity="0.7"/>`;
+    s+=face(cx,cy+14,10,FM[st],col);
   } else {
-    // flexing!
-    const flex=stage>=4;
-    const lax=50-bw-(5+am), rax=50+bw+(5+am);
-    s+=`<ellipse cx="${lax}" cy="${ay+5}" rx="${4+am}" ry="${7+am}" fill="${skin}"/>`;
-    s+=`<ellipse cx="${rax}" cy="${ay+5}" rx="${4+am}" ry="${7+am}" fill="${skin}"/>`;
-    if(flex){
-      // arms raised flexing
-      s+=`<ellipse cx="${50-bw-8}" cy="${ay-2}" rx="${5+am}" ry="${5+am}" fill="${skin}"/>`;
-      s+=`<ellipse cx="${50+bw+8}" cy="${ay-2}" rx="${5+am}" ry="${5+am}" fill="${skin}"/>`;
-      // bicep line
-      s+=`<path d="M${50-bw-12} ${ay+1} Q${50-bw-9} ${ay-7} ${50-bw-4} ${ay+2}" fill="none" stroke="${skinD}" stroke-width="1.5" opacity="0.7"/>`;
-      s+=`<path d="M${50+bw+12} ${ay+1} Q${50+bw+9} ${ay-7} ${50+bw+4} ${ay+2}" fill="none" stroke="${skinD}" stroke-width="1.5" opacity="0.7"/>`;
-    } else {
-      s+=`<line x1="${lax}" y1="${ay+12}" x2="${lax+2}" y2="${ay+22}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
-      s+=`<line x1="${rax}" y1="${ay+12}" x2="${rax-2}" y2="${ay+22}" stroke="${skin}" stroke-width="${3+am/2}" stroke-linecap="round"/>`;
-    }
-    // muscles on shirt
-    if(stage>=3){
-      s+=`<ellipse cx="${50-5}" cy="${by+8}" rx="5" ry="6" fill="${mid}" opacity="0.35"/>`;
-      s+=`<ellipse cx="${50+5}" cy="${by+8}" rx="5" ry="6" fill="${mid}" opacity="0.35"/>`;
-      s+=`<ellipse cx="${50-5}" cy="${by+18}" rx="4" ry="5" fill="${mid}" opacity="0.25"/>`;
-      s+=`<ellipse cx="${50+5}" cy="${by+18}" rx="4" ry="5" fill="${mid}" opacity="0.25"/>`;
-    }
+    s+=`<path d="M${cx-bw} ${cy} Q${cx-bw} ${cy-bh} ${cx} ${cy-bh} Q${cx+bw} ${cy-bh} ${cx+bw} ${cy} Z" fill="${col}" opacity="0.9"/>`;
+    s+=`<path d="M${cx-bw*0.45} ${cy} Q${cx-bw*0.45} ${cy-bh*0.55} ${cx} ${cy-bh*0.65} Q${cx+bw*0.45} ${cy-bh*0.55} ${cx+bw*0.45} ${cy} Z" fill="${vlt}" opacity="0.42"/>`;
+    s+=`<path d="M${cx-bw} ${cy} Q${cx-bw*0.65} ${cy+bh*0.55} ${cx-bw*0.3} ${cy} Q${cx+bw*0.05} ${cy+bh*0.6} ${cx+bw*0.4} ${cy} Q${cx+bw*0.75} ${cy+bh*0.55} ${cx+bw} ${cy} Z" fill="${mid}" opacity="0.45"/>`;
+    if(st>=3){[[cx-bw*0.35,cy-bh*0.5],[cx+bw*0.28,cy-bh*0.62],[cx-bw*0.05,cy-bh*0.75]].forEach(([sx,sy])=>s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${1.5+st*0.3}" fill="${vlt}" opacity="0.55"/>`);}
+    const tc=[0,2,3,4,5,7][st],tl=[0,14,20,27,33,40][st];
+    for(let i=0;i<tc;i++){const tx=cx-bw*0.75+i*(bw*1.5/Math.max(tc-1,1));const wave=i%2===0?6:-6;s+=`<path d="M${tx.toFixed(1)} ${cy+2} Q${(tx+wave).toFixed(1)} ${(cy+tl*0.45).toFixed(1)} ${tx.toFixed(1)} ${(cy+tl*0.75).toFixed(1)} Q${(tx-wave*0.7).toFixed(1)} ${(cy+tl).toFixed(1)} ${tx.toFixed(1)} ${(cy+tl*1.2).toFixed(1)}" fill="none" stroke="${mid}" stroke-width="${1.2+st*0.18}" stroke-linecap="round" opacity="0.7"/>`;}
+    s+=face(cx,cy-bh*0.22,bw*0.88,FM[st],col);
+    if(st===5){[[cx-bw-9,cy-8],[cx+bw+9,cy-10],[cx,cy-bh-11]].forEach(([sx,sy])=>s+=spk(sx,sy,'#ffd93d'));}
   }
+  return s+'</svg>';
+}
 
+// ─── BALLOON ──────────────────────────────────────────────────────
+function drawBalloon(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,42),vlt=lgt(col,62);
+  const sizes=[0,14,18,22,26,30],yPos=[84,74,63,52,40,28];
+  const bw=sizes[st],bh=Math.round(sizes[st]*1.25),by=yPos[st];
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  if(st===0){
+    s+=`<ellipse cx="50" cy="82" rx="12" ry="8" fill="${lt}" opacity="0.55"/>`;
+    s+=`<ellipse cx="50" cy="79" rx="9" ry="6" fill="${col}" opacity="0.65"/>`;
+    s+=face(50,79,13,FM[st],col);
+  } else {
+    if(st>=3){s+=`<ellipse cx="22" cy="36" rx="13" ry="8" fill="white" opacity="0.38"/>`;s+=`<ellipse cx="80" cy="50" rx="11" ry="7" fill="white" opacity="0.38"/>`;}
+    if(st>=5){s+=`<path d="M17 20 Q20 17 23 20" fill="none" stroke="#aaa" stroke-width="1.2" stroke-linecap="round"/>`;s+=`<path d="M27 13 Q30 10 33 13" fill="none" stroke="#aaa" stroke-width="1.2" stroke-linecap="round"/>`;}
+    s+=`<line x1="50" y1="${by+bh}" x2="50" y2="${by+bh+10}" stroke="${mid}" stroke-width="1.5" stroke-linecap="round"/>`;
+    s+=`<line x1="44" y1="${by+bh}" x2="43" y2="${by+bh+10}" stroke="${mid}" stroke-width="1" opacity="0.55"/>`;
+    s+=`<line x1="56" y1="${by+bh}" x2="57" y2="${by+bh+10}" stroke="${mid}" stroke-width="1" opacity="0.55"/>`;
+    s+=`<rect x="43" y="${by+bh+10}" width="14" height="10" rx="3" fill="${mid}"/>`;
+    s+=`<ellipse cx="50" cy="${by}" rx="${bw}" ry="${bh}" fill="${col}"/>`;
+    s+=`<ellipse cx="${50-bw*0.32}" cy="${by}" rx="${bw*0.28}" ry="${bh}" fill="${mid}" opacity="0.14"/>`;
+    s+=`<ellipse cx="${50+bw*0.32}" cy="${by}" rx="${bw*0.28}" ry="${bh}" fill="${mid}" opacity="0.14"/>`;
+    s+=`<ellipse cx="${50-bw*0.28}" cy="${by-bh*0.28}" rx="${bw*0.28}" ry="${bh*0.32}" fill="${vlt}" opacity="0.42"/>`;
+    s+=`<ellipse cx="50" cy="${by+bh}" rx="4" ry="3" fill="${mid}"/>`;
+    s+=face(50,by,bw*0.68,FM[st],col);
+    if(st===5)s+=spk(50-bw-8,by-5,lgt(col,25))+spk(50+bw+8,by+4,lgt(col,25));
+  }
+  return s+'</svg>';
+}
+
+// ─── GHOST ────────────────────────────────────────────────────────
+function drawGhost(pct,col){
+  const st=stg(pct),mid=drk(col,20),lt=lgt(col,45),vlt=lgt(col,68);
+  const ops=[0.2,0.38,0.55,0.72,0.88,1.0],szs=[12,16,20,23,26,28];
+  const op=ops[st],sz=szs[st],cx=50,cy=46;
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="${cx}" cy="${cy+sz+15}" rx="${sz*0.9}" ry="${sz*0.26}" fill="${mid}" opacity="${op*0.28}"/>`;
+  s+=`<path d="M${cx-sz} ${cy} Q${cx-sz} ${cy-sz} ${cx} ${cy-sz} Q${cx+sz} ${cy-sz} ${cx+sz} ${cy} L${cx+sz} ${cy+sz} Q${cx+sz*0.7} ${cy+sz*0.68} ${cx+sz*0.38} ${cy+sz} Q${cx+sz*0.08} ${cy+sz*1.32} ${cx-sz*0.22} ${cy+sz} Q${cx-sz*0.52} ${cy+sz*0.68} ${cx-sz} ${cy+sz} Z" fill="${col}" opacity="${op}"/>`;
+  s+=`<ellipse cx="${cx}" cy="${cy-sz*0.08}" rx="${sz*0.65}" ry="${sz*0.7}" fill="${vlt}" opacity="${op*0.32}"/>`;
+  s+=face(cx,cy,sz*0.88,FM[st],col);
+  if(st>=3){
+    s+=`<ellipse cx="${cx-sz-7}" cy="${cy-sz*0.28}" rx="5.5" ry="9" fill="${col}" opacity="${op*0.82}" transform="rotate(-20 ${cx-sz-7} ${cy-sz*0.28})"/>`;
+    s+=`<ellipse cx="${cx+sz+7}" cy="${cy-sz*0.28}" rx="5.5" ry="9" fill="${col}" opacity="${op*0.82}" transform="rotate(20 ${cx+sz+7} ${cy-sz*0.28})"/>`;
+  }
+  if(st===5){
+    [[cx-sz-13,cy-10],[cx+sz+13,cy-8],[cx,cy-sz-15]].forEach(([sx,sy])=>s+=spk(sx,sy,'#ffd93d'));
+    s+=`<path d="M${cx-6} ${cy-sz-8} Q${cx-6} ${cy-sz-14} ${cx} ${cy-sz-11} Q${cx+6} ${cy-sz-14} ${cx+6} ${cy-sz-8} Q${cx+6} ${cy-sz-3} ${cx} ${cy-sz-1} Q${cx-6} ${cy-sz-3} ${cx-6} ${cy-sz-8} Z" fill="#ffb3c6" opacity="0.8"/>`;
+  }
+  return s+'</svg>';
+}
+
+// ─── CLOUD ────────────────────────────────────────────────────────
+function drawCloud(pct,col){
+  const st=stg(pct),mid=drk(col,20),lt=lgt(col,45),vlt=lgt(col,68);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  if(st===0){
+    s+=`<ellipse cx="50" cy="45" rx="25" ry="17" fill="#777" opacity="0.82"/>`;
+    s+=`<ellipse cx="37" cy="37" rx="15" ry="13" fill="#888" opacity="0.82"/>`;
+    s+=`<ellipse cx="63" cy="39" rx="13" ry="12" fill="#777" opacity="0.82"/>`;
+    s+=face(50,47,21,'sleepy','#888');
+    for(let i=0;i<6;i++)s+=`<line x1="${29+i*8}" y1="65" x2="${27+i*8}" y2="80" stroke="#60a0cc" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>`;
+    s+=`<path d="M56 57 L51 68 L55 68 L49 82" fill="none" stroke="#ffd93d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.72"/>`;
+  } else if(st===1){
+    s+=`<ellipse cx="50" cy="45" rx="25" ry="17" fill="${drk(col,14)}" opacity="0.62"/>`;
+    s+=`<ellipse cx="37" cy="37" rx="15" ry="13" fill="${drk(col,8)}" opacity="0.67"/>`;
+    s+=`<ellipse cx="63" cy="39" rx="13" ry="12" fill="${drk(col,14)}" opacity="0.62"/>`;
+    s+=face(50,47,21,FM[st],col);
+    for(let i=0;i<4;i++)s+=`<line x1="${31+i*11}" y1="65" x2="${29+i*11}" y2="77" stroke="${lt}" stroke-width="1.6" stroke-linecap="round" opacity="0.5"/>`;
+  } else if(st===2){
+    s+=`<ellipse cx="50" cy="45" rx="25" ry="17" fill="${col}" opacity="0.72"/>`;
+    s+=`<ellipse cx="37" cy="37" rx="15" ry="13" fill="${lt}" opacity="0.78"/>`;
+    s+=`<ellipse cx="63" cy="39" rx="13" ry="12" fill="${col}" opacity="0.72"/>`;
+    s+=face(50,47,21,FM[st],col);
+    s+=`<circle cx="79" cy="24" r="9" fill="#ffd93d" opacity="0.38"/>`;
+  } else if(st===3){
+    s+=`<circle cx="73" cy="22" r="13" fill="#ffd93d" opacity="0.62"/>`;
+    s+=`<ellipse cx="50" cy="46" rx="25" ry="16" fill="${col}" opacity="0.82"/>`;
+    s+=`<ellipse cx="37" cy="38" rx="15" ry="13" fill="${vlt}" opacity="0.88"/>`;
+    s+=`<ellipse cx="64" cy="40" rx="14" ry="12" fill="${col}" opacity="0.82"/>`;
+    s+=face(50,47,21,FM[st],col);
+    ['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff'].forEach((rc,i)=>{const rr=36+i*5;s+=`<path d="M17 82 A${rr} ${rr} 0 0 1 63 82" fill="none" stroke="${rc}" stroke-width="3" opacity="0.42" stroke-linecap="round"/>`;});
+  } else if(st===4){
+    s+=`<circle cx="70" cy="20" r="15" fill="#ffd93d" opacity="0.82"/>`;
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2,rx=70+Math.cos(a)*21,ry=20+Math.sin(a)*21,rx2=70+Math.cos(a)*26,ry2=20+Math.sin(a)*26;s+=`<line x1="${rx.toFixed(1)}" y1="${ry.toFixed(1)}" x2="${rx2.toFixed(1)}" y2="${ry2.toFixed(1)}" stroke="#ffd93d" stroke-width="1.6" opacity="0.48" stroke-linecap="round"/>`;}
+    s+=`<ellipse cx="39" cy="50" rx="21" ry="14" fill="${col}" opacity="0.88"/>`;
+    s+=`<ellipse cx="25" cy="44" rx="13" ry="11" fill="${vlt}" opacity="0.92"/>`;
+    s+=`<ellipse cx="54" cy="44" rx="13" ry="11" fill="${col}" opacity="0.88"/>`;
+    s+=`<ellipse cx="39" cy="43" rx="13" ry="11" fill="white" opacity="0.48"/>`;
+    s+=face(39,51,19,FM[st],col);
+    ['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff'].forEach((rc,i)=>{const rr=35+i*5;s+=`<path d="M11 84 A${rr} ${rr} 0 0 1 67 84" fill="none" stroke="${rc}" stroke-width="2.8" opacity="0.48" stroke-linecap="round"/>`;});
+  } else {
+    s+=`<circle cx="66" cy="18" r="17" fill="#ffd93d"/>`;
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2,rx=66+Math.cos(a)*23,ry=18+Math.sin(a)*23,rx2=66+Math.cos(a)*29,ry2=18+Math.sin(a)*29;s+=`<line x1="${rx.toFixed(1)}" y1="${ry.toFixed(1)}" x2="${rx2.toFixed(1)}" y2="${ry2.toFixed(1)}" stroke="#ffd93d" stroke-width="1.8" opacity="0.52" stroke-linecap="round"/>`;}
+    s+=`<ellipse cx="38" cy="52" rx="23" ry="15" fill="${vlt}" opacity="0.97"/>`;
+    s+=`<ellipse cx="24" cy="45" rx="15" ry="12" fill="${vlt}" opacity="0.93"/>`;
+    s+=`<ellipse cx="56" cy="45" rx="15" ry="12" fill="${vlt}" opacity="0.93"/>`;
+    s+=`<ellipse cx="38" cy="44" rx="14" ry="11" fill="white" opacity="0.5"/>`;
+    s+=face(38,52,21,'excited',col);
+    ['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff','#c77dff'].forEach((rc,i)=>{const rr=32+i*5;s+=`<path d="M10 86 A${rr} ${rr} 0 0 1 66 86" fill="none" stroke="${rc}" stroke-width="2.8" opacity="0.5" stroke-linecap="round"/>`;});
+    s+=spk(16,30,'#ffd93d')+spk(82,55,'#ffd93d');
+  }
+  return s+'</svg>';
+}
+
+// ─── PLANET ───────────────────────────────────────────────────────
+function drawPlanet(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,40),vlt=lgt(col,62),gld='#ffd93d';
+  const rs=[14,16,18,20,22,23],r=rs[st],cx=50,cy=50;
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  [[14,16],[78,20],[12,72],[82,65],[50,8],[28,12],[72,12],[86,42],[18,48]].slice(0,[0,1,2,4,6,9][st]).forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="1.2" fill="${gld}" opacity="0.42"/>`);
+  if(st===0){
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#b4b2a9"/>`;
+    s+=`<circle cx="${cx-4}" cy="${cy-3}" r="3.5" fill="#888" opacity="0.5"/>`;
+    s+=face(cx,cy,r*0.88,'sleepy','#888');
+  } else {
+    if(st>=4)s+=`<ellipse cx="${cx}" cy="${cy+r*0.75}" rx="${r+13}" ry="5.5" fill="${vlt}" opacity="${st===5?0.44:0.28}"/>`;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${st<=1?'#888780':'#378ADD'}" opacity="${st<=1?0.85:0.95}"/>`;
+    if(st>=1){s+=`<ellipse cx="${cx-r*0.3}" cy="${cy-r*0.2}" rx="${r*(0.2+st*0.08)}" ry="${r*(0.18+st*0.07)}" fill="${col}" opacity="0.92"/>`;if(st>=2)s+=`<ellipse cx="${cx+r*0.35}" cy="${cy+r*0.3}" rx="${r*(0.15+st*0.06)}" ry="${r*(0.13+st*0.05)}" fill="${mid}" opacity="0.86"/>`;if(st>=3)s+=`<ellipse cx="${cx-r*0.2}" cy="${cy+r*0.45}" rx="${r*0.22}" ry="${r*0.16}" fill="${col}" opacity="0.8"/>`;}
+    if(st>=3)s+=`<ellipse cx="${cx+r*0.22}" cy="${cy-r*0.46}" rx="${r*0.3}" ry="${r*0.14}" fill="white" opacity="0.5"/>`;
+    s+=face(cx,cy,r*0.88,FM[st],st<=1?'#888':col);
+    if(st>=4)s+=`<ellipse cx="${cx}" cy="${cy+r*0.75}" rx="${r+13}" ry="5.5" fill="none" stroke="${lt}" stroke-width="2" opacity="0.38"/>`;
+    if(st===5){s+=`<circle cx="${cx+r+13}" cy="${cy-r*0.5}" r="6" fill="${gld}" opacity="0.82"/>`;s+=face(cx+r+13,cy-r*0.5,6,'happy',gld);s+=spk(cx-r-10,cy-8,gld);}
+  }
+  return s+'</svg>';
+}
+
+// ─── DRAGON ───────────────────────────────────────────────────────
+function drawDragon(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,44),vlt=lgt(col,66);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="50" cy="91" rx="28" ry="6" fill="${mid}" opacity="0.18"/>`;
+  if(st===0){
+    s+=`<ellipse cx="50" cy="68" rx="18" ry="22" fill="${lt}"/>`;
+    s+=`<ellipse cx="50" cy="64" rx="14" ry="17" fill="${vlt}" opacity="0.4"/>`;
+    [[42,58],[56,62],[48,72],[60,70],[44,68]].forEach(([ex,ey])=>s+=`<circle cx="${ex}" cy="${ey}" r="2" fill="${mid}" opacity="0.3"/>`);
+    s+=face(50,68,18,'sleepy',col);
+    s+=`<path d="M28 88 Q40 82 50 84 Q60 82 72 88" fill="none" stroke="#8B6914" stroke-width="3" stroke-linecap="round" opacity="0.5"/>`;
+    s+=`<path d="M30 92 Q42 86 50 88 Q58 86 70 92" fill="none" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>`;
+  } else if(st===1){
+    s+=`<ellipse cx="50" cy="70" rx="18" ry="20" fill="${lt}"/>`;
+    s+=`<ellipse cx="50" cy="67" rx="14" ry="15" fill="${vlt}" opacity="0.4"/>`;
+    [[42,60],[56,64],[48,74]].forEach(([ex,ey])=>s+=`<circle cx="${ex}" cy="${ey}" r="2" fill="${mid}" opacity="0.3"/>`);
+    s+=`<path d="M46 54 L48 62 L44 66 L50 58 L52 64" fill="none" stroke="${drk(col,35)}" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>`;
+    s+=`<ellipse cx="50" cy="52" rx="10" ry="9" fill="${col}"/>`;
+    s+=`<path d="M45 46 Q43 40 45 37" fill="none" stroke="${mid}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<path d="M55 46 Q57 40 55 37" fill="none" stroke="${mid}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=face(50,52,11,FM[st],col);
+    s+=`<ellipse cx="50" cy="56" rx="2" ry="1.3" fill="#f4a0a0"/>`;
+    s+=`<path d="M28 90 Q40 84 50 86 Q60 84 72 90" fill="none" stroke="#8B6914" stroke-width="3" stroke-linecap="round" opacity="0.5"/>`;
+  } else if(st===2){
+    s+=`<path d="M32 78 Q32 88 50 88 Q68 88 68 78 Q68 72 50 72 Q32 72 32 78 Z" fill="${lt}" opacity="0.7"/>`;
+    s+=`<ellipse cx="50" cy="68" rx="15" ry="16" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="72" rx="9" ry="10" fill="${lt}" opacity="0.5"/>`;
+    s+=`<path d="M35 62 Q26 56 30 48 Q34 56 38 60 Z" fill="${mid}" opacity="0.7"/>`;
+    s+=`<path d="M65 62 Q74 56 70 48 Q66 56 62 60 Z" fill="${mid}" opacity="0.7"/>`;
+    s+=`<ellipse cx="50" cy="52" rx="13" ry="12" fill="${col}"/>`;
+    s+=`<path d="M43 44 Q41 37 43 34" fill="none" stroke="${mid}" stroke-width="2.2" stroke-linecap="round"/>`;
+    s+=`<path d="M57 44 Q59 37 57 34" fill="none" stroke="${mid}" stroke-width="2.2" stroke-linecap="round"/>`;
+    s+=face(50,52,13,FM[st],col);
+    s+=`<ellipse cx="50" cy="57" rx="2.5" ry="1.5" fill="#f4a0a0"/>`;
+    s+=`<path d="M64 76 Q78 72 76 84 Q74 90 66 88" fill="none" stroke="${mid}" stroke-width="3" stroke-linecap="round"/>`;
+  } else if(st===3){
+    s+=`<path d="M30 62 Q16 50 22 36 Q28 50 36 58 Z" fill="${mid}" opacity="0.65"/>`;
+    s+=`<path d="M70 62 Q84 50 78 36 Q72 50 64 58 Z" fill="${mid}" opacity="0.65"/>`;
+    s+=`<line x1="30" y1="62" x2="20" y2="40" stroke="${drk(col,30)}" stroke-width="0.8" opacity="0.4"/>`;
+    s+=`<line x1="70" y1="62" x2="80" y2="40" stroke="${drk(col,30)}" stroke-width="0.8" opacity="0.4"/>`;
+    s+=`<ellipse cx="50" cy="72" rx="17" ry="15" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="76" rx="11" ry="9" fill="${lt}" opacity="0.45"/>`;
+    s+=`<path d="M66 80 Q82 76 80 90 Q78 96 68 92" fill="none" stroke="${mid}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<path d="M80 90 Q84 96 80 98" fill="none" stroke="${mid}" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="55" rx="15" ry="14" fill="${col}"/>`;
+    s+=`<path d="M42 46 Q40 38 42 34" fill="none" stroke="${mid}" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<path d="M58 46 Q60 38 58 34" fill="none" stroke="${mid}" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=face(50,55,15,FM[st],col);
+    s+=`<ellipse cx="50" cy="60.5" rx="3" ry="1.8" fill="#f4a0a0"/>`;
+    s+=`<path d="M60 50 Q68 44 66 38 Q62 44 60 50" fill="${lgt('#ff9f43',20)}" opacity="0.7"/>`;
+  } else if(st===4){
+    s+=`<path d="M26 60 Q10 46 16 28 Q24 46 34 56 Z" fill="${mid}" opacity="0.7"/>`;
+    s+=`<path d="M74 60 Q90 46 84 28 Q76 46 66 56 Z" fill="${mid}" opacity="0.7"/>`;
+    s+=`<ellipse cx="50" cy="73" rx="19" ry="16" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="77" rx="12" ry="9" fill="${lt}" opacity="0.42"/>`;
+    s+=`<path d="M68 82 Q86 76 84 92 Q82 98 70 95" fill="none" stroke="${mid}" stroke-width="4" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="54" rx="17" ry="16" fill="${col}"/>`;
+    s+=`<path d="M40 44 Q38 35 40 31" fill="none" stroke="${mid}" stroke-width="2.8" stroke-linecap="round"/>`;
+    s+=`<path d="M60 44 Q62 35 60 31" fill="none" stroke="${mid}" stroke-width="2.8" stroke-linecap="round"/>`;
+    s+=`<path d="M46 40 Q48 33 50 30 Q52 33 54 40" fill="${mid}" opacity="0.6"/>`;
+    s+=face(50,54,16,FM[st],col);
+    s+=`<ellipse cx="50" cy="60" rx="3.5" ry="2" fill="#f4a0a0"/>`;
+    s+=`<path d="M62 48 Q72 40 70 30 Q64 40 62 48" fill="#ff9f43" opacity="0.75"/>`;
+    s+=`<path d="M64 46 Q72 38 72 30 Q66 39 64 46" fill="#ffd93d" opacity="0.5"/>`;
+  } else {
+    s+=`<ellipse cx="50" cy="60" rx="40" ry="38" fill="${vlt}" opacity="0.12"/>`;
+    s+=`<path d="M22 58 Q4 42 10 22 Q20 42 32 54 Z" fill="${mid}" opacity="0.72"/>`;
+    s+=`<path d="M78 58 Q96 42 90 22 Q80 42 68 54 Z" fill="${mid}" opacity="0.72"/>`;
+    s+=`<ellipse cx="50" cy="74" rx="21" ry="18" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="78" rx="13" ry="10" fill="${lt}" opacity="0.4"/>`;
+    s+=`<path d="M70 84 Q90 78 88 96 Q86 102 72 98" fill="none" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
+    s+=`<ellipse cx="50" cy="52" rx="19" ry="18" fill="${col}"/>`;
+    [[38,36],[44,30],[50,27],[56,30],[62,36]].forEach(([sx,sy])=>s+=`<path d="M${sx-2} 42 Q${sx} ${sy} ${sx+2} 42" fill="${mid}" opacity="0.7"/>`);
+    s+=face(50,52,17,'excited',col);
+    s+=`<ellipse cx="50" cy="59" rx="4" ry="2.5" fill="#f4a0a0"/>`;
+    s+=`<path d="M64 46 Q80 34 78 20 Q70 34 64 46" fill="#ff9f43" opacity="0.82"/>`;
+    s+=`<path d="M66 44 Q80 32 82 20 Q72 32 66 44" fill="#ffd93d" opacity="0.6"/>`;
+    s+=`<path d="M68 42 Q82 30 84 18 Q74 30 68 42" fill="white" opacity="0.3"/>`;
+    s+=spk(20,28,lgt(col,30))+spk(82,58,lgt(col,30))+spk(50,18,lgt(col,30));
+  }
+  return s+'</svg>';
+}
+
+// ─── POTION (bigger bottles, no overflow, more detail) ────────────
+function drawPotion(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,44),vlt=lgt(col,68);
+  const fillLevels=[0,0.1,0.28,0.5,0.72,0.95];
+  const bottleSizes=[0.7,0.8,0.9,1.0,1.1,1.2];
+  const fl=fillLevels[st],bs=bottleSizes[st];
+  // bottle dims scale with stage
+  const bx=50,by=88,bw=18*bs,bh=32*bs;
+  const neckW=8*bs,neckH=14*bs,neckY=by-bh-neckH;
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="${bx}" cy="${by+4}" rx="${bw+4}" ry="${4*bs}" fill="${mid}" opacity="0.2"/>`;
+  // bottle body
+  s+=`<path d="M${bx-neckW} ${by-bh} Q${bx-bw} ${by-bh+6} ${bx-bw} ${by} Q${bx-bw} ${by+2} ${bx} ${by+3} Q${bx+bw} ${by+2} ${bx+bw} ${by} Q${bx+bw} ${by-bh+6} ${bx+neckW} ${by-bh} Z" fill="${vlt}" opacity="0.55"/>`;
+  // liquid fill
+  if(fl>0){
+    const fillY=by-bh*fl;
+    const fillW=Math.min(bw,bw*0.85+bw*0.15*fl);
+    s+=`<path d="M${bx-fillW*0.85} ${fillY} Q${bx-bw} ${by-bh+6} ${bx-bw} ${by} Q${bx-bw} ${by+2} ${bx} ${by+3} Q${bx+bw} ${by+2} ${bx+bw} ${by} Q${bx+bw} ${by-bh+6} ${bx+fillW*0.85} ${fillY} Z" fill="${col}" opacity="0.82"/>`;
+    // bubbles
+    const bubCount=Math.min(st,4);
+    for(let i=0;i<bubCount;i++){
+      const bbx=bx-bw*0.4+i*(bw*0.8/(Math.max(bubCount-1,1)));
+      const bby=fillY+bh*fl*0.3+i*bh*fl*0.15;
+      if(bby<by-2)s+=`<circle cx="${bbx.toFixed(1)}" cy="${bby.toFixed(1)}" r="${1.5+i%2}" fill="${vlt}" opacity="0.55"/>`;
+    }
+    // surface shimmer
+    s+=`<ellipse cx="${bx}" cy="${fillY}" rx="${fillW*0.7}" ry="2.5" fill="${vlt}" opacity="0.4"/>`;
+  }
+  // bottle outline
+  s+=`<path d="M${bx-neckW} ${by-bh} Q${bx-bw} ${by-bh+6} ${bx-bw} ${by} Q${bx-bw} ${by+2} ${bx} ${by+3} Q${bx+bw} ${by+2} ${bx+bw} ${by} Q${bx+bw} ${by-bh+6} ${bx+neckW} ${by-bh} Z" fill="none" stroke="${mid}" stroke-width="1.8" opacity="0.5"/>`;
+  // highlight stripe
+  s+=`<path d="M${bx-bw*0.6} ${by-bh*0.85} Q${bx-bw*0.55} ${by-bh*0.3} ${bx-bw*0.5} ${by-2}" fill="none" stroke="${vlt}" stroke-width="${2*bs}" stroke-linecap="round" opacity="0.5"/>`;
   // neck
-  s+=`<rect x="46" y="${hy+hw*1.8}" width="8" height="6" rx="3" fill="${skin}"/>`;
-  // head
-  s+=`<ellipse cx="50" cy="${hy}" rx="${hw}" ry="${hw*1.1}" fill="${skin}"/>`;
-  // hair
-  if(isFem){
-    s+=`<ellipse cx="50" cy="${hy-hw*0.8}" rx="${hw}" ry="${hw*0.5}" fill="${dark}"/>`;
-    s+=`<path d="M${50-hw} ${hy} Q${50-hw-4} ${hy+8} ${50-hw-2} ${hy+14}" fill="none" stroke="${dark}" stroke-width="3.5" stroke-linecap="round"/>`;
-    s+=`<path d="M${50+hw} ${hy} Q${50+hw+4} ${hy+8} ${50+hw+2} ${hy+14}" fill="none" stroke="${dark}" stroke-width="3.5" stroke-linecap="round"/>`;
-  } else {
-    s+=`<ellipse cx="50" cy="${hy-hw*0.85}" rx="${hw}" ry="${hw*0.45}" fill="${dark}"/>`;
-    if(stage>=3){
-      // beard stubble
-      s+=`<ellipse cx="50" cy="${hy+hw*0.5}" rx="6" ry="4" fill="${skinD}" opacity="0.5"/>`;
-    }
-  }
-  // eyes
-  const eyeOpen=stage<5;
-  if(eyeOpen){
-    s+=`<circle cx="46.5" cy="${hy}" r="${1.5}" fill="#333"/>`;
-    s+=`<circle cx="53.5" cy="${hy}" r="${1.5}" fill="#333"/>`;
-    s+=`<circle cx="47" cy="${hy-0.4}" r="0.6" fill="white"/>`;
-    s+=`<circle cx="54" cy="${hy-0.4}" r="0.6" fill="white"/>`;
-    // expression changes with stage
-    if(stage<=1){
-      // neutral/tired
-      s+=`<path d="M47 ${hy+5} Q50 ${hy+6} 53 ${hy+5}" fill="none" stroke="${skinD}" stroke-width="1" stroke-linecap="round"/>`;
-    } else if(stage<=3){
-      // determined
-      s+=`<path d="M47 ${hy+4} Q50 ${hy+6.5} 53 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.2" stroke-linecap="round"/>`;
-    } else {
-      // big grin
-      s+=`<path d="M46 ${hy+4} Q50 ${hy+8} 54 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.5" stroke-linecap="round"/>`;
-      s+=`<path d="M46 ${hy+4} Q50 ${hy+8} 54 ${hy+4}" fill="${light}" opacity="0.4"/>`;
-    }
-    // eyebrows more intense with stage
-    const brow=stage>=3?2:1;
-    s+=`<line x1="44" y1="${hy-4-brow}" x2="49" y2="${hy-3-brow}" stroke="${dark}" stroke-width="${1+brow*0.3}" stroke-linecap="round"/>`;
-    s+=`<line x1="56" y1="${hy-4-brow}" x2="51" y2="${hy-3-brow}" stroke="${dark}" stroke-width="${1+brow*0.3}" stroke-linecap="round"/>`;
-  } else {
-    // stage 5 — triumphant eyes closed
-    s+=`<path d="M44 ${hy} Q46.5 ${hy-2} 49 ${hy}" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>`;
-    s+=`<path d="M51 ${hy} Q53.5 ${hy-2} 56 ${hy}" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>`;
-    s+=`<path d="M46 ${hy+4} Q50 ${hy+9} 54 ${hy+4}" fill="none" stroke="${skinD}" stroke-width="1.5" stroke-linecap="round"/>`;
-  }
-  // accessories per stage
-  if(stage===0){
-    // water bottle
-    s+=`<rect x="64" y="75" width="7" height="13" rx="2" fill="${light}"/>`;
-    s+=`<rect x="65" y="73" width="5" height="3" rx="1" fill="${mid}"/>`;
-    s+=`<line x1="65" y1="79" x2="70" y2="79" stroke="${mid}" stroke-width="0.8" opacity="0.5"/>`;
-  } else if(stage===1){
-    // dumbbell
-    s+=`<line x1="58" y1="80" x2="70" y2="80" stroke="#888" stroke-width="2.5" stroke-linecap="round"/>`;
-    s+=`<rect x="56" y="77" width="4" height="6" rx="1" fill="#666"/><rect x="68" y="77" width="4" height="6" rx="1" fill="#666"/>`;
-  } else if(stage===2){
-    // bigger dumbbell
-    s+=`<line x1="57" y1="78" x2="71" y2="78" stroke="#777" stroke-width="3" stroke-linecap="round"/>`;
-    s+=`<rect x="54" y="74" width="5" height="8" rx="1" fill="#555"/><rect x="69" y="74" width="5" height="8" rx="1" fill="#555"/>`;
-  } else if(stage===3||stage===4){
-    // barbell
-    s+=`<line x1="20" y1="30" x2="80" y2="30" stroke="#888" stroke-width="3" stroke-linecap="round"/>`;
-    s+=`<rect x="14" y="24" width="8" height="12" rx="2" fill="#555"/><rect x="78" y="24" width="8" height="12" rx="2" fill="#555"/>`;
-    s+=`<rect x="20" y="25" width="6" height="10" rx="1.5" fill="#777"/><rect x="74" y="25" width="6" height="10" rx="1.5" fill="#777"/>`;
-    if(stage===4){
-      s+=`<rect x="8" y="23" width="7" height="14" rx="2" fill="#444"/><rect x="85" y="23" width="7" height="14" rx="2" fill="#444"/>`;
-    }
-  } else if(stage===5){
-    // trophy!
-    s+=`<rect x="42" y="8" width="16" height="12" rx="3" fill="#ffd93d"/>`;
-    s+=`<rect x="46" y="18" width="8" height="5" rx="1" fill="#e6c435"/>`;
-    s+=`<rect x="42" y="22" width="16" height="3" rx="1" fill="#e6c435"/>`;
-    s+=`<path d="M42 10 Q36 10 36 16 Q36 20 42 20" fill="none" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`;
-    s+=`<path d="M58 10 Q64 10 64 16 Q64 20 58 20" fill="none" stroke="#ffd93d" stroke-width="3" stroke-linecap="round"/>`;
-    s+=`<text x="47" y="17" font-size="7" fill="white" font-weight="bold" font-family="sans-serif">1st</text>`;
-  }
-  // sweat drops on higher stages
-  if(stage>=2&&stage<=4){
-    s+=`<path d="M${72} ${hy-4} Q${73} ${hy-8} ${74} ${hy-4}" fill="${light}" opacity="${0.3+stage*0.1}"/>`;
-    if(stage>=3)s+=`<path d="M${27} ${hy-2} Q${26} ${hy-6} ${25} ${hy-2}" fill="${light}" opacity="0.5"/>`;
+  s+=`<rect x="${bx-neckW}" y="${neckY}" width="${neckW*2}" height="${neckH}" rx="${neckW*0.6}" fill="${vlt}" opacity="0.6"/>`;
+  s+=`<rect x="${bx-neckW}" y="${neckY}" width="${neckW*2}" height="${neckH}" rx="${neckW*0.6}" fill="none" stroke="${mid}" stroke-width="1.5" opacity="0.45"/>`;
+  // cork
+  s+=`<rect x="${bx-neckW*0.8}" y="${neckY-6}" width="${neckW*1.6}" height="8" rx="3" fill="${drk(col,15)}"/>`;
+  s+=`<rect x="${bx-neckW*0.6}" y="${neckY-4}" width="${neckW*1.2}" height="3" rx="1" fill="${lt}" opacity="0.4"/>`;
+  // label with face
+  const labelR=bw*0.65,labelY=by-bh*0.45;
+  s+=`<ellipse cx="${bx}" cy="${labelY}" rx="${labelR}" ry="${labelR*0.75}" fill="${vlt}" opacity="0.45"/>`;
+  s+=face(bx,labelY,labelR*1.1,FM[st],col);
+  // stars decoration on bottle
+  if(st>=2){s+=`<circle cx="${bx-bw+3}" cy="${by-bh*0.7}" r="1.5" fill="${lt}" opacity="0.5"/>`;s+=`<circle cx="${bx+bw-3}" cy="${by-bh*0.6}" r="1.5" fill="${lt}" opacity="0.5"/>`;}
+  if(st>=4){s+=spk(bx-bw-8,by-bh*0.5,lgt(col,25));s+=spk(bx+bw+8,by-bh*0.6,lgt(col,25));}
+  if(st===5){
+    s+=spk(bx-bw-10,by-bh*0.2,lgt(col,25))+spk(bx+bw+10,by-bh*0.3,lgt(col,25))+spk(bx,neckY-14,lgt(col,25));
+    [[bx-14,neckY-10],[bx+14,neckY-8],[bx,neckY-16]].forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="1.8" fill="${lgt(col,20)}" opacity="0.6"/>`);
   }
   return s+'</svg>';
 }
 
-function drawViz(pct,color,theme,idx){
-  if(theme==='cats') return drawCat(pct,color);
-  if(theme==='castles') return drawCastle(pct,color);
-  // alternate male/female for muscle
-  return drawMuscle(pct,color,idx%2===0?'m':'f');
+// ─── HAUNTED HOUSE ────────────────────────────────────────────────
+function drawHouse(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,42),vlt=lgt(col,66);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  const starC=[0,1,3,5,2,0][st];
+  [[15,18],[80,22],[12,40],[85,38],[50,10]].slice(0,starC).forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="1.2" fill="#ffd93d" opacity="0.5"/>`);
+  if(st<=2)s+=`<circle cx="75" cy="22" r="10" fill="#ffd93d" opacity="${0.2+st*0.1}"/>`;
+  s+=`<rect x="10" y="88" width="80" height="6" rx="3" fill="${lt}" opacity="0.35"/>`;
+  for(let i=0;i<6;i++){s+=`<rect x="${14+i*13}" y="82" width="5" height="10" rx="1" fill="${mid}" opacity="${0.3+st*0.08}"/>`;s+=`<rect x="${12+i*13}" y="84" width="9" height="2" rx="1" fill="${mid}" opacity="${0.2+st*0.07}"/>`;}
+  const wallCol=st===0?'#3a3030':st<=2?drk(col,30):st<=3?mid:col;
+  s+=`<rect x="22" y="56" width="56" height="36" rx="2" fill="${wallCol}" opacity="${0.5+st*0.1}"/>`;
+  s+=`<rect x="42" y="72" width="16" height="20" rx="3" fill="${st>=3?lgt(col,30):'#2a1a1a'}"/>`;
+  if(st>=3){s+=`<ellipse cx="50" cy="72" rx="8" ry="6" fill="${lgt(col,30)}"/>`;s+=`<circle cx="56" cy="82" r="1.5" fill="${mid}"/>`;}
+  const winCol=st<2?'#1a1010':st===2?drk(col,10):st===3?col:lgt(col,20);
+  const winOp=st<2?0.6:0.85;
+  s+=`<rect x="26" y="62" width="12" height="10" rx="2" fill="${winCol}" opacity="${winOp}"/>`;
+  s+=`<line x1="32" y1="62" x2="32" y2="72" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
+  s+=`<line x1="26" y1="67" x2="38" y2="67" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
+  s+=`<rect x="62" y="62" width="12" height="10" rx="2" fill="${winCol}" opacity="${winOp}"/>`;
+  s+=`<line x1="68" y1="62" x2="68" y2="72" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
+  s+=`<line x1="62" y1="67" x2="74" y2="67" stroke="${mid}" stroke-width="0.8" opacity="0.4"/>`;
+  if(st>=3){s+=`<ellipse cx="32" cy="67" rx="8" ry="5" fill="${lgt(col,30)}" opacity="${(st-2)*0.12}"/>`;s+=`<ellipse cx="68" cy="67" rx="8" ry="5" fill="${lgt(col,30)}" opacity="${(st-2)*0.12}"/>`;}
+  s+=`<polygon points="16,58 50,28 84,58" fill="${st<2?'#2a1a2e':mid}" opacity="${0.6+st*0.08}"/>`;
+  s+=`<rect x="62" y="34" width="10" height="18" rx="1" fill="${mid}" opacity="0.7"/>`;
+  if(st>=2)s+=`<path d="M67 34 Q64 28 67 22 Q70 16 67 10" fill="none" stroke="${lt}" stroke-width="2" stroke-linecap="round" opacity="${0.2+st*0.08}"/>`;
+  s+=`<ellipse cx="50" cy="44" rx="6" ry="5" fill="${st<3?'#1a1010':lgt(col,20)}" opacity="0.8"/>`;
+  // face on house
+  s+=face(50,75,14,FM[st],st<2?'#888':col);
+  if(st>=4){
+    // flowers/vines for cheerful stages
+    s+=`<circle cx="22" cy="68" r="4" fill="${lgt(col,30)}" opacity="0.7"/>`;s+=`<circle cx="22" cy="68" r="1.8" fill="#ffd93d" opacity="0.7"/>`;
+    s+=`<circle cx="78" cy="68" r="4" fill="${lgt(col,30)}" opacity="0.7"/>`;s+=`<circle cx="78" cy="68" r="1.8" fill="#ffd93d" opacity="0.7"/>`;
+    s+=`<circle cx="22" cy="80" r="3.5" fill="${lt}" opacity="0.6"/>`;s+=`<circle cx="78" cy="80" r="3.5" fill="${lt}" opacity="0.6"/>`;
+  }
+  if(st===5){
+    // rainbow over house, extra flowers, sparkles
+    ['#ff6b6b','#ff9f43','#ffd93d','#6bcb77','#4d96ff'].forEach((rc,i)=>{const rr=44+i*5;s+=`<path d="M8 58 A${rr} ${rr} 0 0 1 92 58" fill="none" stroke="${rc}" stroke-width="2.5" opacity="0.45" stroke-linecap="round"/>`;});
+    s+=spk(10,46,lgt(col,20))+spk(90,46,lgt(col,20))+spk(50,16,lgt(col,20));
+    // little sun above
+    s+=`<circle cx="50" cy="18" r="7" fill="#ffd93d" opacity="0.6"/>`;
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2;s+=`<line x1="${50+Math.cos(a)*9}" y1="${18+Math.sin(a)*9}" x2="${50+Math.cos(a)*13}" y2="${18+Math.sin(a)*13}" stroke="#ffd93d" stroke-width="1.2" opacity="0.5" stroke-linecap="round"/>`;}
+    // extra window flowers
+    [[26,60],[60,60],[34,82],[64,82]].forEach(([fx,fy])=>{s+=`<circle cx="${fx}" cy="${fy}" r="3" fill="${lt}" opacity="0.7"/>`;s+=`<circle cx="${fx}" cy="${fy}" r="1.2" fill="#ffd93d" opacity="0.7"/>`;});
+  }
+  // ghost for spooky stages
+  if(st<=2){
+    const gop=[0.5,0.6,0.4][st],gy=[30,26,22][st];
+    s+=`<path d="M44 ${gy} Q44 ${gy-8} 50 ${gy-8} Q56 ${gy-8} 56 ${gy} L56 ${gy+8} Q54 ${gy+5} 52 ${gy+8} Q50 ${gy+5} 48 ${gy+8} Q46 ${gy+5} 44 ${gy+8} Z" fill="${vlt}" opacity="${gop}"/>`;
+    s+=`<circle cx="47.5" cy="${gy-1}" r="1.5" fill="#222" opacity="0.6"/><circle cx="52.5" cy="${gy-1}" r="1.5" fill="#222" opacity="0.6"/>`;
+  }
+  return s+'</svg>';
 }
 
-function getVizMoods(theme){
-  if(theme==='cats') return CAT_MOODS;
-  if(theme==='castles') return CASTLE_MOODS;
-  return MUSCLE_MOODS;
+// ─── SPELL BOOK (more sparkles/detail at max) ─────────────────────
+function drawBook(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,44),vlt=lgt(col,68);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="50" cy="91" rx="28" ry="5" fill="${mid}" opacity="0.18"/>`;
+  const bookCol=st===0?drk(col,30):st<=2?mid:col;
+  s+=`<rect x="24" y="28" width="52" height="62" rx="4" fill="${drk(col,35)}" opacity="0.5"/>`;
+  s+=`<rect x="20" y="26" width="10" height="66" rx="3" fill="${mid}"/>`;
+  s+=`<rect x="26" y="26" width="52" height="64" rx="3" fill="${bookCol}" opacity="0.88"/>`;
+  if(st>=1){
+    s+=`<circle cx="52" cy="52" r="${8+st*4}" fill="none" stroke="${lt}" stroke-width="${1+st*0.3}" opacity="${0.3+st*0.08}"/>`;
+    if(st>=2){
+      const pts=5,r1=6+st*2,r2=3+st;
+      let star='';for(let i=0;i<pts*2;i++){const a=i/pts/2*Math.PI*2-Math.PI/2,r=i%2===0?r1:r2,sx=52+Math.cos(a)*r,sy=52+Math.sin(a)*r;star+=(i===0?'M':'L')+sx.toFixed(1)+' '+sy.toFixed(1);}
+      s+=`<path d="${star}Z" fill="none" stroke="${lt}" stroke-width="1.2" opacity="${0.4+st*0.08}"/>`;
+      // fill the star at higher stages
+      if(st>=4){s+=`<path d="${star}Z" fill="${lt}" opacity="${(st-3)*0.12}"/>`;}
+    }
+  }
+  s+=`<rect x="34" y="36" width="30" height="3" rx="1.5" fill="${lt}" opacity="${0.2+st*0.06}"/>`;
+  s+=`<rect x="38" y="42" width="22" height="2" rx="1" fill="${lt}" opacity="${0.15+st*0.05}"/>`;
+  // extra rune lines at higher stages
+  if(st>=3){
+    s+=`<rect x="32" y="70" width="16" height="2" rx="1" fill="${lt}" opacity="0.3"/>`;
+    s+=`<rect x="34" y="75" width="12" height="2" rx="1" fill="${lt}" opacity="0.25"/>`;
+  }
+  s+=`<rect x="72" y="30" width="4" height="56" rx="1" fill="${lgt(col,60)}" opacity="0.4"/>`;
+  for(let i=0;i<4;i++)s+=`<line x1="73" y1="${34+i*8}" x2="75" y2="${34+i*8}" stroke="${mid}" stroke-width="0.5" opacity="0.3"/>`;
+  // face
+  s+=face(52,60,16,FM[st],bookCol);
+  if(st>=3){
+    const sparkPts=[[36,24],[68,24],[78,50],[78,72],[28,70]];
+    sparkPts.slice(0,st-1).forEach(([sx,sy])=>s+=spk(sx,sy,lgt(col,20)));
+  }
+  if(st===5){
+    // dramatic lightning from book
+    s+=`<path d="M52 24 L48 14 L54 16 L50 6" fill="none" stroke="${lgt(col,20)}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>`;
+    s+=`<path d="M68 34 L76 26 L74 32 L82 24" fill="none" stroke="${lgt(col,20)}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>`;
+    s+=`<path d="M36 34 L28 26 L30 32 L22 24" fill="none" stroke="${lgt(col,20)}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>`;
+    // glowing aura
+    s+=`<ellipse cx="52" cy="54" rx="30" ry="28" fill="none" stroke="${lt}" stroke-width="1" opacity="0.18"/>`;
+    s+=`<ellipse cx="52" cy="54" rx="22" ry="20" fill="none" stroke="${lt}" stroke-width="0.7" opacity="0.14"/>`;
+    // star burst top
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r1=8,r2=14;s+=`<line x1="${52+Math.cos(a)*r1}" y1="${6+Math.sin(a)*r1}" x2="${52+Math.cos(a)*r2}" y2="${6+Math.sin(a)*r2}" stroke="${lgt(col,20)}" stroke-width="1" opacity="0.6" stroke-linecap="round"/>`;}
+    s+=`<circle cx="50" cy="6" r="4" fill="${lgt(col,20)}" opacity="0.8"/>`;
+    // floating runes
+    [[14,42],[88,42],[14,68],[88,68],[52,96]].forEach(([rx,ry])=>spk(rx,ry,lgt(col,20))).forEach(x=>s+=x||'');
+    [[14,42],[88,42],[14,68],[88,68]].forEach(([rx,ry])=>s+=spk(rx,ry,lgt(col,20)));
+  }
+  return s+'</svg>';
 }
 
+// ─── CRYSTAL (faceted gems, not just triangles) ───────────────────
+function drawCrystal(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,42),vlt=lgt(col,66);
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="50" cy="91" rx="28" ry="6" fill="${mid}" opacity="0.2"/>`;
+  s+=`<ellipse cx="50" cy="87" rx="22" ry="7" fill="${drk(col,30)}" opacity="0.3"/>`;
+
+  if(st===0){
+    // raw rough shard — hexagonal cross-section
+    s+=`<polygon points="50,52 44,58 44,78 50,84 56,78 56,58" fill="${lt}" opacity="0.6"/>`;
+    s+=`<polygon points="50,52 44,58 50,60 56,58" fill="${vlt}" opacity="0.4"/>`;
+    s+=`<polygon points="44,58 44,78 50,80 50,60" fill="${mid}" opacity="0.35"/>`;
+    s+=`<polygon points="56,58 50,60 50,80 56,78" fill="${lt}" opacity="0.25"/>`;
+    // tip glint
+    s+=`<circle cx="50" cy="52" r="2" fill="${vlt}" opacity="0.6"/>`;
+    s+=face(50,70,10,'sleepy',lt);
+  } else if(st===1){
+    // small faceted gem
+    const cy=72,h=22,w=10;
+    // main hexagonal prism
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50-w},${cy+h-8} ${50},${cy+h} ${50+w},${cy+h-8} ${50+w},${cy-h+8}" fill="${col}" opacity="0.82"/>`;
+    // facets
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50},${cy-h+10}" fill="${vlt}" opacity="0.5"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50+w},${cy-h+8} ${50},${cy-h+10}" fill="${lt}" opacity="0.35"/>`;
+    s+=`<polygon points="${50-w},${cy-h+8} ${50-w},${cy+h-8} ${50},${cy}" fill="${mid}" opacity="0.3"/>`;
+    s+=`<polygon points="${50+w},${cy-h+8} ${50+w},${cy+h-8} ${50},${cy}" fill="${lt}" opacity="0.2"/>`;
+    s+=`<line x1="50" y1="${cy-h}" x2="50" y2="${cy}" stroke="${vlt}" stroke-width="1.5" opacity="0.4"/>`;
+    s+=face(50,cy,10,FM[st],col);
+  } else if(st===2){
+    // medium with side shards
+    const cy=70,h=24,w=12;
+    // left small shard
+    s+=`<polygon points="34,60 28,64 28,78 34,82 40,78 40,64" fill="${lt}" opacity="0.65"/>`;
+    s+=`<polygon points="34,60 28,64 34,66 40,64" fill="${vlt}" opacity="0.45"/>`;
+    // main gem
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50-w},${cy+h-6} ${50},${cy+h} ${50+w},${cy+h-6} ${50+w},${cy-h+8}" fill="${col}" opacity="0.88"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50},${cy-h+11}" fill="${vlt}" opacity="0.55"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50+w},${cy-h+8} ${50},${cy-h+11}" fill="${lt}" opacity="0.38"/>`;
+    s+=`<polygon points="${50-w},${cy-h+8} ${50-w},${cy+h-6} ${50},${cy}" fill="${mid}" opacity="0.28"/>`;
+    s+=`<line x1="50" y1="${cy-h}" x2="50" y2="${cy-2}" stroke="${vlt}" stroke-width="2" opacity="0.45"/>`;
+    s+=face(50,cy,11,FM[st],col);
+  } else if(st===3){
+    // cluster of 3 gems
+    // back gems
+    s+=`<polygon points="34,56 27,62 27,76 34,80 41,76 41,62" fill="${lt}" opacity="0.7"/>`;
+    s+=`<polygon points="34,56 27,62 34,64 41,62" fill="${vlt}" opacity="0.45"/>`;
+    s+=`<polygon points="66,56 59,62 59,76 66,80 73,76 73,62" fill="${lt}" opacity="0.7"/>`;
+    s+=`<polygon points="66,56 59,62 66,64 73,62" fill="${vlt}" opacity="0.45"/>`;
+    // main tall gem
+    const cy=68,h=28,w=13;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50-w},${cy+h-6} ${50},${cy+h} ${50+w},${cy+h-6} ${50+w},${cy-h+8}" fill="${col}" opacity="0.9"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50},${cy-h+12}" fill="${vlt}" opacity="0.6"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50+w},${cy-h+8} ${50},${cy-h+12}" fill="${lt}" opacity="0.4"/>`;
+    s+=`<polygon points="${50-w},${cy-h+8} ${50-w},${cy+h-6} ${50},${cy+2}" fill="${mid}" opacity="0.3"/>`;
+    s+=`<polygon points="${50+w},${cy-h+8} ${50+w},${cy+h-6} ${50},${cy+2}" fill="${lt}" opacity="0.22"/>`;
+    s+=`<line x1="50" y1="${cy-h}" x2="50" y2="${cy-4}" stroke="${vlt}" stroke-width="2.2" opacity="0.5"/>`;
+    s+=face(50,cy,12,FM[st],col);
+    s+=`<circle cx="34" cy="59" r="2.5" fill="${vlt}" opacity="0.5"/><circle cx="66" cy="59" r="2.5" fill="${vlt}" opacity="0.5"/>`;
+  } else if(st===4){
+    // large cluster + glow
+    s+=`<ellipse cx="50" cy="70" rx="32" ry="20" fill="${vlt}" opacity="0.12"/>`;
+    s+=`<polygon points="28,60 20,67 20,79 28,84 36,79 36,67" fill="${lt}" opacity="0.7"/>`;
+    s+=`<polygon points="28,60 20,67 28,70 36,67" fill="${vlt}" opacity="0.5"/>`;
+    s+=`<polygon points="72,60 64,67 64,79 72,84 80,79 80,67" fill="${lt}" opacity="0.7"/>`;
+    s+=`<polygon points="72,60 64,67 72,70 80,67" fill="${vlt}" opacity="0.5"/>`;
+    s+=`<polygon points="36,70 28,77 28,87 36,90 44,87 44,77" fill="${mid}" opacity="0.65"/>`;
+    s+=`<polygon points="64,70 56,77 56,87 64,90 72,87 72,77" fill="${mid}" opacity="0.65"/>`;
+    const cy=65,h=30,w=14;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+9} ${50-w},${cy+h-5} ${50},${cy+h} ${50+w},${cy+h-5} ${50+w},${cy-h+9}" fill="${col}"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+9} ${50},${cy-h+14}" fill="${vlt}" opacity="0.65"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50+w},${cy-h+9} ${50},${cy-h+14}" fill="${lt}" opacity="0.45"/>`;
+    s+=`<polygon points="${50-w},${cy-h+9} ${50-w},${cy+h-5} ${50},${cy+4}" fill="${mid}" opacity="0.32"/>`;
+    s+=`<polygon points="${50+w},${cy-h+9} ${50+w},${cy+h-5} ${50},${cy+4}" fill="${lt}" opacity="0.24"/>`;
+    s+=`<line x1="50" y1="${cy-h}" x2="50" y2="${cy-6}" stroke="${vlt}" stroke-width="2.5" opacity="0.55"/>`;
+    s+=face(50,cy,13,FM[st],col);
+    s+=spk(16,54,lgt(col,25))+spk(84,54,lgt(col,25));
+  } else {
+    // fairy ring — elaborate glowing cluster
+    s+=`<ellipse cx="50" cy="70" rx="40" ry="26" fill="${vlt}" opacity="0.14"/>`;
+    // ring of small gems
+    const ringGems=[[20,72],[28,60],[38,54],[62,54],[72,60],[80,72],[74,82],[62,86],[38,86],[26,82]];
+    ringGems.forEach(([rx,ry],i)=>{
+      const rw=5+i%2*2,rh=10+i%2*4;
+      s+=`<polygon points="${rx},${ry-rh} ${rx-rw},${ry-rh+4} ${rx-rw},${ry+rh-4} ${rx},${ry+rh} ${rx+rw},${ry+rh-4} ${rx+rw},${ry-rh+4}" fill="${i%2===0?lt:mid}" opacity="0.7"/>`;
+      s+=`<polygon points="${rx},${ry-rh} ${rx-rw},${ry-rh+4} ${rx},${ry-rh+5}" fill="${vlt}" opacity="0.4"/>`;
+      s+=`<circle cx="${rx}" cy="${ry-rh}" r="1.5" fill="${vlt}" opacity="0.55"/>`;
+    });
+    // central grand gem
+    const cy=66,h=26,w=13;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50-w},${cy+h-5} ${50},${cy+h} ${50+w},${cy+h-5} ${50+w},${cy-h+8}" fill="${col}"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50-w},${cy-h+8} ${50},${cy-h+13}" fill="${vlt}" opacity="0.7"/>`;
+    s+=`<polygon points="${50},${cy-h} ${50+w},${cy-h+8} ${50},${cy-h+13}" fill="${lt}" opacity="0.5"/>`;
+    s+=`<polygon points="${50-w},${cy-h+8} ${50-w},${cy+h-5} ${50},${cy+3}" fill="${mid}" opacity="0.3"/>`;
+    s+=`<polygon points="${50+w},${cy-h+8} ${50+w},${cy+h-5} ${50},${cy+3}" fill="${lt}" opacity="0.22"/>`;
+    s+=`<line x1="50" y1="${cy-h}" x2="50" y2="${cy-5}" stroke="${vlt}" stroke-width="3" opacity="0.6"/>`;
+    s+=`<circle cx="50" cy="${cy-h}" r="5" fill="${vlt}" opacity="0.7"/>`;
+    s+=`<circle cx="50" cy="${cy-h}" r="2.5" fill="white" opacity="0.5"/>`;
+    s+=face(50,cy,13,'excited',col);
+    // sparkle crown
+    for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r=22;const sx=50+Math.cos(a)*r,sy=cy-h+Math.sin(a)*12;s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="1.4" fill="${lgt(col,25)}" opacity="0.5"/>`;}
+    s+=spk(14,44,lgt(col,20))+spk(86,44,lgt(col,20))+spk(50,26,lgt(col,20));
+  }
+  return s+'</svg>';
+}
+
+// ─── WITCH ────────────────────────────────────────────────────────
+function drawWitch(pct,col){
+  const st=stg(pct),mid=drk(col,22),lt=lgt(col,44),vlt=lgt(col,68),gld='#ffd93d';
+  let s=`<svg width="86" height="86" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<ellipse cx="50" cy="92" rx="24" ry="5" fill="${mid}" opacity="0.18"/>`;
+  if(st===0){
+    s+=`<path d="M38 88 Q40 70 50 68 Q60 70 62 88 Z" fill="${col}" opacity="0.8"/>`;
+    s+=`<ellipse cx="50" cy="88" rx="12" ry="4" fill="${drk(col,20)}"/>`;
+    s+=`<line x1="40" y1="76" x2="32" y2="82" stroke="${mid}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<line x1="60" y1="76" x2="68" y2="82" stroke="${mid}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="50" cy="60" r="10" fill="#f4c89a"/>`;
+    s+=face(50,60,12,'sleepy','#f4c89a');
+    s+=`<ellipse cx="50" cy="63.5" rx="1.8" ry="1.2" fill="#f4a0a0"/>`;
+    s+=`<polygon points="34,52 50,18 66,52" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="52" rx="18" ry="5" fill="${mid}"/>`;
+    s+=`<path d="M50 18 Q44 28 40 36" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="40" cy="36" r="3" fill="${mid}"/>`;
+  } else if(st===1){
+    s+=`<path d="M36 90 Q38 68 50 66 Q62 68 64 90 Z" fill="${col}" opacity="0.85"/>`;
+    s+=`<ellipse cx="50" cy="90" rx="14" ry="4.5" fill="${drk(col,20)}"/>`;
+    s+=`<path d="M50 76 L51.5 80 L56 80 L52.5 82.5 L54 87 L50 84.5 L46 87 L47.5 82.5 L44 80 L48.5 80 Z" fill="${gld}" opacity="0.5"/>`;
+    s+=`<line x1="38" y1="74" x2="28" y2="80" stroke="${mid}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<line x1="62" y1="74" x2="72" y2="78" stroke="${mid}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<line x1="72" y1="78" x2="84" y2="92" stroke="#8B6914" stroke-width="2" stroke-linecap="round"/>`;
+    s+=`<path d="M80 88 Q88 84 90 94 Q82 90 80 88 Z" fill="#c8a060" opacity="0.7"/>`;
+    s+=`<circle cx="50" cy="58" r="11" fill="#f4c89a"/>`;
+    s+=face(50,58,13,FM[st],'#f4c89a');
+    s+=`<ellipse cx="50" cy="62" rx="2" ry="1.3" fill="#f4a0a0"/>`;
+    s+=`<polygon points="34,50 50,18 66,50" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="50" rx="18" ry="5" fill="${mid}"/>`;
+    s+=`<path d="M50 18 Q46 26 44 32" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round"/>`;
+  } else if(st===2){
+    s+=`<path d="M36 90 Q38 68 50 66 Q62 68 64 90 Z" fill="${col}" opacity="0.85"/>`;
+    s+=`<ellipse cx="50" cy="90" rx="14" ry="4.5" fill="${drk(col,20)}"/>`;
+    s+=`<path d="M50 76 L51.5 80 L56 80 L52.5 82.5 L54 87 L50 84.5 L46 87 L47.5 82.5 L44 80 L48.5 80 Z" fill="${gld}" opacity="0.6"/>`;
+    s+=`<line x1="38" y1="73" x2="26" y2="76" stroke="${mid}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<line x1="62" y1="73" x2="74" y2="76" stroke="${mid}" stroke-width="3.5" stroke-linecap="round"/>`;
+    s+=`<line x1="26" y1="76" x2="80" y2="68" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<path d="M76 66 Q86 62 86 72 Q78 70 76 66 Z" fill="#c8a060" opacity="0.7"/>`;
+    s+=`<circle cx="50" cy="57" r="11" fill="#f4c89a"/>`;
+    s+=face(50,57,13,'neutral','#f4c89a');
+    s+=`<ellipse cx="50" cy="61" rx="2" ry="1.3" fill="#f4a0a0"/>`;
+    s+=`<polygon points="34,49 50,17 66,49" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="49" rx="18" ry="5" fill="${mid}"/>`;
+    s+=`<circle cx="50" cy="20" r="2" fill="${gld}" opacity="0.6"/>`;
+  } else if(st===3){
+    s+=`<path d="M34 90 Q37 66 50 64 Q63 66 66 90 Z" fill="${col}" opacity="0.9"/>`;
+    s+=`<ellipse cx="50" cy="90" rx="16" ry="5" fill="${drk(col,20)}"/>`;
+    s+=`<path d="M50 74 L51.5 78 L56 78 L52.5 80.5 L54 85 L50 82.5 L46 85 L47.5 80.5 L44 78 L48.5 78 Z" fill="${gld}" opacity="0.7"/>`;
+    s+=`<line x1="38" y1="72" x2="24" y2="64" stroke="${mid}" stroke-width="4" stroke-linecap="round"/>`;
+    s+=`<line x1="62" y1="72" x2="76" y2="64" stroke="${mid}" stroke-width="4" stroke-linecap="round"/>`;
+    s+=`<line x1="76" y1="64" x2="88" y2="52" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="89" cy="51" r="4" fill="${gld}"/>`;
+    for(let i=0;i<4;i++){const a=i/4*Math.PI*2,sx=89+Math.cos(a)*8,sy=51+Math.sin(a)*8;s+=`<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="1.5" fill="${gld}" opacity="0.5"/>`;}
+    s+=`<circle cx="50" cy="55" r="12" fill="#f4c89a"/>`;
+    s+=face(50,55,14,'happy','#f4c89a');
+    s+=`<ellipse cx="50" cy="59.5" rx="2" ry="1.3" fill="#f4a0a0"/>`;
+    s+=`<polygon points="34,47 50,14 66,47" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="47" rx="19" ry="5.5" fill="${mid}"/>`;
+    [[42,46],[50,46],[58,46]].forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="2" fill="${gld}" opacity="0.7"/>`);
+    s+=`<circle cx="50" cy="16" r="2.5" fill="${gld}" opacity="0.65"/>`;
+  } else if(st===4){
+    s+=`<path d="M32 90 Q36 64 50 62 Q64 64 68 90 Z" fill="${col}" opacity="0.92"/>`;
+    s+=`<ellipse cx="50" cy="90" rx="18" ry="5.5" fill="${drk(col,20)}"/>`;
+    s+=`<path d="M50 72 L52 77 L57.5 77 L53.5 80 L55 85 L50 82 L45 85 L46.5 80 L42.5 77 L48 77 Z" fill="${gld}" opacity="0.8"/>`;
+    s+=`<line x1="36" y1="70" x2="20" y2="60" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
+    s+=`<line x1="64" y1="70" x2="80" y2="60" stroke="${mid}" stroke-width="4.5" stroke-linecap="round"/>`;
+    s+=`<line x1="20" y1="60" x2="8" y2="46" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="7" cy="45" r="4.5" fill="${col}"/>`;
+    s+=`<line x1="80" y1="60" x2="92" y2="46" stroke="#8B6914" stroke-width="2.5" stroke-linecap="round"/>`;
+    s+=`<circle cx="93" cy="45" r="4.5" fill="${col}"/>`;
+    s+=`<circle cx="50" cy="76" r="24" fill="none" stroke="${lt}" stroke-width="0.8" opacity="0.3"/>`;
+    s+=`<circle cx="50" cy="54" r="13" fill="#f4c89a"/>`;
+    s+=face(50,54,15,'happy','#f4c89a');
+    s+=`<ellipse cx="50" cy="59" rx="2.3" ry="1.5" fill="#f4a0a0"/>`;
+    s+=`<polygon points="32,46 50,10 68,46" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="46" rx="21" ry="6" fill="${mid}"/>`;
+    [[40,45],[50,45],[60,45]].forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="2.5" fill="${gld}" opacity="0.8"/>`);
+    s+=`<circle cx="50" cy="12" r="3.5" fill="${gld}" opacity="0.75"/>`;
+    s+=spk(7,40,lgt(col,25))+spk(93,40,lgt(col,25));
+  } else {
+    s+=`<ellipse cx="50" cy="70" rx="36" ry="34" fill="${vlt}" opacity="0.14"/>`;
+    s+=`<path d="M30 90 Q34 62 50 60 Q66 62 70 90 Z" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="90" rx="20" ry="6" fill="${drk(col,20)}"/>`;
+    s+=`<path d="M50 70 L52.5 76 L59 76 L54.5 79.5 L56.5 86 L50 82.5 L43.5 86 L45.5 79.5 L41 76 L47.5 76 Z" fill="${gld}"/>`;
+    s+=`<line x1="34" y1="68" x2="16" y2="56" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<line x1="66" y1="68" x2="84" y2="56" stroke="${mid}" stroke-width="5" stroke-linecap="round"/>`;
+    s+=`<line x1="16" y1="56" x2="4" y2="40" stroke="#8B6914" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="3" cy="39" r="6" fill="${col}"/>`;
+    s+=`<circle cx="3" cy="39" r="3" fill="${lgt(col,30)}" opacity="0.7"/>`;
+    s+=`<line x1="84" y1="56" x2="96" y2="40" stroke="#8B6914" stroke-width="3" stroke-linecap="round"/>`;
+    s+=`<circle cx="97" cy="39" r="6" fill="${col}"/>`;
+    s+=`<circle cx="97" cy="39" r="3" fill="${lgt(col,30)}" opacity="0.7"/>`;
+    s+=`<circle cx="50" cy="75" r="30" fill="none" stroke="${lt}" stroke-width="1" opacity="0.25"/>`;
+    s+=`<circle cx="50" cy="75" r="22" fill="none" stroke="${lt}" stroke-width="0.7" opacity="0.2"/>`;
+    s+=`<circle cx="50" cy="52" r="14" fill="#f4c89a"/>`;
+    s+=face(50,52,16,'excited','#f4c89a');
+    s+=`<ellipse cx="50" cy="57" rx="2.5" ry="1.6" fill="#f4a0a0"/>`;
+    s+=`<polygon points="30,44 50,6 70,44" fill="${col}"/>`;
+    s+=`<ellipse cx="50" cy="44" rx="23" ry="6.5" fill="${mid}"/>`;
+    [[40,43],[50,43],[60,43]].forEach(([sx,sy])=>s+=`<circle cx="${sx}" cy="${sy}" r="3" fill="${gld}"/>`);
+    s+=`<circle cx="50" cy="8" r="5" fill="${gld}"/>`;
+    s+=`<circle cx="50" cy="8" r="2.5" fill="white" opacity="0.6"/>`;
+    [[14,32],[86,34],[50,18],[22,60],[78,58]].forEach(([rx,ry])=>s+=spk(rx,ry,lgt(col,20)));
+  }
+  return s+'</svg>';
+}
+
+const drawFns={cats:drawCat,fairy:drawFairy,jelly:drawJelly,balloon:drawBalloon,ghost:drawGhost,cloud:drawCloud,planet:drawPlanet,dragon:drawDragon,potion:drawPotion,house:drawHouse,book:drawBook,crystal:drawCrystal,witch:drawWitch};
+
+// ─── RENDER FUNCTIONS ─────────────────────────────────────────────
 function renderViz(){
-  document.getElementById('viz-month-label').textContent=MONTHS[vizMonth]+' '+vizYear;
+  document.getElementById('viz-mo').textContent=MOS[vizM]+' '+vizY;
   const grid=document.getElementById('viz-grid'),empty=document.getElementById('viz-empty');
-  if(habits.length===0){empty.style.display='block';grid.innerHTML='';return;}
+  if(!habits.length){empty.style.display='block';grid.innerHTML='';return;}
   empty.style.display='none';
-  const isFuture=(vizYear>TODAY.getFullYear())||(vizYear===TODAY.getFullYear()&&vizMonth>TODAY.getMonth());
-  const moods=getVizMoods(vizTheme);
-  grid.innerHTML=habits.map((h,i)=>{
-    const{count,total}=monthComp(h,vizYear,vizMonth);
-    const pct=isFuture?0:count/total;
-    const stage=pct===0?0:pct<0.2?1:pct<0.4?2:pct<0.6?3:pct<0.8?4:5;
-    return`<div class="viz-card">${drawViz(pct,h.color,vizTheme,i)}<div class="viz-name" title="${h.name}">${h.name}</div><div class="viz-pct">${isFuture?'—':Math.round(pct*100)+'%'}</div><div class="viz-sub">${isFuture?'future':count+' / '+total+' days'}</div><div class="viz-mood">${moods[stage]}</div><div class="pct-bar"><div class="pct-bar-fill" style="width:${Math.round(pct*100)}%;background:${h.color};"></div></div></div>`;
+  const isFut=(vizY>TODAY.getFullYear())||(vizY===TODAY.getFullYear()&&vizM>TODAY.getMonth());
+  const moods=MOODS[theme],anim=ANIMS[theme],drawFn=drawFns[theme];
+  // Sort by completion % descending
+  const sorted=[...habits].map(h=>{
+    const{c,t}=mcomp(h,vizY,vizM);
+    const pct=isFut?0:c/t;
+    return{h,c,t,pct};
+  }).sort((a,b)=>b.pct-a.pct);
+  grid.innerHTML=sorted.map(({h,c,t,pct})=>{
+    const st=stg(pct);
+    return`<div class="vcard"><div class="svg-wrap"><div class="${anim}">${drawFn(pct,h.color)}</div></div><div class="vname" title="${h.name}">${h.name}</div><div class="vpct">${isFut?'—':Math.round(pct*100)+'%'}</div><div class="vsub">${isFut?'future':c+' / '+t+' days'}</div><div class="vmood">${moods[st]}</div><div class="pbar"><div class="pbfill" style="width:${Math.round(pct*100)}%;background:${h.color};"></div></div></div>`;
   }).join('');
 }
 
-function renderDashboard(){
-  document.getElementById('dash-month-label').textContent=MONTHS[dashMonth]+' '+dashYear;
-  document.getElementById('dash-progress-label').textContent=MONTHS[dashMonth]+' progress';
-  const doneToday=habits.filter(h=>h.done[todayKey]).length,total=habits.length;
-  const mDaysTotal=daysInMonth(dashYear,dashMonth);
-  const mCount=habits.reduce((s,h)=>s+monthComp(h,dashYear,dashMonth).count,0);
-  const mPoss=habits.length*mDaysTotal;
-  document.getElementById('dash-summary').innerHTML=`<div class="dash-card"><div class="dash-val">${total}</div><div class="dash-label">Habits</div></div><div class="dash-card"><div class="dash-val">${doneToday}/${total}</div><div class="dash-label">Today</div></div><div class="dash-card"><div class="dash-val">${mPoss>0?Math.round(mCount/mPoss*100):0}%</div><div class="dash-label">${MONTHS[dashMonth].slice(0,3)} rate</div></div>`;
-  const isNow=dashYear===TODAY.getFullYear()&&dashMonth===TODAY.getMonth();
-  if(!habits.length){document.getElementById('dash-today').innerHTML='<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">No habits yet.</div>';document.getElementById('dash-bars').innerHTML='';return;}
-  document.getElementById('dash-today').innerHTML=isNow?habits.map(h=>{const done=h.done[todayKey];return`<div class="today-item${done?' checked':''}" onclick="toggleTodayDash(${h.id})"><div class="check-circle" style="${done?'background:'+h.color:''}">${done?'&#10003;':''}</div><span class="today-name">${h.name}</span></div>`;}).join(''):'<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">Go to current month to check off today.</div>';
-  document.getElementById('dash-bars').innerHTML=habits.map(h=>{const{count}=monthComp(h,dashYear,dashMonth),pct=Math.round(count/mDaysTotal*100);return`<div class="bar-row"><div class="color-pip" style="background:${h.color};width:9px;height:9px;border-radius:50%;flex-shrink:0;"></div><div style="font-size:13px;color:var(--ink);width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${h.name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${h.color};"></div></div><div class="bar-pct">${pct}%</div></div>`;}).join('');
+function renderDash(){
+  document.getElementById('dash-mo').textContent=MOS[dashM]+' '+dashY;
+  document.getElementById('dash-plbl').textContent=MOS[dashM]+' progress';
+  const doneT=habits.filter(h=>h.done[TK]).length,total=habits.length;
+  const mdt=dim(dashY,dashM),mc=habits.reduce((s,h)=>s+mcomp(h,dashY,dashM).c,0),mp=habits.length*mdt;
+  document.getElementById('dash-summary').innerHTML=`
+    <div class="dcard"><div class="dval">${total}</div><div class="dlbl">Habits</div></div>
+    <div class="dcard"><div class="dval">${doneT}/${total}</div><div class="dlbl">Today</div></div>
+    <div class="dcard"><div class="dval">${mp>0?Math.round(mc/mp*100):0}%</div><div class="dlbl">${MOS[dashM].slice(0,3)} rate</div></div>
+    <div class="dcard"><div class="dval">${mc}</div><div class="dlbl">Days done</div></div>
+  `;
+  const isNow=dashY===TODAY.getFullYear()&&dashM===TODAY.getMonth();
+  if(!habits.length){
+    document.getElementById('dash-today').innerHTML='<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">No habits yet.</div>';
+    document.getElementById('dash-bars').innerHTML='';return;
+  }
+  document.getElementById('dash-today').innerHTML=isNow
+    ?habits.map(h=>{const done=h.done[TK];return`<div class="titem${done?' chk':''}" onclick="togToday(${h.id})"><div class="ccirc" style="${done?'background:'+h.color:''}">${done?'&#10003;':''}</div><span class="tname">${h.name}</span></div>`;}).join('')
+    :'<div style="color:var(--muted);font-size:13px;padding:.5rem 0 1rem">Go to current month to check off today.</div>';
+  document.getElementById('dash-bars').innerHTML=habits.map(h=>{
+    const{c}=mcomp(h,dashY,dashM),p=Math.round(c/mdt*100);
+    return`<div class="brow"><div class="cpip" style="background:${h.color};width:9px;height:9px;border-radius:50%;flex-shrink:0;"></div><div style="font-size:13px;color:var(--ink);width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;">${h.name}</div><div class="btrack"><div class="bfill" style="width:${p}%;background:${h.color};"></div></div><div class="bpct">${p}%</div></div>`;
+  }).join('');
 }
 
-function buildHabitCard(h){
-  const days=[]; for(let i=27;i>=0;i--){const d=new Date(TODAY);d.setDate(TODAY.getDate()-i);days.push(d);}
-  const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=daysInMonth(y,m);
-  const{count}=monthComp(h,y,m),pct=Math.round(count/mt*100);
+function renderLastMonth(){
+  const thisY=TODAY.getFullYear(),thisM=TODAY.getMonth();
+  const lastM=thisM===0?11:thisM-1,lastY=thisM===0?thisY-1:thisY;
+  const lmName=MOS[lastM],tmName=MOS[thisM];
+  const list=document.getElementById('lm-list'),empty=document.getElementById('lm-empty'),sumBox=document.getElementById('lm-summary-box');
+  if(!habits.length){empty.style.display='block';list.innerHTML='';sumBox.innerHTML='';return;}
+  empty.style.display='none';
+  let improved=0,declined=0,same=0;
+  const cards=habits.map(h=>{
+    const{c:tc,t:tt}=mcomp(h,thisY,thisM);
+    const{c:lc,t:lt2}=mcomp(h,lastY,lastM);
+    const thisPct=tt>0?Math.round(tc/tt*100):0;
+    const lastPct=lt2>0?Math.round(lc/lt2*100):0;
+    const diff=thisPct-lastPct;
+    const absDiff=Math.abs(diff);
+    let icon,iconClass,trendClass,trendLbl,diffStr;
+    if(absDiff<=5){same++;icon='→';iconClass='trend-same';trendClass='diff-same';trendLbl='about the same';diffStr=diff===0?'±0%':(diff>0?'+':'')+diff+'%';}
+    else if(diff>0){improved++;icon='↑';iconClass='trend-up';trendClass='diff-up';trendLbl='improving!';diffStr='+'+diff+'%';}
+    else{declined++;icon='↓';iconClass='trend-down';trendClass='diff-down';trendLbl='dropped';diffStr=diff+'%';}
+    return`<div class="lm-card">
+      <div class="lm-left">
+        <div class="lm-name">${h.name}</div>
+        <div class="lm-bars">
+          <div class="lm-bar-row">
+            <div class="lm-bar-lbl">${lmName.slice(0,3)}</div>
+            <div class="lm-track"><div class="lm-fill" style="width:${lastPct}%;background:${h.color};opacity:0.4;"></div></div>
+            <div class="lm-pct">${lastPct}%</div>
+          </div>
+          <div class="lm-bar-row">
+            <div class="lm-bar-lbl" style="font-weight:500;color:var(--ink)">${tmName.slice(0,3)}</div>
+            <div class="lm-track"><div class="lm-fill" style="width:${thisPct}%;background:${h.color};"></div></div>
+            <div class="lm-pct" style="font-weight:500;color:var(--ink)">${thisPct}%</div>
+          </div>
+        </div>
+      </div>
+      <div class="lm-right">
+        <div class="trend-icon ${iconClass}">${icon}</div>
+        <div class="trend-lbl">${trendLbl}</div>
+        <div class="trend-diff ${trendClass}">${diffStr}</div>
+      </div>
+    </div>`;
+  });
+  let summaryIcon,summaryText;
+  if(!habits.length){summaryIcon='✨';summaryText='Add habits to start tracking!';}
+  else if(improved>declined&&improved>same){summaryIcon='🌟';summaryText=`You improved on <span>${improved} of ${habits.length}</span> habits vs ${lmName}. Keep it up!`;}
+  else if(declined>improved&&declined>same){summaryIcon='💪';summaryText=`${declined} habit${declined>1?'s':''} dipped vs ${lmName} — you've got this month to bounce back!`;}
+  else if(same>=improved&&same>=declined){summaryIcon='✨';summaryText=`Staying consistent! Most habits are about the same as ${lmName}.`;}
+  else{summaryIcon='📈';summaryText=`Mixed month — <span>${improved}</span> up, <span>${declined}</span> down vs ${lmName}. Every day counts!`;}
+  sumBox.innerHTML=`<div class="lm-summary"><div class="lm-summary-icon">${summaryIcon}</div><div class="lm-summary-text">${summaryText}</div></div>`;
+  list.innerHTML=cards.join('');
+}
+
+function buildCard(h){
+  const days=[];for(let i=27;i>=0;i--){const d=new Date(TODAY);d.setDate(TODAY.getDate()-i);days.push(d);}
+  const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=dim(y,m);
+  const{c}=mcomp(h,y,m),p=Math.round(c/mt*100);
   const cells=days.map(d=>{
-    const key=dateKey(d),isToday=d.getTime()===TODAY.getTime(),isFuture=d>TODAY,done=h.done[key];
-    let cls='day-cell';if(done)cls+=' done';if(isToday)cls+=' today';if(isFuture)cls+=' future';
-    return`<div class="${cls}" style="${done?'background:'+h.color:''}" onclick="toggleDay(${h.id},'${key}',this,'${h.color}')" title="${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}">${!done?d.getDate():''}</div>`;
+    const key=dk(d),isT=d.getTime()===TODAY.getTime(),isFut=d>TODAY,done=h.done[key];
+    let cls='dcell';if(done)cls+=' done';if(isT)cls+=' today';if(isFut)cls+=' future';
+    return`<div class="${cls}" style="${done?'background:'+h.color:''}" onclick="togDay(${h.id},'${key}',this,'${h.color}')" title="${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}">${!done?d.getDate():''}</div>`;
   }).join('');
-  return`<div class="habit-card" data-habit-id="${h.id}"><div class="habit-head"><div class="color-pip" style="background:${h.color}"></div><span class="habit-name-label">${h.name}</span><button class="del-btn" onclick="deleteHabit(${h.id})">&#x2715;</button></div><div class="month-lbl">Last 28 days — tap to toggle</div><div class="grid">${cells}</div><div class="stats-row"><div class="stat"><div class="stat-label">This month</div><div class="stat-val">${count}/${mt}</div></div><div class="stat"><div class="stat-label">Monthly rate</div><div class="stat-val">${pct}%</div></div></div></div>`;
+  return`<div class="hcard" data-hid="${h.id}"><div class="hhead"><div class="cpip" style="background:${h.color}"></div><span class="hname">${h.name}</span><button class="dbtn" onclick="delHabit(${h.id})">&#x2715;</button></div><div class="mlbl">Last 28 days — tap to toggle</div><div class="dgrid">${cells}</div><div class="srow"><div class="sstat"><div class="sstat-lbl">This month</div><div class="sstat-val">${c}/${mt}</div></div><div class="sstat"><div class="sstat-lbl">Monthly rate</div><div class="sstat-val">${p}%</div></div></div></div>`;
 }
 
 function renderHabits(){
-  const list=document.getElementById('habits-list'),empty=document.getElementById('empty-msg');
+  const list=document.getElementById('hlist'),empty=document.getElementById('hempty');
   if(!habits.length){list.innerHTML='';list.appendChild(empty);empty.style.display='block';return;}
   empty.style.display='none';
-  list.innerHTML=habits.map(h=>buildHabitCard(h)).join('');
+  list.innerHTML=habits.map(h=>buildCard(h)).join('');
 }
 
-renderViz(); renderDashboard(); renderHabits();
+// Init
+renderViz();renderDash();renderHabits();
 </script>
+</body>
+</html>
