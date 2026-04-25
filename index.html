@@ -236,14 +236,13 @@ function showTab(t){
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['viz','dash','lastmonth','habits'][i]===t));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+t).classList.add('active');
-  renderActive();
+  renderAll();
 }
 function renderActive(){
-  if(activeTab==='viz')renderViz();
-  else if(activeTab==='dash')renderDash();
-  else if(activeTab==='lastmonth')renderLastMonth();
-  else renderHabits();
+  renderViz();renderDash();renderLastMonth();
+  if(activeTab==='habits')renderHabits();
 }
+function renderAll(){renderViz();renderDash();renderLastMonth();renderHabits();}
 function setTheme(t,btn){theme=t;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderViz();}
 function chMo(v,d){
   if(v==='viz'){vizM+=d;if(vizM>11){vizM=0;vizY++;}if(vizM<0){vizM=11;vizY--;}renderViz();}
@@ -256,15 +255,13 @@ function addHabit(){
   if(!name)return;
   const h={id:Date.now(),name,color:selCol,done:{}};
   habits.push(h);inp.value='';save();
-  document.getElementById('hempty').style.display='none';
-  document.getElementById('hlist').insertAdjacentHTML('beforeend',buildCard(h));
-  renderActive();
+  
+  
+  renderAll();
 }
 function delHabit(id){
   habits=habits.filter(x=>x.id!==id);save();
-  const el=document.querySelector(`[data-hid="${id}"]`);if(el)el.remove();
-  if(!habits.length){const e=document.getElementById('hempty');if(e){e.style.display='block';document.getElementById('hlist').appendChild(e);}}
-  if(activeTab!=='habits')renderActive();
+  renderAll();
 }
 function togDay(id,key,el,col){
   const h=habits.find(x=>x.id===id);if(!h)return;
@@ -273,15 +270,12 @@ function togDay(id,key,el,col){
   else{el.style.background='';el.style.borderColor='';el.textContent=parseInt(key.slice(-2));el.classList.remove('done');}
   const card=el.closest('.hcard');
   if(card){const y=TODAY.getFullYear(),m=TODAY.getMonth(),mt=dim(y,m);const{c}=mcomp(h,y,m),p=Math.round(c/mt*100);const vs=card.querySelectorAll('.sstat-val');if(vs[0])vs[0].textContent=c+'/'+mt;if(vs[1])vs[1].textContent=p+'%';}
-  if(activeTab==='viz')renderViz();
-  else if(activeTab==='dash')renderDash();
-  else if(activeTab==='lastmonth')renderLastMonth();
+  renderViz();renderDash();renderLastMonth();
 }
 function togToday(id){
   const h=habits.find(x=>x.id===id);if(!h)return;
   h.done[TK]=!h.done[TK];save();
-  renderDash();
-  if(activeTab==='viz')renderViz();
+  renderViz();renderDash();renderLastMonth();
 }
 
 // ─── SHARED HELPERS ───────────────────────────────────────────────
