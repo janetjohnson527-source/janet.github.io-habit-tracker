@@ -1170,8 +1170,16 @@ function buildCard(h){
 }
 
 function renderHabits(){
-  const list=document.getElementById('hlist'),empty=document.getElementById('hempty');
-  if(!habits.length){list.innerHTML='';list.appendChild(empty);empty.style.display='block';return;}
+  const list=document.getElementById('hlist');
+  // detach empty msg safely before wiping innerHTML
+  const empty=document.getElementById('hempty');
+  if(empty&&empty.parentNode===list)list.removeChild(empty);
+  if(!habits.length){
+    list.innerHTML='';
+    empty.style.display='block';
+    list.appendChild(empty);
+    return;
+  }
   empty.style.display='none';
   list.innerHTML=habits.map(h=>buildCard(h)).join('');
 }
