@@ -17,8 +17,7 @@ body.t-deepocean  { --bg0:#020810; --bg1:#040e1c; --bg2:#061628; --bg3:#0a1f38; 
 body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; --border:rgba(80,220,80,0.1); --border-hi:rgba(100,255,80,0.18); --text:#e8f8d8; --text2:#7aaa60; --text3:#3a5a28; --accent:#78ff50; --accent2:#ffc832; --title-a:#78ff50; --title-b:#ffc832; --title-c:#78ff50; }
 
 #confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:9999;display:none}
-#drag-ghost{position:fixed;pointer-events:none;z-index:8888;border-radius:12px;padding:8px 13px;border:2px solid var(--accent);box-shadow:0 0 20px var(--accent);font-size:11px;font-weight:700;font-family:var(--ff);letter-spacing:.05em;text-transform:uppercase;opacity:0;transition:opacity .1s;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;color:var(--text);background:var(--bg2)}
-#drag-ghost.show{opacity:.92}
+
 
 #done-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);background:var(--bg1);border:2px solid var(--accent);border-radius:24px;padding:26px 34px;text-align:center;z-index:9998;box-shadow:0 0 60px rgba(0,0,0,.6);pointer-events:none;opacity:0;transition:opacity .25s,transform .3s;min-width:230px}
 #done-toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -70,22 +69,17 @@ body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; 
 .node-connector{height:2px;width:14px;flex-shrink:0;margin-right:5px;border-radius:1px}
 .node-card{flex:1;border-radius:12px;border:1.5px solid transparent;padding:9px 11px;cursor:pointer;display:flex;align-items:center;gap:7px;min-width:0;user-select:none;transition:filter .1s,border-color .15s,box-shadow .15s,opacity .15s;position:relative}
 .node-card.selected{box-shadow:0 0 0 2px var(--sel-c,#fff),0 0 14px var(--sel-g,rgba(255,255,255,.2))}
-.node-card.dragging{opacity:.3}
-.drop-indicator{height:3px;margin:1px 0;border-radius:2px;background:var(--accent);box-shadow:0 0 12px var(--accent);display:none;animation:gpulse .6s ease-in-out infinite alternate}
-.drop-indicator.show{display:block}
-@keyframes gpulse{from{opacity:.7}to{opacity:1;box-shadow:0 0 20px var(--accent)}}
+
 .collapse-btn{width:19px;height:19px;border-radius:50%;background:transparent;cursor:pointer;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;font-family:var(--ff);border:2px solid;transition:transform .15s;padding:0;min-width:19px}
 .collapse-btn:active{transform:scale(.82)}
 .node-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .node-sticker{font-size:15px;flex-shrink:0;line-height:1}
 .node-label{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .node-snip{font-size:10px;opacity:.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;flex-shrink:0}
-.drag-handle{font-size:14px;cursor:grab;flex-shrink:0;opacity:0;transition:opacity .15s;color:var(--text3);padding:0 2px;touch-action:none}
-.node-card:hover .drag-handle,.node-card.selected .drag-handle{opacity:.55}
-.drag-handle:active{cursor:grabbing}
+
 .node-edit-btn{font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;border:none;cursor:pointer;font-family:var(--ff);flex-shrink:0;opacity:0;transition:opacity .15s;letter-spacing:.03em}
 .node-card:hover .node-edit-btn,.node-card.selected .node-edit-btn{opacity:1}
-@media(max-width:500px){.node-edit-btn,.drag-handle{opacity:1}}
+@media(max-width:500px){.node-edit-btn{opacity:1}}
 .branch-gap{height:12px}
 
 /* MODAL */
@@ -149,7 +143,6 @@ body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; 
 <body class="t-litebrite">
 
 <canvas id="confetti-canvas"></canvas>
-<div id="drag-ghost"></div>
 <div id="done-toast">
   <span id="done-toast-emoji">✨</span>
   <div id="done-toast-text">DONE!</div>
@@ -196,7 +189,7 @@ body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; 
     <div id="done-empty">Nothing done yet ✨<br><span style="font-size:11px;opacity:.5">Mark nodes as done to archive them here</span></div>
   </div>
 
-  <div id="statusbar">Tap to select · Double-tap to edit · Hold ⠿ to reorder</div>
+  <div id="statusbar">Tap to select · Double-tap to edit ✨</div>
 </div>
 
 <div id="modal-overlay">
@@ -509,81 +502,7 @@ function toggleCollapse(id) {
   n.collapsed = !n.collapsed; save(); render();
 }
 
-// ── DRAG TO REORDER ──
-let dragNodeId=null, dragOverEl=null, dragInsertBefore=null, dragParentId=null;
-const ghost = document.getElementById('drag-ghost');
 
-function startDrag(nodeId, x, y) {
-  const n = nodes.find(x=>x.id===nodeId); if (!n) return;
-  dragNodeId=nodeId; dragParentId=n.parentId;
-  const c = getColor(n);
-  ghost.textContent = n.label.toUpperCase();
-  ghost.style.background = c.bg; ghost.style.color = c.text; ghost.style.borderColor = c.border;
-  ghost.style.left=(x+12)+'px'; ghost.style.top=(y-20)+'px';
-  ghost.classList.add('show');
-  const src = document.querySelector(`.node-card[data-card-id="${nodeId}"]`);
-  if (src) src.classList.add('dragging');
-  document.body.style.userSelect = 'none';
-  setStatus('Drag to reorder — release to drop ✦');
-}
-function moveDrag(x, y) {
-  if (!dragNodeId) return;
-  ghost.style.left=(x+12)+'px'; ghost.style.top=(y-20)+'px';
-  const els = document.querySelectorAll('.node-row[data-node-id]');
-  let closestEl=null, closestDist=Infinity, insertBefore=null;
-  els.forEach(el => {
-    const id = parseInt(el.dataset.nodeId);
-    const n = nodes.find(x=>x.id===id);
-    if (!n || n.parentId !== dragParentId || id===dragNodeId) return;
-    const rect = el.getBoundingClientRect();
-    const mid = rect.top + rect.height/2;
-    const dist = Math.abs(y - mid);
-    if (dist < closestDist) { closestDist=dist; closestEl=el; insertBefore=y<mid }
-  });
-  document.querySelectorAll('.drop-indicator').forEach(d => d.classList.remove('show'));
-  if (closestEl && closestDist < 60) {
-    dragOverEl=closestEl; dragInsertBefore=insertBefore;
-    const ind = document.getElementById((insertBefore?'ind-before-':'ind-after-')+closestEl.dataset.nodeId);
-    if (ind) ind.classList.add('show');
-  } else { dragOverEl=null; dragInsertBefore=null }
-}
-function endDrag() {
-  if (!dragNodeId) return;
-  ghost.classList.remove('show');
-  document.querySelectorAll('.drop-indicator').forEach(d => d.classList.remove('show'));
-  document.querySelectorAll('.node-card.dragging').forEach(c => c.classList.remove('dragging'));
-  document.body.style.userSelect = '';
-  if (dragOverEl && dragInsertBefore !== null) {
-    snap();
-    const targetId = parseInt(dragOverEl.dataset.nodeId);
-    const siblings = getChildren(dragParentId);
-    const targetNode = nodes.find(x=>x.id===targetId);
-    const draggedNode = nodes.find(x=>x.id===dragNodeId);
-    if (targetNode && draggedNode) {
-      const others = siblings.filter(s=>s.id!==dragNodeId).sort((a,b)=>a.order-b.order);
-      const ti = others.findIndex(s=>s.id===targetId);
-      const arr = [];
-      others.forEach((s,i) => {
-        if (dragInsertBefore && i===ti) arr.push({id:dragNodeId});
-        arr.push({id:s.id});
-        if (!dragInsertBefore && i===ti) arr.push({id:dragNodeId});
-      });
-      if (!arr.find(x=>x.id===dragNodeId)) arr.push({id:dragNodeId});
-      arr.forEach((item,i) => { const n=nodes.find(x=>x.id===item.id); if(n) n.order=i*10 });
-      save(); render(); setStatus('Reordered ✨');
-    }
-  }
-  dragNodeId=null; dragOverEl=null; dragInsertBefore=null; dragParentId=null;
-}
-document.addEventListener('mousemove', e => { if (dragNodeId) moveDrag(e.clientX, e.clientY) });
-document.addEventListener('mouseup', endDrag);
-let touchDragActive = false;
-document.addEventListener('touchmove', e => {
-  if (!dragNodeId) return;
-  touchDragActive = true;
-  const t = e.touches[0]; moveDrag(t.clientX, t.clientY); e.preventDefault();
-}, {passive:false});
-document.addEventListener('touchend', () => { if (touchDragActive) { endDrag(); touchDragActive=false } });
 
 // ── CONFETTI ──
 function launchConfetti() {
@@ -775,10 +694,7 @@ function render() {
       const c=getColor(n), hasKids=getChildren(n.id).length>0, isSel=n.id===selectedId;
       const sticker=n.stickerIdx!==null?STICKERS[n.stickerIdx].e:'';
       const descSnip=n.descHtml?n.descHtml.replace(/<[^>]+>/g,'').slice(0,20):'';
-      const sibList=getChildren(n.parentId); const isLast=sibList[sibList.length-1]?.id===n.id;
-
-      // before indicator
-      const indB=document.createElement('div'); indB.className='drop-indicator'; indB.id=`ind-before-${n.id}`; indB.style.marginLeft=(depth*22)+'px'; map.appendChild(indB);
+      const sibList=getChildren(n.parentId);
 
       const row=document.createElement('div'); row.className='node-row'; row.dataset.nodeId=n.id; row.style.paddingLeft=(depth*22)+'px';
 
@@ -790,11 +706,6 @@ function render() {
       const card=document.createElement('div'); card.className='node-card'+(isSel?' selected':''); card.dataset.cardId=n.id;
       card.style.background=c.bg; card.style.borderColor=isSel?c.border:'rgba(255,255,255,0.04)';
       if (isSel) { card.style.setProperty('--sel-c',c.border); card.style.setProperty('--sel-g',c.glow) }
-
-      const dh=document.createElement('span'); dh.className='drag-handle'; dh.textContent='⠿';
-      dh.addEventListener('mousedown', e => { e.stopPropagation(); startDrag(n.id,e.clientX,e.clientY) });
-      dh.addEventListener('touchstart', e => { const t=e.touches[0]; startDrag(n.id,t.clientX,t.clientY) }, {passive:true});
-      card.appendChild(dh);
 
       if (hasKids) {
         const cb=document.createElement('button'); cb.className='collapse-btn'; cb.style.borderColor=c.border; cb.style.color=c.border; cb.textContent=n.collapsed?'+':'−';
@@ -815,10 +726,6 @@ function render() {
 
       card.addEventListener('click', () => handleTap(n.id));
       row.appendChild(card); map.appendChild(row);
-
-      if (isLast) {
-        const indA=document.createElement('div'); indA.className='drop-indicator'; indA.id=`ind-after-${n.id}`; indA.style.marginLeft=(depth*22)+'px'; map.appendChild(indA);
-      }
     });
     const gap=document.createElement('div'); gap.className='branch-gap'; map.appendChild(gap);
   });
