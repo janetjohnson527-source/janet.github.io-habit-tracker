@@ -15,6 +15,7 @@ body.t-litebrite  { --bg0:#000000; --bg1:#050508; --bg2:#0a0a12; --bg3:#0f0f1a; 
 body.t-goldenhour { --bg0:#0a0400; --bg1:#110700; --bg2:#1a0d00; --bg3:#251200; --border:rgba(255,140,0,0.12); --border-hi:rgba(255,140,0,0.22); --text:#fff5e6; --text2:#cc9966; --text3:#6b4420; --accent:#ffc800; --accent2:#ff6400; --title-a:#ff6400; --title-b:#ffc800; --title-c:#ff6400; }
 body.t-deepocean  { --bg0:#020810; --bg1:#040e1c; --bg2:#061628; --bg3:#0a1f38; --border:rgba(0,180,255,0.12); --border-hi:rgba(0,180,255,0.22); --text:#e0f4ff; --text2:#6aaac8; --text3:#2a4a62; --accent:#00b4ff; --accent2:#64dcc8; --title-a:#00b4ff; --title-b:#64dcc8; --title-c:#00b4ff; }
 body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; --border:rgba(80,220,80,0.1); --border-hi:rgba(100,255,80,0.18); --text:#e8f8d8; --text2:#7aaa60; --text3:#3a5a28; --accent:#78ff50; --accent2:#ffc832; --title-a:#78ff50; --title-b:#ffc832; --title-c:#78ff50; }
+body.t-princess   { --bg0:#0d0008; --bg1:#140010; --bg2:#1e0018; --bg3:#280020; --border:rgba(255,100,200,0.14); --border-hi:rgba(255,140,220,0.26); --text:#fff0fa; --text2:#e080c8; --text3:#7a3a60; --accent:#ff60c8; --accent2:#ffaaee; --title-a:#ff60c8; --title-b:#ffaaee; --title-c:#cc40ff; }
 
 #confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:9999;display:none}
 
@@ -35,7 +36,30 @@ body.t-forest     { --bg0:#040804; --bg1:#080f04; --bg2:#0e1808; --bg3:#162010; 
 #map-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;width:100%;height:100%;display:block}
 #view-map{position:relative}
 
-/* ── LITE BRITE ── */
+/* ── PER-THEME NODE PERSONALITIES ── */
+/* Lite Brite: sharp corners, neon inner glow */
+body.t-litebrite .node-card{border-radius:6px!important;border-width:1.5px}
+body.t-litebrite .node-card.selected{box-shadow:0 0 0 2px var(--sel-c),0 0 18px var(--sel-g),inset 0 0 12px rgba(255,255,255,0.04)!important}
+
+/* Golden Hour: warm badge shape — slightly squircle */
+body.t-goldenhour .node-card{border-radius:10px 10px 8px 8px!important}
+body.t-goldenhour .node-label{letter-spacing:.07em}
+body.t-goldenhour .node-connector{background:linear-gradient(90deg,var(--accent2),var(--accent))!important;box-shadow:0 0 6px var(--accent)!important}
+
+/* Deep Ocean: horizontal capsule — wide and rounded */
+body.t-deepocean .node-card{border-radius:20px!important;padding-left:14px!important;padding-right:14px!important}
+body.t-deepocean .node-connector{border-radius:0;height:1.5px;opacity:.6}
+
+/* Forest: organic uneven corners */
+body.t-forest .node-card{border-radius:12px 6px 14px 6px!important}
+body.t-forest .node-dot{border-radius:2px;transform:rotate(45deg)}
+
+/* Princess: full pill + shimmer border animation */
+body.t-princess .node-card{border-radius:999px!important;padding-left:16px!important;padding-right:14px!important}
+body.t-princess .node-card.selected{box-shadow:0 0 0 2px var(--sel-c),0 0 20px var(--sel-g),0 0 40px rgba(220,60,255,.15)!important}
+@keyframes shimmer-border{0%,100%{border-color:rgba(255,96,200,.4)}50%{border-color:rgba(204,64,255,.7)}}
+body.t-princess .node-card{animation:shimmer-border 3s ease-in-out infinite}
+body.t-princess .node-card.selected{animation:none}
 body.t-litebrite #header::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.015) 3px,rgba(255,255,255,0.015) 4px);pointer-events:none;z-index:0}
 body.t-litebrite #header-title{font-size:20px;letter-spacing:.08em;text-shadow:0 0 20px rgba(255,0,255,.6),0 0 40px rgba(0,255,255,.4)}
 body.t-litebrite .node-card{border-radius:8px}
@@ -77,23 +101,37 @@ body.t-forest #statusbar{border-top-color:rgba(80,220,60,.2);color:var(--accent)
 /* mossy dashed connectors */
 body.t-forest .node-connector{border-radius:2px;opacity:.7}
 body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 20px rgba(20,80,10,.06)}
-#header{padding:13px 14px 9px;background:transparent;border-bottom:.5px solid var(--border);position:relative;z-index:10;transition:background .4s;overflow:hidden}
+
+/* ── PRINCESS ── */
+body.t-princess #header{background:linear-gradient(180deg,rgba(20,0,16,1),rgba(14,0,10,1));overflow:hidden}
+body.t-princess #header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 0%,rgba(255,80,200,0.12),transparent 55%),radial-gradient(ellipse at 70% 0%,rgba(200,60,255,0.09),transparent 55%);pointer-events:none}
+body.t-princess #header-title{font-size:20px;letter-spacing:.06em;text-shadow:0 0 20px rgba(255,80,200,.6),0 0 40px rgba(200,60,255,.3)}
+body.t-princess .node-connector{border-radius:999px}
+body.t-princess #view-map::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,60,200,0.04),transparent 60%);pointer-events:none;z-index:0}
+body.t-princess #statusbar{border-top-color:rgba(255,100,200,.25);color:var(--accent)}
+body.t-princess .node-card{border-radius:999px}
+body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
+#header{padding:10px 14px;background:transparent;border-bottom:.5px solid var(--border);position:relative;z-index:10;transition:background .4s;overflow:hidden;min-height:58px;display:flex;align-items:center}
 /* All direct header content must sit above the bg-canvas (z-index:0) */
 #header-title,#add-row,#btn-row{position:relative;z-index:1}
-#header-title{font-size:17px;font-weight:800;letter-spacing:.02em;margin-bottom:10px;background:linear-gradient(90deg,var(--title-a),var(--title-b),var(--title-c));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 5s linear infinite}
+#header-title{font-size:17px;font-weight:800;letter-spacing:.02em;margin-bottom:0;background:linear-gradient(90deg,var(--title-a),var(--title-b),var(--title-c));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 5s linear infinite}
 @keyframes shimmer{to{background-position:200% center}}
-#add-row{display:flex;gap:7px;align-items:center}
+
+/* Floating bottom add bar */
+#fab-bar{position:sticky;bottom:0;background:color-mix(in srgb,var(--bg1) 96%,transparent);border-top:1.5px solid var(--border-hi);padding:10px 12px;z-index:10;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
+#fab-input-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
+#fab-btn-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#fab-btn-row::-webkit-scrollbar{display:none}
 #add-input{flex:1;min-width:0;font-size:14px;font-family:var(--ff);font-weight:500;padding:10px 14px;border-radius:13px;border:1.5px solid var(--border-hi);background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
 #add-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
 #add-input::placeholder{color:var(--text3)}
-#btn-row{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-#btn-row::-webkit-scrollbar{display:none}
 .btn{font-size:11px;font-family:var(--ff);font-weight:700;padding:8px 13px;border-radius:12px;border:none;cursor:pointer;white-space:nowrap;letter-spacing:.03em;transition:opacity .15s,transform .1s;flex-shrink:0;-webkit-appearance:none}
 .btn:active{transform:scale(.92)}
 .btn-add{background:var(--accent);color:#000}
 .btn-blank{background:var(--bg3);color:var(--accent);border:1.5px solid var(--border-hi)}
 .btn-root{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
 .btn-icon{background:var(--bg3);color:var(--text2);border:1px solid var(--border);font-size:15px;padding:8px 11px}
+.btn-subtle{opacity:.45;font-size:13px;padding:6px 9px!important}
 
 /* THEME SWITCHER */
 #theme-bar{display:flex;gap:5px;padding:7px 14px;background:var(--bg1);border-bottom:.5px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative;z-index:5}
@@ -108,7 +146,7 @@ body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 
 .tab.am{color:var(--accent);border-bottom-color:var(--accent)}
 .tab.ad{color:var(--accent2);border-bottom-color:var(--accent2)}
 
-#view-map{flex:1;overflow-y:auto;padding:12px 10px;-webkit-overflow-scrolling:touch;background:var(--bg1)}
+#view-map{flex:1;overflow-y:auto;padding:12px 10px 8px;-webkit-overflow-scrolling:touch;background:var(--bg1)}
 #view-done{display:none;flex-direction:column;padding:12px 10px;gap:8px;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg1)}
 #statusbar{font-size:10px;color:var(--text3);padding:5px 14px 8px;background:var(--bg1);border-top:.5px solid var(--border);min-height:28px;letter-spacing:.03em}
 
@@ -151,7 +189,8 @@ body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 
 #modal-titlerow{display:flex;align-items:center;gap:8px}
 #modal-name{font-size:18px;font-weight:700;font-family:var(--ff);border:none;background:transparent;color:var(--text);width:100%;outline:none;-webkit-appearance:none}
 #modal-name::placeholder{color:var(--text3)}
-#modal-xbtn{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:.5px solid var(--border-hi);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2);font-family:var(--ff);line-height:1}
+#modal-xbtn{width:30px;height:30px;border-radius:50%;background:#16a34a;border:none;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-family:var(--ff);line-height:1;box-shadow:0 0 10px rgba(22,163,74,.4);transition:transform .12s,box-shadow .12s}
+#modal-xbtn:hover{transform:scale(1.1);box-shadow:0 0 16px rgba(22,163,74,.6)}
 #modal-body{padding:14px 16px 36px;display:flex;flex-direction:column;gap:14px}
 .m-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 #swatch-row{display:flex;gap:6px;flex-wrap:wrap}
@@ -212,24 +251,14 @@ body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 
   <div id="header">
     <canvas id="bg-canvas"></canvas>
     <div id="header-title" id="htitle">✨ Mind Map</div>
-    <div id="add-row">
-      <input id="add-input" placeholder="New thought… 💭" maxlength="40" autocomplete="off"/>
-      <button class="btn btn-add" id="btn-child">+ Child</button>
-    </div>
-    <div id="btn-row">
-      <button class="btn btn-blank" id="btn-blank">✦ Blank</button>
-      <button class="btn btn-root"  id="btn-root">🌿 Branch</button>
-      <button class="btn btn-icon"  id="btn-export">💾</button>
-      <input  type="file" id="import-file" accept=".json" style="display:none"/>
-      <button class="btn btn-icon"  id="btn-import">📂</button>
-    </div>
   </div>
 
   <div id="theme-bar">
     <button class="theme-btn active" data-theme="t-litebrite"  style="background:#ff00ff;color:#000">🌈 Lite Brite</button>
     <button class="theme-btn"        data-theme="t-goldenhour" style="color:var(--text2)">🌅 Golden Hour</button>
     <button class="theme-btn"        data-theme="t-deepocean"  style="color:var(--text2)">🌊 Deep Ocean</button>
-    <button class="theme-btn"        data-theme="t-forest"     style="color:var(--text2)">🍄 Enchanted Forest</button>
+    <button class="theme-btn"        data-theme="t-forest"     style="color:var(--text2)">🍄 Forest</button>
+    <button class="theme-btn"        data-theme="t-princess"   style="color:var(--text2)">👑 Princess</button>
   </div>
 
   <div id="tabs">
@@ -248,6 +277,21 @@ body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 
     <div id="done-empty">Nothing done yet ✨<br><span style="font-size:11px;opacity:.5">Mark nodes as done to archive them here</span></div>
   </div>
 
+  <!-- Floating bottom add bar -->
+  <div id="fab-bar">
+    <div id="fab-input-row">
+      <input id="add-input" placeholder="New thought… 💭" maxlength="40" autocomplete="off"/>
+      <button class="btn btn-add" id="btn-child">+ Child</button>
+    </div>
+    <div id="fab-btn-row">
+      <button class="btn btn-blank" id="btn-blank">✦ Blank</button>
+      <button class="btn btn-root"  id="btn-root">🌿 Branch</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-icon btn-subtle" id="btn-export" title="Backup to file">💾</button>
+      <input  type="file" id="import-file" accept=".json" style="display:none"/>
+      <button class="btn btn-icon btn-subtle" id="btn-import" title="Load from file">📂</button>
+    </div>
+  </div>
   <div id="statusbar">Tap to select · Double-tap to edit ✨</div>
 </div>
 
@@ -258,7 +302,7 @@ body.t-forest .node-card:hover{box-shadow:0 0 14px rgba(80,255,50,.1),inset 0 0 
       <div id="modal-colorbar"></div>
       <div id="modal-titlerow">
         <input id="modal-name" placeholder="Name this node… ✨"/>
-        <button id="modal-xbtn">×</button>
+        <button id="modal-xbtn" title="Done">✓</button>
       </div>
     </div>
     <div id="modal-body">
@@ -362,6 +406,20 @@ const THEME_PALETTES = {
     {bg:'rgba(80,240,140,.11)',  border:'#50f08c', text:'#a8f8c6', glow:'rgba(80,240,140,.4)'},
     {bg:'rgba(180,255,0,.1)',    border:'#b4ff00', text:'#d9ff80', glow:'rgba(180,255,0,.35)'},
   ],
+  't-princess': [
+    {bg:'rgba(255,80,180,.13)',  border:'#ff50b4', text:'#ffb8e4', glow:'rgba(255,80,180,.5)'},
+    {bg:'rgba(220,60,255,.12)',  border:'#dc3cff', text:'#eeaaff', glow:'rgba(220,60,255,.45)'},
+    {bg:'rgba(255,140,220,.12)', border:'#ff8cdc', text:'#ffc8ee', glow:'rgba(255,140,220,.4)'},
+    {bg:'rgba(255,60,140,.12)',  border:'#ff3c8c', text:'#ffaacc', glow:'rgba(255,60,140,.45)'},
+    {bg:'rgba(180,40,255,.12)',  border:'#b428ff', text:'#d898ff', glow:'rgba(180,40,255,.45)'},
+    {bg:'rgba(255,100,200,.12)', border:'#ff64c8', text:'#ffbce8', glow:'rgba(255,100,200,.4)'},
+    {bg:'rgba(255,180,240,.1)',  border:'#ffb4f0', text:'#ffdaf8', glow:'rgba(255,180,240,.35)'},
+    {bg:'rgba(240,60,220,.12)',  border:'#f03cdc', text:'#f8aaee', glow:'rgba(240,60,220,.45)'},
+    {bg:'rgba(255,120,180,.12)', border:'#ff78b4', text:'#ffc4da', glow:'rgba(255,120,180,.4)'},
+    {bg:'rgba(200,80,255,.12)',  border:'#c850ff', text:'#e4b0ff', glow:'rgba(200,80,255,.4)'},
+    {bg:'rgba(255,60,200,.12)',  border:'#ff3cc8', text:'#ffaaeb', glow:'rgba(255,60,200,.45)'},
+    {bg:'rgba(255,200,240,.1)',  border:'#ffc8f0', text:'#ffe4f8', glow:'rgba(255,200,240,.35)'},
+  ],
 };
 
 const THEME_META = {
@@ -369,6 +427,7 @@ const THEME_META = {
   't-goldenhour': { title:'🌅 Golden Hour', done1:'🌅', done2:'GOLDEN! ✨', confetti:['#ffc800','#ff6400','#ffaa00','#ff3c00','#ffdc50','#ff8c00','#fff064','#ffb414','#dc3c00','#c86400'] },
   't-deepocean':  { title:'🌊 Deep Ocean', done1:'🌊', done2:'DEEP! ✨', confetti:['#00b4ff','#64dcc8','#0064ff','#00dcdc','#50a0ff','#00a0c8','#00f0c8','#00c8ff','#3cc8b4','#64b4ff'] },
   't-forest':     { title:'🍄 Enchanted Forest', done1:'🍄', done2:'MAGIC! ✨', confetti:['#78ff50','#ffc832','#50dc64','#c8ff00','#3cc850','#ffb400','#64ff78','#dcff50','#28b43c','#ffdc00'] },
+  't-princess':   { title:'👑 Princess Mode', done1:'💖', done2:'SLAY! 👑', confetti:['#ff50b4','#dc3cff','#ff8cdc','#ff3c8c','#b428ff','#ff64c8','#ffb4f0','#f03cdc','#ff78b4','#c850ff'] },
 };
 
 
@@ -577,6 +636,90 @@ function startBgAnimation(theme) {
       bgRaf = requestAnimationFrame(draw);
     }
     draw();
+  } else if (theme === 't-princess') {
+    // Clean: twinkling 4-point stars + floating gems/diamonds + soft pink nebula glow
+    let t = 0;
+    const stars = Array.from({length:28},(_,i)=>({
+      x: (i*137+19) % cw(), y: (i*83+7) % (ch()*.85),
+      phase: Math.random()*Math.PI*2, speed: .02+Math.random()*.025,
+      size: .8+Math.random()*1.8
+    }));
+    const gems = Array.from({length:16},()=>({
+      x: Math.random()*cw(), y: Math.random()*ch(),
+      vy: -(0.12+Math.random()*.18), vx: (Math.random()-.5)*.15,
+      phase: Math.random()*Math.PI*2, speed: .025+Math.random()*.02,
+      size: 3+Math.random()*4,
+      color: ['#ff60c8','#cc40ff','#ff90e0','#e060ff','#ffaaee'][Math.floor(Math.random()*5)],
+      rot: Math.random()*Math.PI
+    }));
+
+    function drawDiamond(x, y, s, rot, col, alpha) {
+      ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.globalAlpha=alpha;
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      ctx.moveTo(0,-s); ctx.lineTo(s*.6,0); ctx.lineTo(0,s); ctx.lineTo(-s*.6,0);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,.35)';
+      ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(s*.6,0); ctx.lineTo(0,-s*.1); ctx.closePath(); ctx.fill();
+      ctx.restore(); ctx.globalAlpha=1;
+    }
+
+    function draw4Star(x, y, r, col, alpha) {
+      ctx.save(); ctx.globalAlpha=alpha;
+      for(let i=0;i<4;i++){
+        ctx.save(); ctx.translate(x,y); ctx.rotate(i*Math.PI/2);
+        ctx.fillStyle=col;
+        ctx.beginPath();
+        ctx.moveTo(0,-r);
+        ctx.quadraticCurveTo(r*.22,0,0,0);
+        ctx.quadraticCurveTo(-r*.22,0,0,-r);
+        ctx.fill(); ctx.restore();
+      }
+      ctx.restore(); ctx.globalAlpha=1;
+    }
+
+    function draw() {
+      t+=.01; ctx.clearRect(0,0,cw(),ch());
+
+      // Gradient sky — deep purple to midnight
+      const sky = ctx.createLinearGradient(0,0,0,ch());
+      sky.addColorStop(0,'rgba(8,0,16,1)');
+      sky.addColorStop(.5,'rgba(18,0,28,1)');
+      sky.addColorStop(1,'rgba(12,0,14,1)');
+      ctx.fillStyle=sky; ctx.fillRect(0,0,cw(),ch());
+
+      // Soft nebula glows — 3 radial blobs
+      [
+        [cw()*.2, ch()*.3, 'rgba(200,40,255,.07)', cw()*.4],
+        [cw()*.8, ch()*.5, 'rgba(255,60,200,.08)', cw()*.35],
+        [cw()*.5, ch()*.8, 'rgba(180,20,240,.06)', cw()*.5],
+      ].forEach(([nx,ny,nc,nr])=>{
+        const g=ctx.createRadialGradient(nx,ny,0,nx,ny,nr);
+        g.addColorStop(0,nc); g.addColorStop(1,'transparent');
+        ctx.fillStyle=g; ctx.fillRect(0,0,cw(),ch());
+      });
+
+      // 4-point sparkle stars
+      stars.forEach(s=>{
+        s.phase+=s.speed;
+        const glow=(Math.sin(s.phase)+1)/2;
+        draw4Star(s.x, s.y, s.size*(1+glow*.8), `rgba(255,200,240,${.15+glow*.6})`, 1);
+      });
+
+      // Floating gem diamonds
+      gems.forEach(d=>{
+        d.y+=d.vy; d.x+=d.vx; d.phase+=d.speed; d.rot+=.008;
+        const glow=(Math.sin(d.phase)+1)/2;
+        if(d.y<-20){d.y=ch()+10; d.x=Math.random()*cw();}
+        ctx.save();
+        ctx.shadowColor=d.color; ctx.shadowBlur=8+glow*10;
+        drawDiamond(d.x, d.y, d.size*(0.7+glow*.4), d.rot, d.color, .4+glow*.45);
+        ctx.shadowBlur=0; ctx.restore();
+      });
+
+      bgRaf = requestAnimationFrame(draw);
+    }
+    draw();
   }
 }
 document.querySelectorAll('.theme-btn').forEach(b => {
@@ -644,8 +787,20 @@ window.addEventListener('resize', () => {
 function mk(label, parentId, ci) {
   return { id:idC++, label, parentId:parentId??null, colorIdx:ci??0, descHtml:'', link:'', imgUrl:'', starred:false, shape:'default', collapsed:false, order:Date.now() };
 }
-function getChildren(id)    { return nodes.filter(n => n.parentId === id).sort((a,b) => a.order-b.order) }
-function getRoots()         { return nodes.filter(n => n.parentId === null).sort((a,b) => a.order-b.order) }
+function getChildren(id) {
+  return nodes.filter(n => n.parentId === id).sort((a,b) => {
+    if (a.starred && !b.starred) return -1;
+    if (!a.starred && b.starred) return 1;
+    return a.order - b.order;
+  });
+}
+function getRoots() {
+  return nodes.filter(n => n.parentId === null).sort((a,b) => {
+    if (a.starred && !b.starred) return -1;
+    if (!a.starred && b.starred) return 1;
+    return a.order - b.order;
+  });
+}
 function getDescendants(id) { const ids=[id]; getChildren(id).forEach(c=>ids.push(...getDescendants(c.id))); return ids }
 function getColor(n)        { const pal=THEME_PALETTES[currentTheme]; return pal[n.colorIdx % pal.length] }
 function childCI(parentId)  {
@@ -895,6 +1050,30 @@ function startMapAnimation(theme) {
       mapRaf = requestAnimationFrame(draw);
     }
     draw();
+  } else if (theme === 't-princess') {
+    // Tiny floating hearts + sparkle trails drifting upward
+    const hearts = Array.from({length:18},()=>({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+      vy:-(0.15+Math.random()*0.25), vx:Math.random()*0.2-0.1,
+      size:3+Math.random()*4, life:Math.random(), decay:0.003+Math.random()*0.003,
+      color:['#ff60c8','#dc3cff','#ff8cdc','#ffb4f0'][Math.floor(Math.random()*4)]
+    }));
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      hearts.forEach(h=>{
+        h.x+=h.vx; h.y+=h.vy; h.life-=h.decay;
+        if(h.life<=0||h.y<-20){h.y=canvas.height+10;h.x=Math.random()*canvas.width;h.life=0.4+Math.random()*0.6;}
+        ctx.save(); ctx.translate(h.x,h.y); ctx.scale(h.size/5,h.size/5);
+        ctx.globalAlpha=h.life*0.4;
+        ctx.fillStyle=h.color;
+        ctx.beginPath();
+        ctx.moveTo(0,1); ctx.bezierCurveTo(-5,-2,-8,3,-5,6); ctx.bezierCurveTo(-2,9,0,10,0,10);
+        ctx.bezierCurveTo(0,10,2,9,5,6); ctx.bezierCurveTo(8,3,5,-2,0,1);
+        ctx.fill(); ctx.restore(); ctx.globalAlpha=1;
+      });
+      mapRaf = requestAnimationFrame(draw);
+    }
+    draw();
   }
 }
 
@@ -1057,7 +1236,6 @@ function buildRows(parentId, depth) {
     return rows;
   });
 }
-let lastTap=0, lastTapId=null;
 function handleTap(id) {
   const now=Date.now();
   if (now-lastTap<360 && lastTapId===id) { openModal(id); lastTap=0; lastTapId=null }
@@ -1071,7 +1249,9 @@ function render() {
     return;
   }
   getRoots().forEach(root => {
-    const rows=[{node:root,depth:0},...buildRows(root.id,1)];
+    // Root itself always shows; only expand children if not collapsed
+    const rows=[{node:root,depth:0}];
+    if (!root.collapsed) rows.push(...buildRows(root.id,1));
     const siblings={};
     rows.forEach(({node:n}) => {
       const key=String(n.parentId);
