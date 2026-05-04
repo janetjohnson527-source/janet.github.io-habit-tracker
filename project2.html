@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>✨ Mind Map</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -118,11 +118,11 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 @keyframes shimmer{to{background-position:200% center}}
 
 /* Floating bottom add bar */
-#fab-bar{position:sticky;bottom:0;background:color-mix(in srgb,var(--bg1) 96%,transparent);border-top:1.5px solid var(--border-hi);padding:10px 12px;z-index:10;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
+#fab-bar{position:sticky;bottom:0;background:color-mix(in srgb,var(--bg1) 96%,transparent);border-top:1.5px solid var(--border-hi);padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:10;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
 #fab-input-row{display:flex;gap:7px;align-items:center;margin-bottom:7px}
 #fab-btn-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #fab-btn-row::-webkit-scrollbar{display:none}
-#add-input{flex:1;min-width:0;font-size:14px;font-family:var(--ff);font-weight:500;padding:10px 14px;border-radius:13px;border:1.5px solid var(--border-hi);background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
+#add-input{flex:1;min-width:0;font-size:16px;font-family:var(--ff);font-weight:500;padding:10px 14px;border-radius:13px;border:1.5px solid var(--border-hi);background:var(--bg2);color:var(--text);outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
 #add-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
 #add-input::placeholder{color:var(--text3)}
 .btn{font-size:11px;font-family:var(--ff);font-weight:700;padding:8px 13px;border-radius:12px;border:none;cursor:pointer;white-space:nowrap;letter-spacing:.03em;transition:opacity .15s,transform .1s;flex-shrink:0;-webkit-appearance:none}
@@ -136,7 +136,7 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 /* THEME SWITCHER */
 #theme-bar{display:flex;gap:5px;padding:7px 14px;background:var(--bg1);border-bottom:.5px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative;z-index:5}
 #theme-bar::-webkit-scrollbar{display:none}
-.theme-btn{font-size:10px;font-family:var(--ff);font-weight:700;padding:5px 11px;border-radius:20px;border:1.5px solid var(--border-hi);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;letter-spacing:.03em}
+.theme-btn{font-size:10px;font-family:var(--ff);font-weight:700;padding:8px 13px;border-radius:20px;border:1.5px solid var(--border-hi);background:var(--bg2);color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;letter-spacing:.03em;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .theme-btn:hover{color:var(--text)}
 .theme-btn.active{color:var(--bg0);border-color:transparent}
 
@@ -203,12 +203,15 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
   display:flex;align-items:center;gap:4px;flex-wrap:wrap;
 }
 #drawer-close{
-  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
   background:#16a34a;border:none;cursor:pointer;
-  font-size:14px;font-weight:800;color:#fff;
+  font-size:16px;font-weight:800;color:#fff;
   display:flex;align-items:center;justify-content:center;
   font-family:var(--ff);box-shadow:0 0 8px rgba(22,163,74,.4);
   transition:transform .12s;
+  /* larger invisible tap area on mobile */
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
 }
 #drawer-close:hover{transform:scale(1.1)}
 #drawer-name-row{
@@ -234,7 +237,7 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 .drawer-star{font-size:22px;cursor:pointer;background:none;border:none;line-height:1;transition:transform .15s,filter .15s;filter:grayscale(1) opacity(.35)}
 .drawer-star.on{filter:none;transform:scale(1.15)}
 #drawer-desc{
-  min-height:56px;font-size:13px;font-family:var(--ff);
+  min-height:56px;font-size:16px;font-family:var(--ff);
   line-height:1.6;color:var(--text);
   padding:9px 11px;border-radius:10px;
   border:1px solid var(--border-hi);background:var(--bg3);
@@ -247,14 +250,14 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 .d-fmt-b{font-size:10px;font-weight:600;padding:4px 8px;border-radius:7px;border:1px solid var(--border-hi);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--ff)}
 .d-fmt-b:hover{border-color:var(--accent);color:var(--accent)}
 .d-input{
-  font-size:12px;font-family:var(--ff);padding:8px 10px;border-radius:9px;
+  font-size:16px;font-family:var(--ff);padding:8px 10px;border-radius:9px;
   border:1px solid var(--border-hi);background:var(--bg3);color:var(--text);
   width:100%;outline:none;-webkit-appearance:none;
 }
 .d-input:focus{border-color:var(--accent2)}
 .d-input::placeholder{color:var(--text3)}
 #drawer-link-row{display:flex;gap:6px}
-#drawer-link{flex:1;font-size:12px;font-family:var(--ff);padding:8px 10px;border-radius:9px;border:1px solid var(--border-hi);background:var(--bg3);color:var(--text);outline:none;-webkit-appearance:none}
+#drawer-link{flex:1;font-size:16px;font-family:var(--ff);padding:8px 10px;border-radius:9px;border:1px solid var(--border-hi);background:var(--bg3);color:var(--text);outline:none;-webkit-appearance:none}
 #drawer-link:focus{border-color:var(--accent2)}
 #drawer-link::placeholder{color:var(--text3)}
 #drawer-link-open{font-size:11px;font-weight:700;font-family:var(--ff);padding:8px 11px;border-radius:9px;background:var(--accent2);color:#000;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0}
