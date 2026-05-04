@@ -33,7 +33,6 @@ body.t-princess   { --bg0:#0d0008; --bg1:#140010; --bg2:#1e0018; --bg3:#280020; 
 /* THEME-SPECIFIC VISUAL DIFFERENTIATORS */
 
 /* ── Shared map canvas ── */
-#map-canvas{position:absolute;inset:0;pointer-events:none;z-index:0;width:100%;height:100%;display:block}
 #view-map{position:relative}
 
 /* ── PER-THEME NODE PERSONALITIES ── */
@@ -313,7 +312,6 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
   </div>
 
   <div id="view-map">
-    <canvas id="map-canvas"></canvas>
     <div id="drawer">
       <div id="drawer-colorbar"></div>
       <div id="drawer-top">
@@ -498,7 +496,6 @@ function applyTheme(t) {
   rebuildSwatches();
   if (window._rebuildDrawerSwatches) window._rebuildDrawerSwatches();
   startBgAnimation(t);
-  startMapAnimation(t);
 }
 
 // ── BACKGROUND CANVAS ANIMATION ──
@@ -795,7 +792,7 @@ function sizeBgCanvas() {
 }
 window.addEventListener('resize', () => {
   sizeBgCanvas();
-  if (currentTheme) { startBgAnimation(currentTheme); startMapAnimation(currentTheme); }
+  if (currentTheme) { startBgAnimation(currentTheme); }
 });
 
 // ── Helpers ──
@@ -933,155 +930,6 @@ function toggleCollapse(id) {
   const n = nodes.find(x => x.id===id); if (!n) return;
   n.collapsed = !n.collapsed; save(); render();
 }
-
-// ── MAP CANVAS ANIMATION ──
-let mapRaf = null;
-function startMapAnimation(theme) {
-  if (mapRaf) { cancelAnimationFrame(mapRaf); mapRaf = null; }
-  const canvas = document.getElementById('map-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const view = document.getElementById('view-map');
-  function resize() { canvas.width=view.clientWidth; canvas.height=view.clientHeight; }
-  resize();
-  const W = ()=>canvas.width, H = ()=>canvas.height;
-
-  if (theme === 't-litebrite') {
-    // Match banner: pulsing neon dots scattered across the map
-    const COLS=['#ff2020','#ff6400','#ffc800','#50ff00','#00c8ff','#8c00ff','#ff00ff','#ff0078','#00ffc8','#fff000'];
-    const dots = Array.from({length:40},()=>({
-      x:Math.random()*W(), y:Math.random()*H(),
-      color:COLS[Math.floor(Math.random()*COLS.length)],
-      phase:Math.random()*Math.PI*2, speed:0.01+Math.random()*0.016, r:1.2+Math.random()*1.6
-    }));
-    function draw() {
-      ctx.clearRect(0,0,W(),H());
-      dots.forEach(d=>{
-        d.phase+=d.speed;
-        const g=(Math.sin(d.phase)+1)/2;
-        ctx.beginPath(); ctx.arc(d.x,d.y,d.r+g*1.2,0,Math.PI*2);
-        ctx.fillStyle=d.color; ctx.globalAlpha=0.1+g*0.22;
-        ctx.shadowColor=d.color; ctx.shadowBlur=4+g*8;
-        ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;
-      });
-      mapRaf=requestAnimationFrame(draw);
-    }
-    draw();
-
-  } else if (theme === 't-goldenhour') {
-    // Match banner: sun rays radiating from bottom-center, drifting heat haze
-    const rays = Array.from({length:10},(_,i)=>({
-      angle:-Math.PI*0.8 + (i/9)*Math.PI*1.6,
-      phase:Math.random()*Math.PI*2, speed:0.005+Math.random()*0.004,
-      len:0.4+Math.random()*0.4, color:Math.random()>0.5?'#ff8c00':'#ffc800'
-    }));
-    function draw() {
-      ctx.clearRect(0,0,W(),H());
-      const ox=W()/2, oy=H()*1.1;
-      rays.forEach(r=>{
-        r.phase+=r.speed;
-        const pulse=(Math.sin(r.phase)+1)/2;
-        const len=(r.len+pulse*0.15)*H();
-        const grd=ctx.createLinearGradient(ox,oy,ox+Math.cos(r.angle)*len,oy+Math.sin(r.angle)*len);
-        grd.addColorStop(0,r.color+'18'); grd.addColorStop(1,r.color+'00');
-        ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(ox+Math.cos(r.angle)*len,oy+Math.sin(r.angle)*len);
-        ctx.strokeStyle=grd; ctx.lineWidth=6+pulse*8; ctx.stroke();
-      });
-      mapRaf=requestAnimationFrame(draw);
-    }
-    draw();
-
-  } else if (theme === 't-deepocean') {
-    // Match banner: expanding caustic rings + rising bubbles
-    const rings = Array.from({length:8},()=>({
-      x:Math.random()*W(), y:Math.random()*H(),
-      r:0, maxR:60+Math.random()*100, speed:0.25+Math.random()*0.3,
-      color:Math.random()>0.5?'#00b4ff':'#64dcc8', opacity:0.05+Math.random()*0.06
-    }));
-    const bubbles = Array.from({length:14},()=>({
-      x:Math.random()*W(), y:H()+Math.random()*H(),
-      r:1+Math.random()*2.5, speed:0.2+Math.random()*0.3,
-      color:['#00b4ff','#64dcc8','#00dcdc'][Math.floor(Math.random()*3)]
-    }));
-    function draw() {
-      ctx.clearRect(0,0,W(),H());
-      rings.forEach(rng=>{
-        rng.r+=rng.speed;
-        if(rng.r>rng.maxR){rng.r=0;rng.x=Math.random()*W();rng.y=Math.random()*H();}
-        const fade=1-rng.r/rng.maxR;
-        ctx.beginPath(); ctx.arc(rng.x,rng.y,rng.r,0,Math.PI*2);
-        ctx.strokeStyle=rng.color+Math.round(fade*rng.opacity*255).toString(16).padStart(2,'0');
-        ctx.lineWidth=1.5*fade; ctx.stroke();
-      });
-      bubbles.forEach(b=>{
-        b.y-=b.speed; b.x+=Math.sin(b.y/40)*0.2;
-        if(b.y<-10){b.y=H()+10;b.x=Math.random()*W();}
-        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-        ctx.strokeStyle=b.color; ctx.globalAlpha=0.2; ctx.lineWidth=0.8; ctx.stroke(); ctx.globalAlpha=1;
-      });
-      mapRaf=requestAnimationFrame(draw);
-    }
-    draw();
-
-  } else if (theme === 't-forest') {
-    // Match banner: fireflies orbiting in lazy ellipses
-    const flies = Array.from({length:20},()=>({
-      cx:Math.random()*W(), cy:Math.random()*H(),
-      r:15+Math.random()*50, angle:Math.random()*Math.PI*2,
-      speed:0.006+Math.random()*0.009,
-      phase:Math.random()*Math.PI*2, pSpeed:0.02+Math.random()*0.02,
-      color:Math.random()>0.4?'#78ff50':'#ffc832'
-    }));
-    function draw() {
-      ctx.clearRect(0,0,W(),H());
-      flies.forEach(f=>{
-        f.angle+=f.speed; f.phase+=f.pSpeed;
-        const glow=(Math.sin(f.phase)+1)/2;
-        const x=f.cx+Math.cos(f.angle)*f.r;
-        const y=f.cy+Math.sin(f.angle)*f.r*0.5;
-        ctx.beginPath(); ctx.arc(x,y,1+glow*1.5,0,Math.PI*2);
-        ctx.fillStyle=f.color; ctx.globalAlpha=0.1+glow*0.45;
-        ctx.shadowColor=f.color; ctx.shadowBlur=5+glow*10;
-        ctx.fill(); ctx.shadowBlur=0; ctx.globalAlpha=1;
-      });
-      mapRaf=requestAnimationFrame(draw);
-    }
-    draw();
-
-  } else if (theme === 't-princess') {
-    // Match banner: floating gem diamonds + 4-point sparkle stars drifting up
-    const gems = Array.from({length:16},()=>({
-      x:Math.random()*W(), y:Math.random()*H(),
-      vy:-(0.1+Math.random()*0.2), vx:(Math.random()-.5)*0.15,
-      size:2.5+Math.random()*3.5, rot:Math.random()*Math.PI,
-      phase:Math.random()*Math.PI*2, speed:0.02+Math.random()*0.02,
-      color:['#ff60c8','#cc40ff','#ff90e0','#e060ff','#ffaaee'][Math.floor(Math.random()*5)]
-    }));
-    function drawDiamond(x,y,s,rot,col,alpha){
-      ctx.save(); ctx.translate(x,y); ctx.rotate(rot); ctx.globalAlpha=alpha;
-      ctx.fillStyle=col;
-      ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(s*.6,0); ctx.lineTo(0,s); ctx.lineTo(-s*.6,0); ctx.closePath(); ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,.3)';
-      ctx.beginPath(); ctx.moveTo(0,-s); ctx.lineTo(s*.6,0); ctx.lineTo(0,-s*.15); ctx.closePath(); ctx.fill();
-      ctx.restore(); ctx.globalAlpha=1;
-    }
-    function draw(){
-      ctx.clearRect(0,0,W(),H());
-      gems.forEach(g=>{
-        g.x+=g.vx; g.y+=g.vy; g.rot+=0.007; g.phase+=g.speed;
-        const glow=(Math.sin(g.phase)+1)/2;
-        if(g.y<-20){g.y=H()+10;g.x=Math.random()*W();}
-        ctx.save(); ctx.shadowColor=g.color; ctx.shadowBlur=4+glow*8;
-        drawDiamond(g.x,g.y,g.size*(0.6+glow*.4),g.rot,g.color,0.25+glow*0.35);
-        ctx.shadowBlur=0; ctx.restore();
-      });
-      mapRaf=requestAnimationFrame(draw);
-    }
-    draw();
-  }
-}
-
-
 
 // ── CONFETTI ──
 function launchConfetti() {
@@ -1361,7 +1209,7 @@ function render() {
 
   // Clear all node rows (canvas stays)
   Array.from(map.childNodes).forEach(n => {
-    if (n.id !== 'map-canvas') n.remove();
+    n.remove();
   });
 
   if (!nodes.length) {
@@ -1478,7 +1326,7 @@ applyTheme(currentTheme);
 rebuildSwatches();
 render(); renderDone(); updateDoneCt();
 // Size bg canvas after layout is complete
-requestAnimationFrame(() => { sizeBgCanvas(); startBgAnimation(currentTheme); startMapAnimation(currentTheme); });
+requestAnimationFrame(() => { sizeBgCanvas(); startBgAnimation(currentTheme); });
 </script>
 </body>
 </html>
