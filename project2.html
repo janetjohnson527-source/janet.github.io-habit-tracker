@@ -179,25 +179,37 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 .branch-gap{height:12px}
 
 /* MODAL */
-#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:flex-end;justify-content:center;z-index:1000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain}
+#modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.82);
+  display:none;align-items:flex-start;justify-content:center;
+  z-index:1000;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  overscroll-behavior:contain;
+  padding:0 10px;
+  /* will be repositioned by JS to sit above keyboard */
+}
 #modal-overlay.open{display:flex}
-@media(min-width:600px){#modal-overlay{align-items:center}#modal{border-radius:22px!important;max-height:88vh}}
 #modal{
-  background:var(--bg1);border-radius:22px 22px 0 0;
-  width:100%;max-width:520px;
-  max-height:82dvh;/* leave room so keyboard doesn't push it off screen */
+  background:var(--bg1);
+  border-radius:18px;
+  width:100%;max-width:480px;
+  /* height is flexible — scrolls internally if needed */
+  max-height:70vh;
   overflow-y:auto;
-  border:.5px solid var(--border-hi);border-bottom:none;
-  box-shadow:0 -24px 80px rgba(0,0,0,.8);
+  border:.5px solid var(--border-hi);
+  box-shadow:0 8px 60px rgba(0,0,0,.7);
   -webkit-overflow-scrolling:touch;
   transition:background .4s;
-  /* Prevent scroll chaining to page */
   overscroll-behavior:contain;
+  /* positioned by JS, default near top */
+  margin-top:14px;
+  flex-shrink:0;
 }
 /* Freeze body scroll when modal open */
 body.modal-open{overflow:hidden;position:fixed;width:100%}
 #modal-breadcrumb{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:14px}
-#modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border-hi);margin:10px auto 6px}
+#modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border-hi);margin:10px auto 6px;opacity:.5}
 #modal-header{padding:4px 16px 12px;border-bottom:.5px solid var(--border)}
 #modal-colorbar{height:4px;border-radius:2px;margin-bottom:12px}
 #modal-titlerow{display:flex;align-items:center;gap:8px}
@@ -1187,6 +1199,7 @@ function openModal(id) {
   // Lock body scroll so page doesn't jump
   document.body.classList.add('modal-open');
   document.getElementById('modal-overlay').classList.add('open');
+  positionModal();
   // NO autofocus — let user tap into field they want, prevents keyboard scroll jump
 }
 function closeModal() {
@@ -1204,11 +1217,43 @@ function closeModal() {
   }
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.classList.remove('modal-open');
+  resetModalPosition();
   // Dismiss keyboard by blurring any focused input
   if (document.activeElement) document.activeElement.blur();
   editingId = null;
 }
 document.getElementById('modal-xbtn').addEventListener('click', closeModal);
+
+// ── Keep modal above keyboard on mobile ──
+function positionModal() {
+  const overlay = document.getElementById('modal-overlay');
+  if (!overlay.classList.contains('open')) return;
+  const modal = document.getElementById('modal');
+  const vv = window.visualViewport;
+  if (!vv) return;
+  // Available vertical space = visualViewport height
+  const vvHeight = vv.height;
+  const vvOffsetTop = vv.offsetTop || 0;
+  // Position overlay to match the visible viewport
+  overlay.style.top    = vvOffsetTop + 'px';
+  overlay.style.height = vvHeight + 'px';
+  overlay.style.bottom = 'auto';
+  // Cap modal height to 75% of visible area
+  modal.style.maxHeight = Math.floor(vvHeight * 0.78) + 'px';
+  modal.style.marginTop = Math.max(10, Math.floor(vvHeight * 0.04)) + 'px';
+}
+function resetModalPosition() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.top = '';
+  overlay.style.height = '';
+  overlay.style.bottom = '';
+  document.getElementById('modal').style.maxHeight = '';
+  document.getElementById('modal').style.marginTop = '';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize',  positionModal);
+  window.visualViewport.addEventListener('scroll',  positionModal);
+}
 
 document.getElementById('modal-overlay').addEventListener('mousedown', e => { if(e.target===document.getElementById('modal-overlay')) closeModal() });
 document.getElementById('modal-done').addEventListener('click', () => {
