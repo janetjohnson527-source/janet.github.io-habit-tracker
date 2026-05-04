@@ -179,10 +179,24 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
 .branch-gap{height:12px}
 
 /* MODAL */
-#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:flex-end;justify-content:center;z-index:1000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:flex-end;justify-content:center;z-index:1000;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain}
 #modal-overlay.open{display:flex}
 @media(min-width:600px){#modal-overlay{align-items:center}#modal{border-radius:22px!important;max-height:88vh}}
-#modal{background:var(--bg1);border-radius:22px 22px 0 0;width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;border:.5px solid var(--border-hi);border-bottom:none;box-shadow:0 -24px 80px rgba(0,0,0,.8);-webkit-overflow-scrolling:touch;transition:background .4s}
+#modal{
+  background:var(--bg1);border-radius:22px 22px 0 0;
+  width:100%;max-width:520px;
+  max-height:82dvh;/* leave room so keyboard doesn't push it off screen */
+  overflow-y:auto;
+  border:.5px solid var(--border-hi);border-bottom:none;
+  box-shadow:0 -24px 80px rgba(0,0,0,.8);
+  -webkit-overflow-scrolling:touch;
+  transition:background .4s;
+  /* Prevent scroll chaining to page */
+  overscroll-behavior:contain;
+}
+/* Freeze body scroll when modal open */
+body.modal-open{overflow:hidden;position:fixed;width:100%}
+#modal-breadcrumb{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:14px}
 #modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border-hi);margin:10px auto 6px}
 #modal-header{padding:4px 16px 12px;border-bottom:.5px solid var(--border)}
 #modal-colorbar{height:4px;border-radius:2px;margin-bottom:12px}
@@ -300,6 +314,7 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
     <div id="modal-handle"></div>
     <div id="modal-header">
       <div id="modal-colorbar"></div>
+      <div id="modal-breadcrumb"></div>
       <div id="modal-titlerow">
         <input id="modal-name" placeholder="Name this node… ✨"/>
         <button id="modal-xbtn" title="Done">✓</button>
@@ -1150,8 +1165,29 @@ function openModal(id) {
   syncSwatches(n.colorIdx);
   syncShapeBtns(n.shape);
   document.getElementById('star-btn').classList.toggle('on', !!n.starred);
+
+  // Build breadcrumb: Root → Parent → This node
+  const crumb = document.getElementById('modal-breadcrumb');
+  crumb.innerHTML = '';
+  const path = [];
+  let cur = n;
+  while (cur) { path.unshift(cur); cur = nodes.find(x=>x.id===cur.parentId)||null; }
+  path.forEach((node, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.textContent = '›'; sep.style.opacity = '.4'; crumb.appendChild(sep);
+    }
+    const span = document.createElement('span');
+    span.textContent = node.label.toUpperCase();
+    span.style.color = i === path.length-1 ? getColor(node).border : 'var(--text3)';
+    if (i === path.length-1) span.style.fontWeight = '700';
+    crumb.appendChild(span);
+  });
+
+  // Lock body scroll so page doesn't jump
+  document.body.classList.add('modal-open');
   document.getElementById('modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('modal-name').focus(), 60);
+  // NO autofocus — let user tap into field they want, prevents keyboard scroll jump
 }
 function closeModal() {
   // Final sync of desc in case of paste/format without input event
@@ -1167,6 +1203,9 @@ function closeModal() {
     }
   }
   document.getElementById('modal-overlay').classList.remove('open');
+  document.body.classList.remove('modal-open');
+  // Dismiss keyboard by blurring any focused input
+  if (document.activeElement) document.activeElement.blur();
   editingId = null;
 }
 document.getElementById('modal-xbtn').addEventListener('click', closeModal);
@@ -1175,7 +1214,7 @@ document.getElementById('modal-overlay').addEventListener('mousedown', e => { if
 document.getElementById('modal-done').addEventListener('click', () => {
   if (editingId===null) return;
   const id=editingId;
-  document.getElementById('modal-overlay').classList.remove('open'); editingId=null;
+  document.getElementById('modal-overlay').classList.remove('open'); document.body.classList.remove('modal-open'); if(document.activeElement)document.activeElement.blur(); editingId=null;
   archiveNode(id); save(); render(); renderDone(); updateDoneCt();
   setTimeout(() => switchTab('done'), 800); setStatus('Marked done! ✅');
 });
@@ -1183,7 +1222,7 @@ document.getElementById('modal-del').addEventListener('click', () => {
   if (editingId===null) return;
   if (!confirm('Delete this node and all its children?')) return;
  const id=editingId;
-  document.getElementById('modal-overlay').classList.remove('open'); editingId=null;
+  document.getElementById('modal-overlay').classList.remove('open'); document.body.classList.remove('modal-open'); if(document.activeElement)document.activeElement.blur(); editingId=null;
   const ids=new Set(getDescendants(id));
   nodes=nodes.filter(n=>!ids.has(n.id));
   if (ids.has(selectedId)) selectedId=null;
