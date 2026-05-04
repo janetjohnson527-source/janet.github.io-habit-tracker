@@ -231,7 +231,6 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
   -webkit-overflow-scrolling:touch;
 }
 .d-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
-#drawer-swatch-row{display:flex;gap:5px;flex-wrap:wrap}
 #drawer-shape-row{display:flex;gap:5px;flex-wrap:wrap}
 .drawer-star{font-size:22px;cursor:pointer;background:none;border:none;line-height:1;transition:transform .15s,filter .15s;filter:grayscale(1) opacity(.35)}
 .drawer-star.on{filter:none;transform:scale(1.15)}
@@ -322,7 +321,6 @@ body.t-princess .node-card:hover{box-shadow:0 0 14px rgba(255,80,200,.15)}
         <input id="drawer-name" placeholder="Name this node…"/>
       </div>
       <div id="drawer-body">
-        <div><div class="d-lbl">🎨 Color</div><div id="drawer-swatch-row"></div></div>
         <div><div class="d-lbl">🔷 Shape</div><div id="drawer-shape-row"></div></div>
         <div style="display:flex;align-items:center;gap:10px">
           <button class="drawer-star" id="drawer-star-btn">⭐</button>
@@ -493,9 +491,8 @@ function applyTheme(t) {
       b.style.color = '';
     }
   });
-  rebuildSwatches();
-  if (window._rebuildDrawerSwatches) window._rebuildDrawerSwatches();
   startBgAnimation(t);
+  render(); // re-render nodes in new theme's colors
 }
 
 // ── BACKGROUND CANVAS ANIMATION ──
@@ -763,13 +760,8 @@ document.querySelectorAll('.theme-btn').forEach(b => {
   b.addEventListener('click', () => applyTheme(b.dataset.theme));
 });
 
-// ── Build swatches ──
-function rebuildSwatches() {
-  window._rebuildDrawerSwatches && window._rebuildDrawerSwatches();
-  if (editingNode()) drawerSyncSwatches(editingNode().colorIdx);
-}
+// ── Build swatches ──  (removed — colors now auto-assigned by tree position)
 function editingNode() { return editingId !== null ? nodes.find(x => x.id === editingId) : null; }
-function syncSwatches(ci) { drawerSyncSwatches(ci); }
 
 // ── Shapes ──
 const SHAPES = [
@@ -796,8 +788,8 @@ window.addEventListener('resize', () => {
 });
 
 // ── Helpers ──
-function mk(label, parentId, ci) {
-  return { id:idC++, label, parentId:parentId??null, colorIdx:ci??0, descHtml:'', link:'', imgUrl:'', starred:false, shape:'default', collapsed:false, order:Date.now() };
+function mk(label, parentId) {
+  return { id:idC++, label, parentId:parentId??null, descHtml:'', link:'', imgUrl:'', starred:false, shape:'default', collapsed:false, order:Date.now() };
 }
 function getChildren(id) {
   return nodes.filter(n => n.parentId === id).sort((a,b) => {
@@ -814,17 +806,22 @@ function getRoots() {
   });
 }
 function getDescendants(id) { const ids=[id]; getChildren(id).forEach(c=>ids.push(...getDescendants(c.id))); return ids }
-function getColor(n)        { const pal=THEME_PALETTES[currentTheme]; return pal[n.colorIdx % pal.length] }
-function childCI(parentId)  {
-  const p = nodes.find(n => n.id === parentId);
-  if (!p) return getRoots().length % THEME_PALETTES[currentTheme].length;
-  return p.colorIdx; // always inherit parent color
+function getRootOf(nodeId) {
+  let cur = nodes.find(x => x.id === nodeId);
+  while (cur && cur.parentId !== null) cur = nodes.find(x => x.id === cur.parentId);
+  return cur || null;
+}
+function getColor(n) {
+  const root = getRootOf(n.id);
+  const rootIdx = root ? getRoots().findIndex(r => r.id === root.id) : 0;
+  const pal = THEME_PALETTES[currentTheme];
+  return pal[rootIdx % pal.length];
 }
 function setStatus(m) { document.getElementById('statusbar').textContent = m }
 function updateDoneCt() { document.getElementById('done-ct').textContent = doneItems.length }
 
 // ── Storage ──
-const STORAGE_KEY = 'mindmap_4themes_v3'; // bumped — forces fresh seed, clears orphaned data
+const STORAGE_KEY = 'mindmap_4themes_v4'; // bumped — color picker removed, auto-assigned colors
 function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify({nodes,doneItems,idC})) } catch(e) {} }
 function load() {
   try {
@@ -889,7 +886,7 @@ function addChild() {
 
   const parentId = getDefaultParent();
   const sib = getChildren(parentId);
-  const n = mk(val, parentId, childCI(parentId));
+  const n = mk(val, parentId);
   n.order = sib.length ? Math.max(...sib.map(s=>s.order)) + 1 : 0;
   nodes.push(n); selectedId = n.id;
   save(); render(); document.getElementById('add-input').value=''; document.getElementById('add-input').focus();
@@ -899,7 +896,7 @@ function addBlank() {
 
   const parentId = getDefaultParent();
   const sib = getChildren(parentId);
-  const n = mk('New node', parentId, childCI(parentId));
+  const n = mk('New node', parentId);
   n.order = sib.length ? Math.max(...sib.map(s=>s.order)) + 1 : 0;
   nodes.push(n); selectedId = n.id;
   save(); render(); openModal(n.id);
@@ -908,7 +905,7 @@ function addRoot() {
   const val = document.getElementById('add-input').value.trim() || 'New branch';
 
   const roots = getRoots();
-  const n = mk(val, null, roots.length % THEME_PALETTES[currentTheme].length);
+  const n = mk(val, null);
   n.order = roots.length ? Math.max(...roots.map(r=>r.order)) + 1 : 0;
   nodes.push(n); selectedId = n.id;
   save(); render(); document.getElementById('add-input').value=''; setStatus(`Branch "${val}" created 🌿`);
@@ -1026,14 +1023,12 @@ function openModal(id) {
   const n = nodes.find(x=>x.id===id); if (!n) return;
   editingId = id;
   const c = getColor(n);
-  const pal = THEME_PALETTES[currentTheme];
-  document.getElementById('drawer-colorbar').style.background = `linear-gradient(90deg,${c.border},${pal[(n.colorIdx+4)%pal.length].border})`;
+  document.getElementById('drawer-colorbar').style.background = c.border;
   document.getElementById('drawer-name').value = n.label;
   document.getElementById('drawer-desc').innerHTML = n.descHtml||'';
   document.getElementById('drawer-link').value = n.link||'';
   document.getElementById('drawer-img').value = n.imgUrl||'';
   drawerUpdateImgPrev(n.imgUrl);
-  drawerSyncSwatches(n.colorIdx);
   drawerSyncShapes(n.shape);
   document.getElementById('drawer-star-btn').classList.toggle('on', !!n.starred);
   buildBreadcrumb(n);
@@ -1062,10 +1057,7 @@ function closeModal() {
   render();
 }
 
-// ── Drawer swatches ──
-function drawerSyncSwatches(ci) {
-  document.querySelectorAll('#drawer-swatch-row .swatch').forEach((s,i) => s.classList.toggle('on', i===ci));
-}
+// ── Drawer shapes ──
 function drawerSyncShapes(shapeId) {
   document.querySelectorAll('#drawer-shape-row .shape-btn').forEach(b => b.classList.toggle('on', b.dataset.shape===(shapeId||'default')));
 }
@@ -1074,30 +1066,8 @@ function drawerUpdateImgPrev(url) {
   if (url) { img.src=url; img.style.display='block'; } else img.style.display='none';
 }
 
-// Build drawer swatch + shape rows once
+// Build shape row once
 (function() {
-  const sr = document.getElementById('drawer-swatch-row');
-  THEME_PALETTES[currentTheme]; // will rebuild on theme change via rebuildDrawerSwatches
-  function buildSwatches() {
-    const sr2 = document.getElementById('drawer-swatch-row');
-    sr2.innerHTML = '';
-    THEME_PALETTES[currentTheme].forEach((p,i) => {
-      const s=document.createElement('div'); s.className='swatch';
-      s.style.background=p.border; s.style.boxShadow=`0 0 7px ${p.border}`;
-      s.addEventListener('click', () => {
-        if (editingId===null) return;
-        const n=nodes.find(x=>x.id===editingId); if(!n) return;
-        n.colorIdx=i;
-        const pal=THEME_PALETTES[currentTheme];
-        document.getElementById('drawer-colorbar').style.background=`linear-gradient(90deg,${pal[i].border},${pal[(i+4)%pal.length].border})`;
-        drawerSyncSwatches(i); save(); render();
-      });
-      sr2.appendChild(s);
-    });
-  }
-  buildSwatches();
-  window._rebuildDrawerSwatches = buildSwatches;
-  
   const shapeRow = document.getElementById('drawer-shape-row');
   SHAPES.forEach(sh => {
     const b=document.createElement('button'); b.className='shape-btn'; b.dataset.shape=sh.id; b.textContent=sh.label;
@@ -1182,7 +1152,6 @@ document.getElementById('drawer-del-btn').addEventListener('click', () => {
 
 // Also rebuild drawer swatches when theme changes
 const _origRebuild = window._rebuildDrawerSwatches;
-function setColor(i) {} // stub — handled inside drawer swatch click
 function syncShapeBtns(shapeId) { drawerSyncShapes(shapeId); }
 function updateImgPrev(url) { drawerUpdateImgPrev(url); }
 
@@ -1314,16 +1283,15 @@ function renderDone() {
 // ── Init ──
 const loaded = load();
 if (!loaded) {
-  const r1=mk('Reading',null,1); r1.order=0;  nodes.push(r1);
-  const r2=mk('Work',null,2);    r2.order=10; nodes.push(r2);
-  const r3=mk('Health',null,3);  r3.order=20; nodes.push(r3);
-  [{l:'Audio books',c:1},{l:'Books read',c:1}].forEach(({l,c},i) => { const n=mk(l,r1.id,c); n.order=i*10; nodes.push(n) });
-  const p=mk('Projects',r2.id,2); p.order=0; nodes.push(p);
-  const g=mk('Gym',r3.id,3);      g.order=0; nodes.push(g);
+  const r1=mk('Reading',null); r1.order=0;  nodes.push(r1);
+  const r2=mk('Work',null); r2.order=10; nodes.push(r2);
+  const r3=mk('Health',null); r3.order=20; nodes.push(r3);
+  [{l:'Audio books'},{l:'Books read'}].forEach(({l},i) => { const n=mk(l,r1.id); n.order=i*10; nodes.push(n) });
+  const p=mk('Projects',r2.id); p.order=0; nodes.push(p);
+  const g=mk('Gym',r3.id); g.order=0; nodes.push(g);
   save();
 }
 applyTheme(currentTheme);
-rebuildSwatches();
 render(); renderDone(); updateDoneCt();
 // Size bg canvas after layout is complete
 requestAnimationFrame(() => { sizeBgCanvas(); startBgAnimation(currentTheme); });
