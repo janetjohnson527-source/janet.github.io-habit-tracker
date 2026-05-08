@@ -600,17 +600,7 @@ document.getElementById('open-link-btn').addEventListener('click',()=>{
 
 document.getElementById('modal-done').addEventListener('click',()=>{
   if(editingId===null)return;
-  closeModal();
-  const id=editingId===null?null:editingId; // closeModal sets editingId=null so capture before
-  // re-find by last node
-  const lastAdded=nodes[nodes.length-1];// fallback - actually we need to capture before close
-  // Better: capture before closeModal
-});
-// Fix: capture id before close
-document.getElementById('modal-done').removeEventListener('click',()=>{});
-document.getElementById('modal-done').addEventListener('click',()=>{
-  if(editingId===null)return;
-  const id=editingId;
+  const id=editingId;   // capture BEFORE closeModal nulls it
   closeModal();
   archiveNode(id);save();render();renderDone();updateDoneCt();
   setTimeout(()=>switchTab('done'),800);
