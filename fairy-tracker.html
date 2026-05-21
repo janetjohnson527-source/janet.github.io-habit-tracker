@@ -374,8 +374,8 @@ function selDay(k){
   var dlbl=dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   var ph=pi?'<span class="phase-pill" style="background:'+pi.bg+';color:'+pi.col+';border:0.5px solid '+pi.mid+';">'+pi.label+' &middot; day '+pi.day+'</span>':'';
   var hasData=(log.s&&log.s.length)||(log.t&&log.t.length);
-  var sH=(log.s||[]).map(function(s,i){return '<span class="dc s"><span>'+s+'</span><button class="dc-del" onclick="delFromDay(''+k+'','s','+i+')">&#x2715;</button></span>';}).join('');
-  var tH=(log.t||[]).map(function(t,i){return '<span class="dc t"><span>'+t+'</span><button class="dc-del" onclick="delFromDay(''+k+'','t','+i+')">&#x2715;</button></span>';}).join('');
+  var sH=(log.s||[]).map(function(s,i){return '<span class="dc s"><span>'+s+'</span><button class="dc-del" onclick="delFromDay(\''+k+'\',\'s\','+i+')">&#x2715;</button></span>';}).join('');
+  var tH=(log.t||[]).map(function(t,i){return '<span class="dc t"><span>'+t+'</span><button class="dc-del" onclick="delFromDay(\''+k+'\',\'t\','+i+')">&#x2715;</button></span>';}).join('');
   var twH='';
   if(G.showTwin){var tw=getTwinDate(dt);if(tw){var twk=dkey(tw),twl=G.logs[twk]||{s:[],t:[]},twpi=G.lastPeriod?getPhase(tw):null;
     var twlbl=tw.toLocaleDateString('en-US',{month:'short',day:'numeric'}),twHas=(twl.s&&twl.s.length)||(twl.t&&twl.t.length);
