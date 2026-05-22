@@ -439,23 +439,121 @@ function renderCal(){
     g.appendChild(el);
   }
 }
+function phaseDesc(p){
+  var d={
+    m:{title:'menstrual',body:'Your period. Energy is lower, your body is shedding the uterine lining. Rest, warmth, and iron-rich foods help. Cramping and fatigue are common.'},
+    f:{title:'follicular',body:'Post-period to ovulation. Oestrogen rises, energy and mood lift. A great time for new projects, social plans, and pushing yourself a little harder.'},
+    o:{title:'ovulation',body:'Peak energy and confidence. Your body is releasing an egg — libido is typically highest here. You may feel more communicative and outgoing.'},
+    l:{title:'luteal',body:'Post-ovulation wind-down. Progesterone rises then falls. Energy dips in the second half; PMS symptoms like bloating, cravings, and mood shifts are common.'},
+  };
+  return d[p]||{title:'',body:''};
+}
 function selDay(k){
   G.selDate=k;renderCal();
-  var dt=new Date(k+'T00:00:00'),log=G.logs[k]||{s:[],t:[]},pi=G.lastPeriod?getPhase(dt):null;
+  var dt=new Date(k+'T00:00:00'),pi=G.lastPeriod?getPhase(dt):null;
   var dlbl=dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   var ph=pi?'<span class="phase-pill" style="background:'+pi.bg+';color:'+pi.col+';border:0.5px solid '+pi.mid+';">'+pi.label+' &middot; day '+pi.day+'</span>':'';
-  var hasData=(log.s&&log.s.length)||(log.t&&log.t.length);
-  var sH=(log.s||[]).map(function(s,i){return '<span class="dc s"><span>'+s+'</span><button class="dc-del" onclick="delFromDay(\''+k+'\',\'s\','+i+')">&#x2715;</button></span>';}).join('');
-  var tH=(log.t||[]).map(function(t,i){return '<span class="dc t"><span>'+t+'</span><button class="dc-del" onclick="delFromDay(\''+k+'\',\'t\','+i+')">&#x2715;</button></span>';}).join('');
   var twH='';
   if(G.showTwin){var tw=getTwinDate(dt);if(tw){var twk=dkey(tw),twl=G.logs[twk]||{s:[],t:[]},twpi=G.lastPeriod?getPhase(tw):null;
     var twlbl=tw.toLocaleDateString('en-US',{month:'short',day:'numeric'}),twHas=(twl.s&&twl.s.length)||(twl.t&&twl.t.length);
     var twPN=twpi?' &middot; '+twpi.label+' day '+twpi.day:'';
     var twC=[].concat((twl.s||[]).map(function(s){return '<span class="tc">'+s+'</span>';}),(twl.t||[]).map(function(t){return '<span class="tc">'+t+'</span>';})).join('');
     twH='<div class="twin-ref"><div class="twin-ref-hd">same day last cycle</div><div class="twin-ref-date">'+twlbl+twPN+'</div><div class="twin-chips">'+(twHas?twC:'<span style="font-size:11px;color:rgba(255,136,0,0.4);font-style:italic;">nothing logged that day</span>')+'</div></div>';}}
-  document.getElementById('dd-wrap').innerHTML='<div class="day-detail"><div class="dd-date">'+dlbl+'</div>'+ph+'<div class="dd-chips">'+(hasData?sH+tH:'<span class="empty-note">nothing logged for this day</span>')+'</div>'+twH+'</div>';
+  document.getElementById('dd-wrap').innerHTML=
+    '<div class="day-detail">'+
+      '<div class="dd-date">'+dlbl+'</div>'+ph+
+      (pi?'<div style="background:'+pi.bg+';border:0.5px solid '+pi.mid+';border-radius:10px;padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">'+
+        '<canvas id="dd-fairy-canvas" width="110" height="110" style="flex-shrink:0;width:55px;height:55px;"></canvas>'+
+        '<div style="flex:1;">'+
+          '<div style="font-size:12px;font-weight:500;color:'+pi.col+';margin-bottom:3px;">'+phaseDesc(pi.p).title+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);line-height:1.5;">'+phaseDesc(pi.p).body+'</div>'+
+        '</div>'+
+      '</div>':'')+
+      '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">symptoms</div>'+
+      '<div id="dd-slist" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:10px;"></div>'+
+      '<div style="display:flex;gap:6px;margin-bottom:12px;">'+
+        '<input id="dd-sinp" type="text" maxlength="40" placeholder="add symptom..." style="flex:1;min-width:0;font-size:14px;font-family:var(--ff);background:var(--bg3);border:0.5px solid #cc6600;color:#ffbb66;border-radius:8px;padding:7px 10px;outline:none;-webkit-appearance:none;">'+
+        '<button onclick="addToDay(\''+k+'\',\'s\')" style="background:#1a0e00;color:#ffbb66;border:0.5px solid #cc6600;font-family:var(--ff);font-size:13px;font-weight:500;padding:0 14px;border-radius:8px;cursor:pointer;min-height:38px;">add</button>'+
+      '</div>'+
+      '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">tips</div>'+
+      '<div id="dd-tlist" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:10px;"></div>'+
+      '<div style="display:flex;gap:6px;margin-bottom:6px;">'+
+        '<input id="dd-tinp" type="text" maxlength="60" placeholder="add tip..." style="flex:1;min-width:0;font-size:14px;font-family:var(--ff);background:var(--bg3);border:0.5px solid #0088cc;color:#66ccff;border-radius:8px;padding:7px 10px;outline:none;-webkit-appearance:none;">'+
+        '<button onclick="addToDay(\''+k+'\',\'t\')" style="background:#001a2a;color:#66ccff;border:0.5px solid #0088cc;font-family:var(--ff);font-size:13px;font-weight:500;padding:0 14px;border-radius:8px;cursor:pointer;min-height:38px;">add</button>'+
+      '</div>'+
+      twH+
+    '</div>';
+  renderDayChips(k);
+  var si=document.getElementById('dd-sinp');if(si)si.onkeydown=function(e){if(e.key==='Enter')addToDay(k,'s');};
+  var ti=document.getElementById('dd-tinp');if(ti)ti.onkeydown=function(e){if(e.key==='Enter')addToDay(k,'t');};
+  if(pi){
+    var dfc=document.getElementById('dd-fairy-canvas');
+    if(dfc){
+      var dpr2=Math.min(window.devicePixelRatio||1,3);
+      dfc.width=Math.round(55*dpr2);dfc.height=Math.round(55*dpr2);
+      var dfx=dfc.getContext('2d');dfx.scale(dpr2,dpr2);
+      drawFairy(dfx,27,34,pi.p,0.58);
+      startCalFairyAnim(dfc,pi.p,dpr2);
+    }
+  }
 }
-function delFromDay(k,type,idx){getLog(k)[type].splice(idx,1);saveG();renderCal();if(G.selDate===k)selDay(k);if(k===dkey(tod()))renderAllLists();}
+function renderDayChips(k){
+  var log=getLog(k);
+  var sl=document.getElementById('dd-slist');
+  var tl=document.getElementById('dd-tlist');
+  if(sl){
+    sl.innerHTML='';
+    if(!(log.s&&log.s.length)){sl.innerHTML='<span style="font-size:11px;color:var(--faint);font-style:italic;">nothing logged</span>';}
+    else{(log.s||[]).forEach(function(v,i){var sp=document.createElement('span');sp.className='dc s';sp.innerHTML='<span>'+v+'</span><button class="dc-del" title="remove">&#x2715;</button>';(function(idx){sp.querySelector('.dc-del').onclick=function(){delFromDay(k,'s',idx);};})(i);sl.appendChild(sp);});}
+  }
+  if(tl){
+    tl.innerHTML='';
+    if(!(log.t&&log.t.length)){tl.innerHTML='<span style="font-size:11px;color:var(--faint);font-style:italic;">nothing logged</span>';}
+    else{(log.t||[]).forEach(function(v,i){var sp=document.createElement('span');sp.className='dc t';sp.innerHTML='<span>'+v+'</span><button class="dc-del" title="remove">&#x2715;</button>';(function(idx){sp.querySelector('.dc-del').onclick=function(){delFromDay(k,'t',idx);};})(i);tl.appendChild(sp);});}
+  }
+}
+var _calFairyAnim=null;
+function startCalFairyAnim(canvas,phase,dpr){
+  if(_calFairyAnim)cancelAnimationFrame(_calFairyAnim);
+  var W=55,H=55;
+  var sparks=[];
+  var f=FC[phase]||FC.m;
+  for(var i=0;i<14;i++){
+    sparks.push({x:Math.random()*W,y:Math.random()*H,sz:Math.random()*1.8+0.4,a:Math.random(),spd:Math.random()*0.018+0.006,col:i%4===0?'#ffffff':f.spk,dx:(Math.random()-0.5)*0.3,dy:(Math.random()-0.7)*0.2});
+  }
+  var t=0;
+  function frame(){
+    if(!canvas.isConnected){_calFairyAnim=null;return;}
+    var ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,W,H);
+    t+=0.04;
+    var bob=Math.sin(t)*2.5;
+    // sparkles
+    for(var i=0;i<sparks.length;i++){
+      var s=sparks[i];s.a+=s.spd;if(s.a>=1){s.a=0;s.x=Math.random()*W;s.y=Math.random()*H;}
+      var fade=s.a<0.5?s.a*2:(1-s.a)*2;
+      ctx.save();ctx.globalAlpha=fade*0.85;ctx.strokeStyle=s.col;ctx.lineWidth=0.8;
+      var r=s.sz;
+      ctx.beginPath();ctx.moveTo(s.x-r,s.y);ctx.lineTo(s.x+r,s.y);ctx.moveTo(s.x,s.y-r);ctx.lineTo(s.x,s.y+r);
+      ctx.moveTo(s.x-r*.7,s.y-r*.7);ctx.lineTo(s.x+r*.7,s.y+r*.7);ctx.moveTo(s.x+r*.7,s.y-r*.7);ctx.lineTo(s.x-r*.7,s.y+r*.7);
+      ctx.stroke();s.x+=s.dx;s.y+=s.dy;if(s.x<0||s.x>W)s.dx*=-1;if(s.y<0||s.y>H)s.dy*=-1;
+      ctx.restore();
+    }
+    // fairy with bob
+    drawFairy(ctx,27,34+bob,phase,0.58);
+    _calFairyAnim=requestAnimationFrame(frame);
+  }
+  _calFairyAnim=requestAnimationFrame(frame);
+}
+function addToDay(k,type){
+  var inp=document.getElementById(type==='s'?'dd-sinp':'dd-tinp');
+  if(!inp)return;
+  var val=inp.value.trim();if(!val)return;
+  getLog(k)[type].push(val);saveG();inp.value='';
+  renderDayChips(k);renderCal();
+  if(k===dkey(tod()))renderAllLists();
+}
+function delFromDay(k,type,idx){getLog(k)[type].splice(idx,1);saveG();renderCal();if(G.selDate===k)renderDayChips(k);if(k===dkey(tod()))renderAllLists();}
 document.getElementById('prevM').onclick=function(){G.calM--;if(G.calM<0){G.calM=11;G.calY--;}renderCal();};
 document.getElementById('nextM').onclick=function(){G.calM++;if(G.calM>11){G.calM=0;G.calY++;}renderCal();};
 document.getElementById('save-btn').onclick=function(){
