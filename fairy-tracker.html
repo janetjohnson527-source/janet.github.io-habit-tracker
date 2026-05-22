@@ -201,7 +201,7 @@ html,body{height:100%;background:#000000;}
   <div class="card">
     <div class="sec-hd"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg> latest period 🩸</div>
     <div class="set-row"><span class="set-lbl">last period start</span><input type="date" id="s-date"></div>
-    <div class="set-row"><span class="set-lbl">cycle length</span><input type="number" id="s-cyc" min="21" max="45" value="28"></div>
+    <div class="set-row"><span class="set-lbl">cycle length <span style="font-size:10px;color:var(--faint);">(auto-updates)</span></span><input type="number" id="s-cyc" min="21" max="45" value="28"></div>
     <div class="set-row"><span class="set-lbl">period duration</span><input type="number" id="s-per" min="2" max="10" value="5"></div>
     <div class="set-note">Update "last period start" any time your cycle shifts &#8212; all phase colours, day counts, and predictions recalculate instantly.</div>
     <button class="save-btn" id="save-btn">save changes</button>
@@ -557,11 +557,26 @@ function delFromDay(k,type,idx){getLog(k)[type].splice(idx,1);saveG();renderCal(
 document.getElementById('prevM').onclick=function(){G.calM--;if(G.calM<0){G.calM=11;G.calY--;}renderCal();};
 document.getElementById('nextM').onclick=function(){G.calM++;if(G.calM>11){G.calM=0;G.calY++;}renderCal();};
 document.getElementById('save-btn').onclick=function(){
-  var dv=document.getElementById('s-date').value;if(dv)G.lastPeriod=new Date(dv+'T00:00:00');
+  var dv=document.getElementById('s-date').value;
+  var toastMsg='saved! calendar updated.';
+  if(dv){
+    var newDate=new Date(dv+'T00:00:00');
+    // auto-calc cycle length if we already have a previous period date
+    if(G.lastPeriod){
+      var prevDate=new Date(G.lastPeriod);prevDate.setHours(0,0,0,0);newDate.setHours(0,0,0,0);
+      var diff=Math.round((newDate-prevDate)/86400000);
+      if(diff>=21&&diff<=45){
+        G.cycleLen=diff;
+        document.getElementById('s-cyc').value=diff;
+        toastMsg='saved! cycle length updated to '+diff+' days.';
+      }
+    }
+    G.lastPeriod=newDate;
+  }
   G.cycleLen=Math.max(21,Math.min(45,parseInt(document.getElementById('s-cyc').value)||28));
   G.periodLen=Math.max(2,Math.min(10,parseInt(document.getElementById('s-per').value)||5));
   saveG();drawRing();updStats();renderCal();initSpk();if(G.selDate)selDay(G.selDate);
-  var t=document.getElementById('toast');t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);
+  var t=document.getElementById('toast');t.textContent=toastMsg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');t.textContent='saved! calendar updated.';},3000);
 };
 function goTab(name){
   var names=['today','calendar','log','settings'];
@@ -580,10 +595,21 @@ function boot(){
   initCanvases();initSpk();drawRing();updStats();renderCal();renderAllLists();animSpk();
   var ptb=document.getElementById('period-today-btn');
   if(ptb){ptb.onclick=function(){
-    G.lastPeriod=tod();
+    var today=tod();
+    var toastMsg='cycle reset to today!';
+    if(G.lastPeriod){
+      var prev=new Date(G.lastPeriod);prev.setHours(0,0,0,0);today.setHours(0,0,0,0);
+      var diff=Math.round((today-prev)/86400000);
+      if(diff>=21&&diff<=45){
+        G.cycleLen=diff;
+        var cyc=document.getElementById('s-cyc');if(cyc)cyc.value=diff;
+        toastMsg='cycle reset! length updated to '+diff+' days.';
+      }
+    }
+    G.lastPeriod=today;
     saveG();drawRing();updStats();renderCal();initSpk();
     var t=document.getElementById('toast');
-    if(t){t.textContent='cycle reset to today!';t.classList.add('show');setTimeout(function(){t.classList.remove('show');t.textContent='saved! calendar updated.';},2500);}
+    if(t){t.textContent=toastMsg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');t.textContent='saved! calendar updated.';},3000);}
   };}
 }
 boot();
