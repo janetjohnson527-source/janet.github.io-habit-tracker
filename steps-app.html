@@ -295,7 +295,7 @@
 <script>
 const themes = [
   { name:"Sweetheart", tag:"cute", env:"none", envColor:"#ff9ecb",
-    bg:"linear-gradient(160deg,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff8fb3", blob2:"#ff4f81",
+    bg:"linear-gradient(to bottom,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff8fb3", blob2:"#ff4f81",
     ring:"#ff6f9c", eyebrow:"#e79bb3", pill:"rgba(90,20,40,0.35)",
     svg:`<path class="float-up" d="M14 22 c-2-4-8-4-8 1 0 4 6 7 8 9 2-2 8-5 8-9 0-5-6-5-8-1z" fill="#ff9ecb" transform="translate(0,4) scale(1.1)" style="animation-delay:.3s"/>
       <path class="float-up" d="M84 30 c-2-4-8-4-8 1 0 4 6 7 8 9 2-2 8-5 8-9 0-5-6-5-8-1z" fill="#ff9ecb" transform="scale(0.8)" style="animation-delay:1.2s"/>
@@ -306,7 +306,7 @@ const themes = [
       <path d="M42 52 Q50 58 58 52" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Night Moon", tag:"cute", env:"stars", envColor:"#e3ddff",
-    bg:"linear-gradient(160deg,#0a0e21,#141b3d 55%,#1c2554)", blob1:"#7c8dff", blob2:"#4a5ad6",
+    bg:"linear-gradient(to bottom,#0a0e21,#141b3d 55%,#1c2554)", blob1:"#7c8dff", blob2:"#4a5ad6",
     ring:"#9aa8ff", eyebrow:"#a9b3e8", pill:"rgba(15,20,50,0.4)",
     svg:`<circle cx="50" cy="50" r="40" fill="#f4f2ff"/>
       <circle class="twinkle" cx="34" cy="30" r="4" fill="#e3ddff" opacity="0.7"/><circle class="twinkle" cx="66" cy="66" r="3" fill="#e3ddff" opacity="0.7" style="animation-delay:.6s"/>
@@ -315,7 +315,7 @@ const themes = [
       <path d="M43 63 Q50 68 57 63" stroke="#2a2550" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Bubblegum Bunny", tag:"cute", env:"bubbles", envColor:"#ff9ecb",
-    bg:"linear-gradient(160deg,#2b1420,#4a1f36 55%,#632a49)", blob1:"#ffb3e0", blob2:"#ff7fc0",
+    bg:"linear-gradient(to bottom,#2b1420,#4a1f36 55%,#632a49)", blob1:"#ffb3e0", blob2:"#ff7fc0",
     ring:"#ff8fcb", eyebrow:"#e6a8cf", pill:"rgba(50,15,35,0.4)",
     svg:`<path d="M30 44 C20 16 32 0 40 12 C45 21 45 35 40 46 Z" fill="#fff" stroke="#ffcbe6" stroke-width="1.5"/>
       <path d="M70 44 C80 16 68 0 60 12 C55 21 55 35 60 46 Z" fill="#fff" stroke="#ffcbe6" stroke-width="1.5"/>
@@ -328,7 +328,7 @@ const themes = [
       <path d="M44 71 Q50 76 56 71" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Panda", tag:"cute", env:"dust", envColor:"#e8e8f0",
-    bg:"linear-gradient(160deg,#141418,#1e1e24 55%,#2a2a30)", blob1:"#e8e8f0", blob2:"#c9c9d4",
+    bg:"linear-gradient(to bottom,#141418,#1e1e24 55%,#2a2a30)", blob1:"#e8e8f0", blob2:"#c9c9d4",
     ring:"#e8e8f0", eyebrow:"#c9c9d4", pill:"rgba(20,20,25,0.4)",
     svg:`<circle cx="50" cy="58" r="32" fill="#fdfdfd"/>
       <ellipse cx="22" cy="26" rx="14" ry="14" fill="#2a2a2a"/><ellipse cx="78" cy="26" rx="14" ry="14" fill="#2a2a2a"/>
@@ -339,7 +339,7 @@ const themes = [
       <circle cx="32" cy="66" r="4.4" fill="#ffb3cf" opacity="0.7"/><circle cx="68" cy="66" r="4.4" fill="#ffb3cf" opacity="0.7"/>` },
 
   { name:"Little Devil", tag:"spooky", env:"embers", envColor:"#ff5c3d",
-    bg:"linear-gradient(160deg,#150505,#220808 55%,#2e0a0a)", blob1:"#ff6b4a", blob2:"#ff2d55",
+    bg:"linear-gradient(to bottom,#150505,#220808 55%,#2e0a0a)", blob1:"#ff6b4a", blob2:"#ff2d55",
     ring:"#ff5c3d", eyebrow:"#e8a08a", pill:"rgba(50,10,10,0.4)",
     svg:`<g class="wag">
         <path d="M78 70 Q92 78 86 92" fill="none" stroke="#c62828" stroke-width="4" stroke-linecap="round"/>
@@ -357,7 +357,7 @@ const themes = [
       <path d="M45 66 L47 70 L49 66 Z" fill="#fff"/><path d="M55 66 L53 70 L51 66 Z" fill="#fff"/>` },
 
   { name:"Ghost", tag:"spooky", env:"none", envColor:"#d8d0ff",
-    bg:"linear-gradient(160deg,#14101f,#241c38 55%,#332750)", blob1:"#cfc4ff", blob2:"#9a8ae0",
+    bg:"linear-gradient(to bottom,#14101f,#241c38 55%,#332750)", blob1:"#cfc4ff", blob2:"#9a8ae0",
     ring:"#d8d0ff", eyebrow:"#c9c0e8", pill:"rgba(25,18,45,0.4)",
     svg:`<path class="wave" d="M22 88 C22 40 30 14 50 14 C70 14 78 40 78 88 C74 82 68 92 62 84 C56 92 50 82 44 92 C38 82 30 94 22 88 Z" fill="#f3f0ff" opacity="0.92"/>
       <g class="blink"><ellipse cx="40" cy="48" rx="4" ry="5.5" fill="#2a2440"/><ellipse cx="60" cy="48" rx="4" ry="5.5" fill="#2a2440"/></g>
@@ -365,7 +365,7 @@ const themes = [
       <circle cx="33" cy="56" r="3.5" fill="#ffc2e0" opacity="0.6"/><circle cx="67" cy="56" r="3.5" fill="#ffc2e0" opacity="0.6"/>` },
 
   { name:"Vampire Bat", tag:"spooky", env:"stars", envColor:"#b98aff",
-    bg:"linear-gradient(160deg,#0a0a0c,#1c1c1e 55%,#302f32)", blob1:"#8a8a90", blob2:"#3a3a3e",
+    bg:"linear-gradient(to bottom,#0a0a0c,#1c1c1e 55%,#302f32)", blob1:"#8a8a90", blob2:"#3a3a3e",
     ring:"#b98aff", eyebrow:"#c9a8e8", pill:"rgba(20,10,35,0.4)",
     svg:`<path class="flap-l" d="M32 46 C10 30 2 46 14 54 C4 58 6 72 20 68" fill="#8a4fd6"/>
       <path class="flap-r" d="M68 46 C90 30 98 46 86 54 C96 58 94 72 80 68" fill="#8a4fd6"/>
@@ -376,7 +376,7 @@ const themes = [
       <path d="M44 62 L45 66 L47 62 Z" fill="#fff"/><path d="M56 62 L55 66 L53 62 Z" fill="#fff"/>` },
 
   { name:"Baby Dragon", tag:"spooky", env:"embers", envColor:"#ffb347",
-    bg:"linear-gradient(160deg,#050f0a,#0a1810 55%,#0e2015)", blob1:"#6fd68f", blob2:"#3a8f5c",
+    bg:"linear-gradient(to bottom,#050f0a,#0a1810 55%,#0e2015)", blob1:"#6fd68f", blob2:"#3a8f5c",
     ring:"#6fd68f", eyebrow:"#a3d9b1", pill:"rgba(15,40,25,0.4)",
     svg:`<path class="flap-l" d="M28 44 C6 34 0 48 12 54 C2 60 6 72 20 68" fill="#3a8f5c"/>
       <path class="flap-r" d="M72 44 C94 34 100 48 88 54 C98 60 94 72 80 68" fill="#3a8f5c"/>
@@ -393,7 +393,7 @@ const themes = [
       <path class="twinkle" d="M50 78 Q46 86 50 92 Q54 86 50 78 Z" fill="#ffb347"/>` },
 
   { name:"Night Owl", tag:"spooky", env:"nightsky", envColor:"#ffe98a",
-    bg:"linear-gradient(160deg,#2a2440,#3a325c 55%,#4a4070)", blob1:"#ffe98a", blob2:"#7ec8f0",
+    bg:"linear-gradient(to bottom,#2a2440,#3a325c 55%,#4a4070)", blob1:"#ffe98a", blob2:"#7ec8f0",
     ring:"#ffe98a", eyebrow:"#c9c0e8", pill:"rgba(20,15,35,0.4)",
     svg:`<path class="flap-l" d="M30 46 C8 36 2 50 14 56 C4 62 8 74 22 70" fill="#3a2e52"/>
       <path class="flap-r" d="M70 46 C92 36 98 50 86 56 C96 62 92 74 78 70" fill="#3a2e52"/>
@@ -406,7 +406,7 @@ const themes = [
       <path d="M55 79 L57 88 M60 79 L64 88" stroke="#f0a83d" stroke-width="2.4" stroke-linecap="round"/>` },
 
   { name:"Flying Witch", tag:"spooky", env:"stars", envColor:"#c9a4ff",
-    bg:"linear-gradient(160deg,#4a3a14,#6a5420 55%,#8a6c2c)", blob1:"#e8c96a", blob2:"#3a2a52",
+    bg:"linear-gradient(to bottom,#4a3a14,#6a5420 55%,#8a6c2c)", blob1:"#e8c96a", blob2:"#3a2a52",
     ring:"#8a6fd6", eyebrow:"#c9a8e8", pill:"rgba(25,15,40,0.4)",
     svg:`<line x1="18" y1="86" x2="80" y2="36" stroke="#8a5a34" stroke-width="4" stroke-linecap="round"/>
       <path d="M10 92 L26 84 L18 78 Z" fill="#c9986a"/>
@@ -419,7 +419,7 @@ const themes = [
       <path d="M42 54 Q48 58 54 54" stroke="#3a1c2e" stroke-width="1.8" fill="none" stroke-linecap="round"/>` },
 
   { name:"Biblically Accurate Angel", tag:"spooky", env:"sun", envColor:"#ffe98a",
-    bg:"linear-gradient(160deg,#1a1408,#241c0c 55%,#2e2410)", blob1:"#ffe98a", blob2:"#e8b84b",
+    bg:"linear-gradient(to bottom,#1a1408,#241c0c 55%,#2e2410)", blob1:"#ffe98a", blob2:"#e8b84b",
     ring:"#ffe98a", eyebrow:"#e8d8a0", pill:"rgba(35,28,10,0.4)",
     svg:`<path class="flap-l" d="M28 32 C6 18 0 40 10 50 C0 60 4 78 24 72" fill="#fff" opacity="0.92"/>
       <path class="flap-r" d="M72 32 C94 18 100 40 90 50 C100 60 96 78 76 72" fill="#fff" opacity="0.92"/>
@@ -434,7 +434,7 @@ const themes = [
       <circle cx="30" cy="64" r="4" fill="#ffb3cf" opacity="0.6"/><circle cx="70" cy="64" r="4" fill="#ffb3cf" opacity="0.6"/>` },
 
   { name:"Moth Man", tag:"spooky", env:"dust", envColor:"#ff5c5c",
-    bg:"linear-gradient(160deg,#3a3a3c,#48484a 55%,#565456)", blob1:"#ff2d2d", blob2:"#5a5a5c",
+    bg:"linear-gradient(to bottom,#3a3a3c,#48484a 55%,#565456)", blob1:"#ff2d2d", blob2:"#5a5a5c",
     ring:"#ff5c5c", eyebrow:"#e8b8b8", pill:"rgba(15,20,15,0.4)",
     svg:`<path class="flap-l" d="M26 40 C0 26 -8 46 6 56 C-6 64 2 82 22 76" fill="#2a2a2e"/>
       <path class="flap-r" d="M74 40 C100 26 108 46 94 56 C106 64 98 82 78 76" fill="#2a2a2e"/>
@@ -446,7 +446,7 @@ const themes = [
       <circle cx="30" cy="60" r="4" fill="#7a2a2a" opacity="0.5"/><circle cx="70" cy="60" r="4" fill="#7a2a2a" opacity="0.5"/>` },
 
   { name:"Alien", tag:"spooky", env:"stars", envColor:"#39ff6a",
-    bg:"linear-gradient(160deg,#0a1a0e,#101e12 55%,#152416)", blob1:"#39ff6a", blob2:"#1c5c30",
+    bg:"linear-gradient(to bottom,#0a1a0e,#101e12 55%,#152416)", blob1:"#39ff6a", blob2:"#1c5c30",
     ring:"#39ff6a", eyebrow:"#a8f5b8", pill:"rgba(10,25,15,0.4)",
     svg:`<path d="M50 2 C74 2 90 22 88 46 C86 68 70 84 50 90 C30 84 14 68 12 46 C10 22 26 2 50 2 Z" fill="#39ff6a"/>
       <g class="blink"><ellipse cx="38" cy="46" rx="9" ry="14" fill="#0a1a0e" transform="rotate(-12 38 46)"/><ellipse cx="62" cy="46" rx="9" ry="14" fill="#0a1a0e" transform="rotate(12 62 46)"/></g>
@@ -455,7 +455,7 @@ const themes = [
       <circle cx="27" cy="58" r="3.8" fill="#c9ffd4" opacity="0.55"/><circle cx="73" cy="58" r="3.8" fill="#c9ffd4" opacity="0.55"/>` },
 
   { name:"Unicorn", tag:"girly", env:"dust", envColor:"#d9a4ff",
-    bg:"linear-gradient(160deg,#241a3a,#38295c 55%,#4a3878)", blob1:"#e8d4ff", blob2:"#c9a4ff",
+    bg:"linear-gradient(to bottom,#241a3a,#38295c 55%,#4a3878)", blob1:"#e8d4ff", blob2:"#c9a4ff",
     ring:"#d9a4ff", eyebrow:"#d4c2ec", pill:"rgba(35,25,55,0.4)",
     svg:`<path class="wave" d="M28 30 C14 28 10 42 20 48 C12 54 16 66 28 64 C20 72 26 82 36 76" fill="none" stroke="#c9a4ff" stroke-width="7" stroke-linecap="round"/>
       <path class="wave" d="M28 30 C14 28 10 42 20 48 C12 54 16 66 28 64 C20 72 26 82 36 76" fill="none" stroke="#ff9ecb" stroke-width="2.5" stroke-linecap="round" opacity="0.6" stroke-dasharray="2 7"/>
@@ -473,7 +473,7 @@ const themes = [
       <circle cx="32" cy="54" r="4" fill="#ffb3e0" opacity="0.8"/><circle cx="68" cy="54" r="4" fill="#ffb3e0" opacity="0.8"/>` },
 
   { name:"Ballerina Bow", tag:"girly", env:"confetti", envColor:["#ff8fc2","#ffc2e0","#fff5f8"],
-    bg:"linear-gradient(160deg,#3a1c2a,#5c2d44 55%,#7a3c5a)", blob1:"#ffd6e6", blob2:"#ff8fc2",
+    bg:"linear-gradient(to bottom,#3a1c2a,#5c2d44 55%,#7a3c5a)", blob1:"#ffd6e6", blob2:"#ff8fc2",
     ring:"#ff8fc2", eyebrow:"#f0c9d9", pill:"rgba(60,25,40,0.4)",
     svg:`<g class="bow-wobble">
         <path d="M50 22 L26 6 C18 2 14 16 24 20 L50 22 Z" fill="#ff8fc2" stroke="#e85a9e" stroke-width="1.5"/>
@@ -495,7 +495,7 @@ const themes = [
       <circle class="twinkle" cx="18" cy="40" r="1.8" fill="#ffc2e0"/><circle class="twinkle" cx="82" cy="40" r="1.8" fill="#ffc2e0"/>` },
 
   { name:"Butterfly", tag:"girly", env:"dust", envColor:"#ff9ecb",
-    bg:"linear-gradient(160deg,#0a1c1a,#122a26 55%,#183630)", blob1:"#3a6a5a", blob2:"#245045",
+    bg:"linear-gradient(to bottom,#0a1c1a,#122a26 55%,#183630)", blob1:"#3a6a5a", blob2:"#245045",
     ring:"#ff9ecb", eyebrow:"#e0b8d8", pill:"rgba(35,18,45,0.4)",
     svg:`<path class="flap-l" d="M46 32 C20 12 4 32 14 48 C4 60 16 80 40 66" fill="#ff9ecb"/>
       <path class="flap-r" d="M54 32 C80 12 96 32 86 48 C96 60 84 80 60 66" fill="#ff9ecb"/>
@@ -508,7 +508,7 @@ const themes = [
       <path d="M46 52 Q50 55 54 52" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.8"/>` },
 
   { name:"Strawberry", tag:"food", env:"none", envColor:"#ff6f7f",
-    bg:"linear-gradient(160deg,#160608,#20090c 55%,#2a0c10)", blob1:"#ff9d9d", blob2:"#ff5c6e",
+    bg:"linear-gradient(to bottom,#160608,#20090c 55%,#2a0c10)", blob1:"#ff9d9d", blob2:"#ff5c6e",
     ring:"#ff6f7f", eyebrow:"#f0b3b8", pill:"rgba(60,20,25,0.4)",
     svg:`<g class="jiggle">
         <path d="M50 26 Q42 8 34 16 Q44 20 50 26 Z" fill="#5fb04a"/>
@@ -529,7 +529,7 @@ const themes = [
       <path d="M43 70 Q50 75 57 70" stroke="#5a0f18" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Teddy Bear", tag:"cute", env:"dust", envColor:"#e8c9a0",
-    bg:"linear-gradient(160deg,#160e06,#22160a 55%,#2c1c0e)", blob1:"#c9986a", blob2:"#a97a4a",
+    bg:"linear-gradient(to bottom,#160e06,#22160a 55%,#2c1c0e)", blob1:"#c9986a", blob2:"#a97a4a",
     ring:"#c9986a", eyebrow:"#e0c2a0", pill:"rgba(30,20,10,0.4)",
     svg:`<circle cx="24" cy="24" r="15" fill="#c9986a"/><circle cx="76" cy="24" r="15" fill="#c9986a"/>
       <circle cx="24" cy="24" r="7.5" fill="#a97a4a"/><circle cx="76" cy="24" r="7.5" fill="#a97a4a"/>
@@ -542,7 +542,7 @@ const themes = [
       <circle cx="32" cy="62" r="4.4" fill="#ffb3cf" opacity="0.75"/><circle cx="68" cy="62" r="4.4" fill="#ffb3cf" opacity="0.75"/>` },
 
   { name:"Flying Angel", tag:"cute", env:"stars", envColor:"#ffe98a",
-    bg:"linear-gradient(160deg,#1a1830,#242048 55%,#2e285c)", blob1:"#ffe98a", blob2:"#c9d4ff",
+    bg:"linear-gradient(to bottom,#1a1830,#242048 55%,#2e285c)", blob1:"#ffe98a", blob2:"#c9d4ff",
     ring:"#ffe98a", eyebrow:"#cfd6f0", pill:"rgba(25,25,45,0.4)",
     svg:`<path class="flap-l" d="M28 42 C6 30 0 46 12 54 C2 60 6 74 22 68" fill="#fff" opacity="0.95"/>
       <path class="flap-r" d="M72 42 C94 30 100 46 88 54 C98 60 94 74 78 68" fill="#fff" opacity="0.95"/>
@@ -554,7 +554,7 @@ const themes = [
       <path d="M43 62 Q50 67 57 62" stroke="#3a1c2e" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Donut", tag:"food", env:"confetti", envColor:["#ff9ecf","#5cd6e0","#ffd94d","#7fd67f"],
-    bg:"linear-gradient(160deg,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffcba4", blob2:"#ff9ecf",
+    bg:"linear-gradient(to bottom,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffcba4", blob2:"#ff9ecf",
     ring:"#ff9ecf", eyebrow:"#f0c2a8", pill:"rgba(60,35,20,0.4)",
     svg:`<circle cx="50" cy="50" r="32" fill="none" stroke="#f0c99b" stroke-width="28"/>
       <circle cx="50" cy="50" r="32" fill="none" stroke="#ff9ecf" stroke-width="21"/>
@@ -568,7 +568,7 @@ const themes = [
       <path d="M44 86 Q50 90 56 86" stroke="#5a2a1a" stroke-width="2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Ice Cream Cone", tag:"food", env:"dust", envColor:"#ffe0c9",
-    bg:"linear-gradient(160deg,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffe0c9", blob2:"#e0a868",
+    bg:"linear-gradient(to bottom,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffe0c9", blob2:"#e0a868",
     ring:"#ffe0c9", eyebrow:"#f0c2a8", pill:"rgba(60,35,20,0.4)",
     svg:`<path d="M30 60 L50 98 L70 60 Z" fill="#e0a868" stroke="#c98a4a" stroke-width="1"/>
       <g opacity="0.5" stroke="#c98a4a" stroke-width="1.4">
@@ -586,7 +586,7 @@ const themes = [
       <path d="M44 66 Q50 71 56 66" stroke="#5a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Matcha Latte", tag:"food", env:"steam", envColor:"#eef5e0",
-    bg:"linear-gradient(160deg,#0f2414,#1f3a1a 55%,#2a4a24)", blob1:"#9cc96a", blob2:"#7fae4a",
+    bg:"linear-gradient(to bottom,#0f2414,#1f3a1a 55%,#2a4a24)", blob1:"#9cc96a", blob2:"#7fae4a",
     ring:"#9cc96a", eyebrow:"#c2e0a0", pill:"rgba(20,40,15,0.4)",
     svg:`<path d="M26 22 L74 22 L69 92 Q50 98 31 92 Z" fill="#eef5e0"/>
       <path d="M26 22 Q50 10 74 22 L73 36 Q50 46 27 36 Z" fill="#7fae4a"/>
@@ -599,7 +599,7 @@ const themes = [
       <circle cx="31" cy="66" r="4.2" fill="#f4a07a" opacity="0.8"/><circle cx="69" cy="66" r="4.2" fill="#f4a07a" opacity="0.8"/>` },
 
   { name:"Martini Glass", tag:"food", env:"bubbles", envColor:"#cbd5e8",
-    bg:"linear-gradient(160deg,#0a0f1a,#141c2e 55%,#1e2a42)", blob1:"#cbd5e8", blob2:"#7fae4a",
+    bg:"linear-gradient(to bottom,#0a0f1a,#141c2e 55%,#1e2a42)", blob1:"#cbd5e8", blob2:"#7fae4a",
     ring:"#cbd5e8", eyebrow:"#b8c2d8", pill:"rgba(15,20,35,0.4)",
     svg:`<path d="M14 12 L86 12 L50 56 Z" fill="#eaf2ff" opacity="0.9" stroke="#cbd5e8" stroke-width="2"/>
       <line x1="50" y1="56" x2="50" y2="84" stroke="#cbd5e8" stroke-width="4"/>
@@ -610,7 +610,7 @@ const themes = [
       <path d="M40 34 Q48 39 56 34" stroke="#2a3a52" stroke-width="2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Lollipop", tag:"food", env:"swirl", envColor:"#ff9ecb",
-    bg:"linear-gradient(160deg,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff9ecb", blob2:"#ff6f9c",
+    bg:"linear-gradient(to bottom,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff9ecb", blob2:"#ff6f9c",
     ring:"#ff6f9c", eyebrow:"#f0b8d0", pill:"rgba(60,20,40,0.4)",
     svg:`<line x1="50" y1="84" x2="50" y2="100" stroke="#e8d8c9" stroke-width="5" stroke-linecap="round"/>
       <circle cx="50" cy="48" r="34" fill="#ff6f9c"/>
@@ -620,7 +620,7 @@ const themes = [
       <path d="M42 60 Q50 65 58 60" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Popsicle", tag:"food", env:"sun", envColor:"#ffe08a",
-    bg:"linear-gradient(160deg,#1c1006,#2a1608 55%,#361c0a)", blob1:"#ffb347", blob2:"#ff9433",
+    bg:"linear-gradient(to bottom,#1c1006,#2a1608 55%,#361c0a)", blob1:"#ffb347", blob2:"#ff9433",
     ring:"#ff9433", eyebrow:"#f0cf8a", pill:"rgba(60,35,10,0.4)",
     svg:`<g class="wobble">
         <rect x="46" y="80" width="8" height="18" rx="3" fill="#e8d8c9"/>
@@ -632,7 +632,7 @@ const themes = [
       </g>` },
 
   { name:"Potion Bottle", tag:"magical", env:"stars", envColor:"#e0c9ff",
-    bg:"linear-gradient(160deg,#0a0614,#120a20 55%,#180e2c)", blob1:"#b98aff", blob2:"#8a4fd6",
+    bg:"linear-gradient(to bottom,#0a0614,#120a20 55%,#180e2c)", blob1:"#b98aff", blob2:"#8a4fd6",
     ring:"#b98aff", eyebrow:"#c9a8e8", pill:"rgba(30,20,45,0.4)",
     svg:`<circle class="float-up" cx="42" cy="50" r="2" fill="#e0c9ff" opacity="0.7"/>
       <circle class="float-up" cx="58" cy="56" r="1.6" fill="#e0c9ff" opacity="0.6" style="animation-delay:.8s"/>
@@ -644,7 +644,7 @@ const themes = [
       <path d="M42 77 Q50 81 58 77" stroke="#2a1440" stroke-width="2" fill="none" stroke-linecap="round"/>` },
 
   { name:"Gift Box", tag:"trinket", env:"confetti", envColor:["#ff9ecb","#ffd166","#7fd6e0"],
-    bg:"linear-gradient(160deg,#3a1830,#5c2650 55%,#7a3468)", blob1:"#ffd6ea", blob2:"#ff9ecb",
+    bg:"linear-gradient(to bottom,#3a1830,#5c2650 55%,#7a3468)", blob1:"#ffd6ea", blob2:"#ff9ecb",
     ring:"#ff9ecb", eyebrow:"#f0c9dc", pill:"rgba(60,20,50,0.4)",
     svg:`<g class="bow-wobble">
         <path d="M50 20 L30 6 C24 2 20 12 28 16 L50 20 Z" fill="#ff9ecb" stroke="#e85a9e" stroke-width="1.5"/>
