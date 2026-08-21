@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Steps">
+<meta name="theme-color" content="#1a1424">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232a1a3a'/%3E%3Ccircle cx='50' cy='50' r='34' fill='none' stroke='%23ff8fc2' stroke-width='9'/%3E%3Ccircle cx='50' cy='24' r='9' fill='%23ff8fc2'/%3E%3C/svg%3E">
+<title>Steps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ring-track: rgba(255,255,255,0.18); }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  html,body{ margin:0; padding:0; height:100%; font-family:'Quicksand', sans-serif; overflow:hidden;
+    background:#111; }
+  body{ position:fixed; inset:0; }
+
+  .app{ position:relative; width:100%; height:100%; overflow:hidden; transition:background 900ms ease; }
+
+  .blob{ position:absolute; border-radius:50%; filter:blur(50px); opacity:0.5;
+    transition:background 900ms ease; pointer-events:none; z-index:0; }
+  .blob.b1{ width:46vh; height:46vh; top:-14vh; left:-10vw; }
+  .blob.b2{ width:40vh; height:40vh; bottom:-10vh; right:-10vw; }
+
+  .env-field{ position:absolute; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .sun-ray{ position:absolute; left:50%; top:38px; width:3px; height:46px;
+    transform-origin:center 220px; opacity:0.35; animation: raySpin 18s linear infinite; }
+  @keyframes raySpin{ 0%{ transform:rotate(0deg) translateX(-50%);} 100%{ transform:rotate(360deg) translateX(-50%);} }
+  .env-star{ position:absolute; width:9px; height:9px;
+    clip-path:polygon(50% 0%,61% 35%,100% 50%,61% 65%,50% 100%,39% 65%,0% 50%,39% 35%);
+    animation: envTwinkle 3.2s ease-in-out infinite; }
+  @keyframes envTwinkle{ 0%,100%{opacity:0.15;} 50%{opacity:0.9;} }
+  .env-moon{ position:absolute; top:32px; right:30px; width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 35% 32%, #ffffff 0%, #f2f6ff 45%, #dce8ff 100%);
+    box-shadow: 0 0 34px 10px rgba(190,220,255,0.55), 0 0 60px 22px rgba(150,195,255,0.28); opacity:0.95; }
+  .env-moon .crater{ position:absolute; border-radius:50%; background:#bcd4f5; opacity:0.55; }
+  .env-bubble{ position:absolute; border-radius:50%; animation: bubbleRise 5s ease-in-out infinite; }
+  @keyframes bubbleRise{ 0%{opacity:0; transform:translateY(0) scale(0.6);} 15%{opacity:0.85;} 80%{opacity:0.45;} 100%{opacity:0; transform:translateY(-160px) scale(1.15);} }
+  .env-ember{ position:absolute; border-radius:50%; animation: emberRise 3.4s ease-in-out infinite; }
+  @keyframes emberRise{ 0%{opacity:0; transform:translateY(0) scale(0.5);} 20%{opacity:1;} 70%{opacity:0.55;} 100%{opacity:0; transform:translateY(-100px) scale(0.3);} }
+  .env-dust{ position:absolute; width:6px; height:6px; border-radius:50%; animation: dustDrift 4.2s ease-in-out infinite; }
+  @keyframes dustDrift{ 0%,100%{opacity:0.15; transform:translate(0,0);} 50%{opacity:0.75; transform:translate(10px,-14px);} }
+  .env-confetti{ position:absolute; width:7px; height:10px; border-radius:2px; animation: confettiFall 4.6s linear infinite; }
+  @keyframes confettiFall{ 0%{opacity:0; transform:translateY(-20px) rotate(0deg);} 12%{opacity:1;} 100%{opacity:0; transform:translateY(200px) rotate(200deg);} }
+  .env-steam{ position:absolute; width:7px; height:26px; border-radius:6px; animation: steamRise 3.8s ease-in-out infinite; }
+  @keyframes steamRise{ 0%{opacity:0; transform:translateY(0) translateX(0) scaleY(0.8);} 35%{opacity:0.55;} 100%{opacity:0; transform:translateY(-70px) translateX(8px) scaleY(1.35);} }
+  .env-swirl{ position:absolute; border-radius:50%; border-style:dashed; border-width:2px; animation: swirlSpin 9s linear infinite; }
+  @keyframes swirlSpin{ 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+  .views{ position:relative; z-index:3; height:100%; padding-bottom:78px; }
+  .view{ display:none; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .view.active{ display:flex; flex-direction:column; align-items:center; }
+
+  .top-bar{ width:100%; padding:calc(env(safe-area-inset-top) + 14px) 20px 4px; text-align:center; flex-shrink:0; }
+  .app-date{ font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.45); }
+
+  .eyebrow{ font-weight:700; letter-spacing:3px; font-size:12px; color:rgba(255,255,255,0.55); margin:10px 0 4px; }
+  .theme-name{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:28px; margin:0 0 4px; transition:color 500ms ease, text-shadow 500ms ease; }
+  .theme-tag{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:14px; }
+
+  .ring-wrap{ position:relative; width:min(72vw,280px); height:min(72vw,280px); margin-top:2px; flex-shrink:0; }
+  svg.ring{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); z-index:1; }
+  .ring-track{ fill:none; stroke:var(--ring-track); stroke-width:16; }
+  .ring-progress{ fill:none; stroke-width:16; stroke-linecap:round; transition: stroke 600ms ease, stroke-dashoffset 900ms cubic-bezier(.2,.8,.2,1); }
+
+  .center-stat{ position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .steps-num{ font-family:'Fredoka', sans-serif; font-weight:700; font-size:clamp(32px,9vw,44px); color:#fff; line-height:1; }
+  .steps-label{ font-size:14px; color:rgba(255,255,255,0.65); margin-top:6px; }
+
+  .mascot-halo{ position:absolute; width:132px; height:132px; border-radius:50%;
+    filter:blur(9px); z-index:2; pointer-events:none; animation: haloPulse 2.6s ease-in-out infinite; }
+  @keyframes haloPulse{ 0%,100%{opacity:0.7; transform:scale(1);} 50%{opacity:1; transform:scale(1.12);} }
+  .trail-particles{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+  .trail-p{ position:absolute; border-radius:50%; opacity:0; animation: trailFloat 2.6s ease-in-out infinite; }
+  @keyframes trailFloat{ 0%{ opacity:0; transform:translate(0,0) scale(0.5); } 20%{ opacity:1; } 50%{ opacity:0.85; transform:translate(var(--dx,6px), -14px) scale(1); } 100%{ opacity:0; transform:translate(calc(var(--dx,6px) * 1.6), -26px) scale(0.6); } }
+  .orbit-dot{ position:absolute; border-radius:50%; pointer-events:none; }
+  @keyframes orbitCW{ from{ transform: rotate(0deg) translateX(var(--rad,42px)); } to{ transform: rotate(360deg) translateX(var(--rad,42px)); } }
+  @keyframes orbitCCW{ from{ transform: rotate(0deg) translateX(var(--rad,34px)); } to{ transform: rotate(-360deg) translateX(var(--rad,34px)); } }
+  .orbit-cw{ animation: orbitCW var(--dur,3.2s) linear infinite; }
+  .orbit-ccw{ animation: orbitCCW var(--dur,4.4s) linear infinite; }
+  .mascot-pulse{ position:absolute; width:40px; height:40px; border-radius:50%; border:2px solid; pointer-events:none; z-index:2; animation: pulseRing 2.6s ease-out infinite; }
+  @keyframes pulseRing{ 0%{ transform:scale(0.55); opacity:0.65; } 100%{ transform:scale(2.3); opacity:0; } }
+
+  .mascot{ position:absolute; width:74px; height:74px; z-index:3; animation: mascot-bob 2.4s ease-in-out infinite; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.4)); }
+  .mascot svg{ width:100%; height:100%; display:block; }
+  @keyframes mascot-bob{ 0%,100%{ transform: translateY(0) rotate(-3deg) scale(1); } 50%{ transform: translateY(-7px) rotate(3deg) scale(1.05); } }
+  .mascot-shadow{ position:absolute; width:38px; height:10px; border-radius:50%; background:rgba(0,0,0,0.35); filter:blur(3px); z-index:2; animation: shadow-pulse 2.4s ease-in-out infinite; }
+  @keyframes shadow-pulse{ 0%,100%{ opacity:0.5; transform:scale(1);} 50%{ opacity:0.25; transform:scale(0.75);} }
+
+  @keyframes blink { 0%,88%,100%{transform:scaleY(1);} 94%{transform:scaleY(0.55);} }
+  .blink{ transform-origin:center; animation:blink 4.5s ease-in-out infinite; }
+  @keyframes wag { 0%,100%{transform:rotate(-8deg);} 50%{transform:rotate(14deg);} }
+  .wag{ animation:wag 1.8s ease-in-out infinite; transform-origin:80px 70px; }
+  @keyframes bowWobble{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
+  .bow-wobble{ animation:bowWobble 2.2s ease-in-out infinite; transform-origin:50px 22px; }
+  @keyframes wave { 0%,100%{transform:skewX(-3deg);} 50%{transform:skewX(3deg);} }
+  .wave{ animation:wave 3s ease-in-out infinite; transform-origin:center; }
+  @keyframes flapL { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(-18deg);} }
+  @keyframes flapR { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(18deg);} }
+  .flap-l{ animation:flapL 0.8s ease-in-out infinite; transform-origin:34px 50px; }
+  .flap-r{ animation:flapR 0.8s ease-in-out infinite; transform-origin:66px 50px; }
+  @keyframes twinkle{0%,100%{opacity:1;}50%{opacity:0.2;}}
+  .twinkle{ animation:twinkle 1.4s ease-in-out infinite; }
+  @keyframes jiggle{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+  .jiggle{ animation:jiggle 1.6s ease-in-out infinite; }
+  @keyframes whiskerWiggle{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-5deg);}}
+  .whisker-l{ animation:whiskerWiggle 2.3s ease-in-out infinite; transform-origin:36px 66px; }
+  .whisker-r{ animation:whiskerWiggle 2.3s ease-in-out infinite; transform-origin:64px 66px; animation-delay:0.1s; }
+  @keyframes floatUp{0%{opacity:0; transform:translateY(0) scale(0.6);} 20%{opacity:1;} 80%{opacity:0.6;} 100%{opacity:0; transform:translateY(-16px) scale(1);}}
+  .float-up{ animation:floatUp 3s ease-in-out infinite; }
+  @keyframes glowPulse{0%,100%{opacity:0.5; transform:scale(1);} 50%{opacity:0.9; transform:scale(1.08);}}
+  .glow-pulse{ animation:glowPulse 2.4s ease-in-out infinite; transform-origin:center; }
+  @keyframes earTwitch{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-8deg);}}
+  .ear-twitch{ animation:earTwitch 2.6s ease-in-out infinite; transform-origin:center; }
+  @keyframes wobble2{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+  .wobble{ animation:wobble2 2.4s ease-in-out infinite; transform-origin:50px 90px; }
+
+  .stat-row{ display:flex; gap:12px; margin-top:18px; flex-shrink:0; }
+  .stat-pill{ background:rgba(0,0,0,0.28); backdrop-filter:blur(6px); border-radius:18px; padding:11px 18px; min-width:86px; transition:background 500ms ease; text-align:center; }
+  .stat-pill b{ display:block; font-family:'Fredoka'; font-size:18px; color:#fff; }
+  .stat-pill span{ display:block; font-size:10px; letter-spacing:0.6px; color:rgba(255,255,255,0.6); margin-top:2px; }
+
+  .track-btn{ margin-top:20px; padding:14px 30px; border-radius:26px; border:none; font-family:'Fredoka';
+    font-weight:600; font-size:15px; cursor:pointer; transition:transform 150ms ease, opacity 200ms ease; flex-shrink:0; }
+  .track-btn:active{ transform:scale(0.96); }
+  .track-btn.start{ background:#fff; color:#1a1424; }
+  .track-btn.stop{ background:rgba(255,255,255,0.15); color:#fff; border:1.5px solid rgba(255,255,255,0.4); }
+  .track-status{ margin-top:10px; font-size:12px; color:rgba(255,255,255,0.55); flex-shrink:0; min-height:16px; }
+
+  .nav-row{ display:flex; align-items:center; justify-content:center; gap:14px; padding:16px 0 6px; flex-shrink:0; }
+  .arrow-btn{ width:36px; height:36px; border-radius:50%; border:none; background:rgba(0,0,0,0.25); color:rgba(255,255,255,0.85); font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 200ms ease, transform 150ms ease; }
+  .arrow-btn:active{ transform:scale(0.9); }
+  .dots{ display:flex; gap:5px; flex-wrap:wrap; justify-content:center; max-width:220px; }
+  .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.28); cursor:pointer; transition:width 300ms ease, background 300ms ease; }
+  .dot.active{ width:18px; border-radius:5px; }
+  .hint{ font-size:10.5px; color:rgba(255,255,255,0.35); margin-bottom:10px; flex-shrink:0; }
+
+  /* Week view */
+  .week-strip{ display:flex; gap:8px; padding:20px 16px; width:100%; justify-content:center; flex-wrap:wrap; }
+  .week-day{ width:44px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .week-day .dow{ font-size:10px; letter-spacing:0.5px; color:rgba(255,255,255,0.5); text-transform:uppercase; }
+  .week-day .cell{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka'; font-size:14px; color:#fff; border:2px solid rgba(255,255,255,0.15); transition:all 300ms ease; }
+  .week-day .cell.filled{ border-color:transparent; }
+  .week-day .cell.today{ box-shadow:0 0 0 2px #fff; }
+  .week-nav{ display:flex; align-items:center; gap:16px; margin-top:8px; }
+  .week-nav .label{ font-family:'Fredoka'; font-size:15px; color:#fff; min-width:150px; text-align:center; }
+
+  /* Month view */
+  .month-nav{ display:flex; align-items:center; justify-content:center; gap:20px; padding:20px 0 6px; }
+  .month-nav .label{ font-family:'Fredoka'; font-weight:600; font-size:18px; color:#fff; min-width:150px; text-align:center; }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; width:min(92vw,360px); padding:8px 16px 20px; }
+  .month-dow{ text-align:center; font-size:10px; color:rgba(255,255,255,0.4); letter-spacing:0.5px; padding-bottom:4px; }
+  .month-cell{ aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-family:'Fredoka'; font-size:13px; color:rgba(255,255,255,0.8); border:1.5px solid rgba(255,255,255,0.1); transition:all 300ms ease; }
+  .month-cell.empty{ border:none; }
+  .month-cell.filled{ color:#1a1424; font-weight:700; border-color:transparent; }
+  .month-cell.today{ box-shadow:0 0 0 2px #fff; }
+  .month-legend{ font-size:11px; color:rgba(255,255,255,0.4); text-align:center; padding-bottom:10px; }
+
+  /* Settings view */
+  .settings-block{ width:min(90vw,360px); padding:24px 16px; }
+  .settings-title{ font-family:'Fredoka'; font-weight:600; font-size:20px; color:#fff; margin:18px 0 10px; }
+  .settings-title:first-child{ margin-top:0; }
+  .goal-input-row{ display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.08); border-radius:16px; padding:6px; }
+  .goal-input-row input{ flex:1; background:transparent; border:none; color:#fff; font-family:'Fredoka'; font-size:20px;
+    text-align:center; outline:none; -moz-appearance:textfield; }
+  .goal-input-row input::-webkit-outer-spin-button, .goal-input-row input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .goal-step-btn{ width:40px; height:40px; border-radius:12px; border:none; background:rgba(255,255,255,0.12); color:#fff; font-size:18px; cursor:pointer; }
+  .settings-note{ font-size:12px; color:rgba(255,255,255,0.45); line-height:1.5; margin-top:8px; }
+  .test-btn{ margin-top:6px; width:100%; padding:12px; border-radius:14px; border:1.5px dashed rgba(255,255,255,0.3);
+    background:transparent; color:rgba(255,255,255,0.7); font-family:'Quicksand'; font-size:13px; cursor:pointer; }
+  .reset-btn{ margin-top:14px; width:100%; padding:12px; border-radius:14px; border:none;
+    background:rgba(255,90,90,0.15); color:#ff9a9a; font-family:'Quicksand'; font-weight:600; font-size:13px; cursor:pointer; }
+
+  /* Bottom nav */
+  .bottom-nav{ position:fixed; left:0; right:0; bottom:0; z-index:5; display:flex;
+    padding:10px 8px calc(env(safe-area-inset-bottom) + 10px); background:rgba(10,8,16,0.85); backdrop-filter:blur(16px);
+    border-top:1px solid rgba(255,255,255,0.08); }
+  .nav-btn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none;
+    color:rgba(255,255,255,0.45); font-family:'Quicksand'; font-size:10.5px; cursor:pointer; padding:6px 4px; }
+  .nav-btn .icon{ font-size:20px; line-height:1; }
+  .nav-btn.active{ color:#fff; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="blob b1" id="blob1"></div>
+  <div class="blob b2" id="blob2"></div>
+  <div class="env-field" id="envField"></div>
+
+  <div class="views">
+
+    <!-- TODAY VIEW -->
+    <div class="view active" id="view-today">
+      <div class="top-bar"><div class="app-date" id="todayDate">—</div></div>
+      <div class="eyebrow">CHOOSE A VIBE</div>
+      <div class="theme-name" id="themeName">Sweetheart</div>
+      <div class="theme-tag" id="themeTag">cute</div>
+
+      <div class="ring-wrap" id="ringWrap">
+        <svg class="ring" viewBox="0 0 280 280">
+          <circle class="ring-track" cx="140" cy="140" r="124"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="140" cy="140" r="124" stroke-dasharray="779" stroke-dashoffset="779"></circle>
+        </svg>
+        <div class="center-stat">
+          <div class="steps-num" id="stepsNum">0</div>
+          <div class="steps-label" id="stepsLabel">of 10,000 steps</div>
+        </div>
+        <div class="mascot-halo" id="mascotHalo"></div>
+        <div id="mascotPulse"></div>
+        <div id="orbitParticles"></div>
+        <div class="trail-particles" id="trailParticles"></div>
+        <div class="mascot-shadow" id="mascotShadow"></div>
+        <div class="mascot" id="mascotWrap"></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-pill"><b id="pctOfGoal">0%</b><span>OF GOAL</span></div>
+        <div class="stat-pill"><b id="distMi">0.0mi</b><span>DISTANCE</span></div>
+      </div>
+
+      <button class="track-btn start" id="trackBtn">Start Tracking</button>
+      <div class="track-status" id="trackStatus"></div>
+
+      <div class="nav-row">
+        <button class="arrow-btn" id="prevBtn">‹</button>
+        <div class="dots" id="dots"></div>
+        <button class="arrow-btn" id="nextBtn">›</button>
+      </div>
+      <div class="hint">Tap a dot or use the arrows to change your vibe</div>
+    </div>
+
+    <!-- WEEK VIEW -->
+    <div class="view" id="view-week">
+      <div class="top-bar"><div class="app-date">THIS WEEK</div></div>
+      <div class="week-nav">
+        <button class="arrow-btn" id="weekPrevBtn">‹</button>
+        <div class="label" id="weekLabel">—</div>
+        <button class="arrow-btn" id="weekNextBtn">›</button>
+      </div>
+      <div class="week-strip" id="weekStrip"></div>
+      <div class="month-legend">Filled in = goal met that day</div>
+    </div>
+
+    <!-- MONTH VIEW -->
+    <div class="view" id="view-month">
+      <div class="top-bar"><div class="app-date">MONTHLY VIEW</div></div>
+      <div class="month-nav">
+        <button class="arrow-btn" id="monthPrevBtn">‹</button>
+        <div class="label" id="monthLabel">—</div>
+        <button class="arrow-btn" id="monthNextBtn">›</button>
+      </div>
+      <div class="month-grid" id="monthDow"></div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-legend">Filled in = goal met that day</div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="view" id="view-settings">
+      <div class="top-bar"><div class="app-date">SETTINGS</div></div>
+      <div class="settings-block">
+        <div class="settings-title">Daily Goal</div>
+        <div class="goal-input-row">
+          <button class="goal-step-btn" id="goalMinus">−</button>
+          <input type="number" id="goalInput" value="10000" step="500">
+          <button class="goal-step-btn" id="goalPlus">+</button>
+        </div>
+        <div class="settings-note">Defaults to 10,000 steps. Changes apply immediately and are saved on this device.</div>
+
+        <div class="settings-title">Motion Tracking</div>
+        <div class="settings-note" id="motionStatusText">Not started yet.</div>
+        <button class="test-btn" id="testStepsBtn">+ Add 10 test steps (for preview / desktop)</button>
+
+        <div class="settings-title">Data</div>
+        <button class="reset-btn" id="resetBtn">Reset all step history</button>
+        <div class="settings-note">This app stores your data only on this device (localStorage) — nothing is sent anywhere.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" data-view="today"><span class="icon">◎</span>Today</button>
+    <button class="nav-btn" data-view="week"><span class="icon">▤</span>Week</button>
+    <button class="nav-btn" data-view="month"><span class="icon">▦</span>Month</button>
+    <button class="nav-btn" data-view="settings"><span class="icon">⚙</span>Settings</button>
+  </div>
+</div>
+
+<script>
+const themes = [
+  { name:"Sweetheart", tag:"cute", env:"none", envColor:"#ff9ecb",
+    bg:"linear-gradient(160deg,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff8fb3", blob2:"#ff4f81",
+    ring:"#ff6f9c", eyebrow:"#e79bb3", pill:"rgba(90,20,40,0.35)",
+    svg:`<path class="float-up" d="M14 22 c-2-4-8-4-8 1 0 4 6 7 8 9 2-2 8-5 8-9 0-5-6-5-8-1z" fill="#ff9ecb" transform="translate(0,4) scale(1.1)" style="animation-delay:.3s"/>
+      <path class="float-up" d="M84 30 c-2-4-8-4-8 1 0 4 6 7 8 9 2-2 8-5 8-9 0-5-6-5-8-1z" fill="#ff9ecb" transform="scale(0.8)" style="animation-delay:1.2s"/>
+      <path class="glow-pulse" d="M50 88 C20 66 6 46 6 30 C6 14 20 4 34 8 C42 10 48 16 50 22 C52 16 58 10 66 8 C80 4 94 14 94 30 C94 46 80 66 50 88 Z" fill="#ff6f9c" opacity="0.35"/>
+      <path d="M50 84 C22 63 9 45 9 30 C9 15 22 6 34 10 C41 12 47 17 50 23 C53 17 59 12 66 10 C78 6 91 15 91 30 C91 45 78 63 50 84 Z" fill="#ff6f9c" stroke="#ff4f81" stroke-width="2"/>
+      <g class="blink"><ellipse cx="38" cy="40" rx="5.5" ry="7" fill="#3a1420"/><ellipse cx="62" cy="40" rx="5.5" ry="7" fill="#3a1420"/><circle cx="40" cy="37" r="1.8" fill="#fff"/><circle cx="64" cy="37" r="1.8" fill="#fff"/></g>
+      <circle cx="30" cy="50" r="5" fill="#ffb3cf" opacity="0.8"/><circle cx="70" cy="50" r="5" fill="#ffb3cf" opacity="0.8"/>
+      <path d="M42 52 Q50 58 58 52" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Night Moon", tag:"cute", env:"stars", envColor:"#e3ddff",
+    bg:"linear-gradient(160deg,#0a0e21,#141b3d 55%,#1c2554)", blob1:"#7c8dff", blob2:"#4a5ad6",
+    ring:"#9aa8ff", eyebrow:"#a9b3e8", pill:"rgba(15,20,50,0.4)",
+    svg:`<circle cx="50" cy="50" r="40" fill="#f4f2ff"/>
+      <circle class="twinkle" cx="34" cy="30" r="4" fill="#e3ddff" opacity="0.7"/><circle class="twinkle" cx="66" cy="66" r="3" fill="#e3ddff" opacity="0.7" style="animation-delay:.6s"/>
+      <g class="blink"><ellipse cx="40" cy="52" rx="5" ry="6.5" fill="#2a2550"/><ellipse cx="60" cy="52" rx="5" ry="6.5" fill="#2a2550"/><circle cx="42" cy="49.5" r="1.7" fill="#fff"/><circle cx="62" cy="49.5" r="1.7" fill="#fff"/></g>
+      <circle cx="32" cy="60" r="4" fill="#ffc2d6" opacity="0.7"/><circle cx="68" cy="60" r="4" fill="#ffc2d6" opacity="0.7"/>
+      <path d="M43 63 Q50 68 57 63" stroke="#2a2550" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Bubblegum Bunny", tag:"cute", env:"bubbles", envColor:"#ff9ecb",
+    bg:"linear-gradient(160deg,#2b1420,#4a1f36 55%,#632a49)", blob1:"#ffb3e0", blob2:"#ff7fc0",
+    ring:"#ff8fcb", eyebrow:"#e6a8cf", pill:"rgba(50,15,35,0.4)",
+    svg:`<path d="M30 44 C20 16 32 0 40 12 C45 21 45 35 40 46 Z" fill="#fff" stroke="#ffcbe6" stroke-width="1.5"/>
+      <path d="M70 44 C80 16 68 0 60 12 C55 21 55 35 60 46 Z" fill="#fff" stroke="#ffcbe6" stroke-width="1.5"/>
+      <circle cx="50" cy="60" r="30" fill="#fff"/>
+      <g class="whisker-l"><line x1="36" y1="64" x2="16" y2="60" stroke="#e8b8cf" stroke-width="1.4"/><line x1="36" y1="67" x2="16" y2="67" stroke="#e8b8cf" stroke-width="1.4"/><line x1="36" y1="70" x2="16" y2="74" stroke="#e8b8cf" stroke-width="1.4"/></g>
+      <g class="whisker-r"><line x1="64" y1="64" x2="84" y2="60" stroke="#e8b8cf" stroke-width="1.4"/><line x1="64" y1="67" x2="84" y2="67" stroke="#e8b8cf" stroke-width="1.4"/><line x1="64" y1="70" x2="84" y2="74" stroke="#e8b8cf" stroke-width="1.4"/></g>
+      <g class="blink"><ellipse cx="41" cy="58" rx="4.8" ry="6.4" fill="#3a1420"/><ellipse cx="59" cy="58" rx="4.8" ry="6.4" fill="#3a1420"/><circle cx="43" cy="55.5" r="1.7" fill="#fff"/><circle cx="61" cy="55.5" r="1.7" fill="#fff"/></g>
+      <circle cx="33" cy="67" r="4.8" fill="#ffb3cf"/><circle cx="67" cy="67" r="4.8" fill="#ffb3cf"/>
+      <path d="M46 65 Q50 68 54 65 Q52 70 50 70 Q48 70 46 65 Z" fill="#ff9ecb"/>
+      <path d="M44 71 Q50 76 56 71" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Panda", tag:"cute", env:"dust", envColor:"#e8e8f0",
+    bg:"linear-gradient(160deg,#141418,#1e1e24 55%,#2a2a30)", blob1:"#e8e8f0", blob2:"#c9c9d4",
+    ring:"#e8e8f0", eyebrow:"#c9c9d4", pill:"rgba(20,20,25,0.4)",
+    svg:`<circle cx="50" cy="58" r="32" fill="#fdfdfd"/>
+      <ellipse cx="22" cy="26" rx="14" ry="14" fill="#2a2a2a"/><ellipse cx="78" cy="26" rx="14" ry="14" fill="#2a2a2a"/>
+      <g class="ear-twitch"><ellipse cx="36" cy="50" rx="11" ry="13" fill="#2a2a2a" transform="rotate(-8 36 50)"/><ellipse cx="64" cy="50" rx="11" ry="13" fill="#2a2a2a" transform="rotate(8 64 50)"/></g>
+      <g class="blink"><circle cx="38" cy="53" r="4.6" fill="#fff"/><circle cx="62" cy="53" r="4.6" fill="#fff"/><circle cx="38" cy="53" r="2.3" fill="#1a1a1a"/><circle cx="62" cy="53" r="2.3" fill="#1a1a1a"/></g>
+      <ellipse cx="50" cy="66" rx="4.4" ry="3.2" fill="#2a2a2a"/>
+      <path d="M43 70 Q50 76 57 70" stroke="#2a2a2a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="66" r="4.4" fill="#ffb3cf" opacity="0.7"/><circle cx="68" cy="66" r="4.4" fill="#ffb3cf" opacity="0.7"/>` },
+
+  { name:"Little Devil", tag:"spooky", env:"embers", envColor:"#ff5c3d",
+    bg:"linear-gradient(160deg,#150505,#220808 55%,#2e0a0a)", blob1:"#ff6b4a", blob2:"#ff2d55",
+    ring:"#ff5c3d", eyebrow:"#e8a08a", pill:"rgba(50,10,10,0.4)",
+    svg:`<g class="wag">
+        <path d="M78 70 Q92 78 86 92" fill="none" stroke="#c62828" stroke-width="4" stroke-linecap="round"/>
+        <path d="M86 90 L94 84 L90 96 Z" fill="#c62828"/>
+      </g>
+      <path d="M28 26 L20 8 L36 20 Z" fill="#c62828"/><path d="M72 26 L80 8 L64 20 Z" fill="#c62828"/>
+      <circle cx="50" cy="52" r="28" fill="#e5433a"/>
+      <g class="blink">
+        <path d="M34 46 L44 50" stroke="#5a0a0a" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M66 46 L56 50" stroke="#5a0a0a" stroke-width="2.5" stroke-linecap="round"/>
+        <ellipse cx="40" cy="54" rx="4" ry="5.5" fill="#2a0505"/><ellipse cx="60" cy="54" rx="4" ry="5.5" fill="#2a0505"/>
+        <circle cx="42" cy="52" r="1.4" fill="#fff"/><circle cx="62" cy="52" r="1.4" fill="#fff"/>
+      </g>
+      <path d="M40 64 Q50 72 60 64" stroke="#2a0505" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M45 66 L47 70 L49 66 Z" fill="#fff"/><path d="M55 66 L53 70 L51 66 Z" fill="#fff"/>` },
+
+  { name:"Ghost", tag:"spooky", env:"none", envColor:"#d8d0ff",
+    bg:"linear-gradient(160deg,#14101f,#241c38 55%,#332750)", blob1:"#cfc4ff", blob2:"#9a8ae0",
+    ring:"#d8d0ff", eyebrow:"#c9c0e8", pill:"rgba(25,18,45,0.4)",
+    svg:`<path class="wave" d="M22 88 C22 40 30 14 50 14 C70 14 78 40 78 88 C74 82 68 92 62 84 C56 92 50 82 44 92 C38 82 30 94 22 88 Z" fill="#f3f0ff" opacity="0.92"/>
+      <g class="blink"><ellipse cx="40" cy="48" rx="4" ry="5.5" fill="#2a2440"/><ellipse cx="60" cy="48" rx="4" ry="5.5" fill="#2a2440"/></g>
+      <ellipse cx="50" cy="60" rx="4" ry="5" fill="#2a2440"/>
+      <circle cx="33" cy="56" r="3.5" fill="#ffc2e0" opacity="0.6"/><circle cx="67" cy="56" r="3.5" fill="#ffc2e0" opacity="0.6"/>` },
+
+  { name:"Vampire Bat", tag:"spooky", env:"stars", envColor:"#b98aff",
+    bg:"linear-gradient(160deg,#0a0a0c,#1c1c1e 55%,#302f32)", blob1:"#8a8a90", blob2:"#3a3a3e",
+    ring:"#b98aff", eyebrow:"#c9a8e8", pill:"rgba(20,10,35,0.4)",
+    svg:`<path class="flap-l" d="M32 46 C10 30 2 46 14 54 C4 58 6 72 20 68" fill="#8a4fd6"/>
+      <path class="flap-r" d="M68 46 C90 30 98 46 86 54 C96 58 94 72 80 68" fill="#8a4fd6"/>
+      <path d="M32 32 L24 14 L40 26 Z" fill="#5c2ea6"/><path d="M68 32 L76 14 L60 26 Z" fill="#5c2ea6"/>
+      <circle cx="50" cy="52" r="24" fill="#6a35b8"/>
+      <g class="blink"><ellipse cx="41" cy="50" rx="4" ry="5.5" fill="#1c0f2e"/><ellipse cx="59" cy="50" rx="4" ry="5.5" fill="#1c0f2e"/><circle cx="43" cy="47.5" r="1.4" fill="#fff"/><circle cx="61" cy="47.5" r="1.4" fill="#fff"/></g>
+      <path d="M42 62 Q50 58 58 62" stroke="#1c0f2e" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M44 62 L45 66 L47 62 Z" fill="#fff"/><path d="M56 62 L55 66 L53 62 Z" fill="#fff"/>` },
+
+  { name:"Baby Dragon", tag:"spooky", env:"embers", envColor:"#ffb347",
+    bg:"linear-gradient(160deg,#050f0a,#0a1810 55%,#0e2015)", blob1:"#6fd68f", blob2:"#3a8f5c",
+    ring:"#6fd68f", eyebrow:"#a3d9b1", pill:"rgba(15,40,25,0.4)",
+    svg:`<path class="flap-l" d="M28 44 C6 34 0 48 12 54 C2 60 6 72 20 68" fill="#3a8f5c"/>
+      <path class="flap-r" d="M72 44 C94 34 100 48 88 54 C98 60 94 72 80 68" fill="#3a8f5c"/>
+      <path class="wag" d="M78 74 Q94 82 90 96" fill="none" stroke="#2f7a4a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M88 92 L98 88 L92 100 Z" fill="#2f7a4a"/>
+      <path d="M30 22 L24 6 L38 18 Z" fill="#2f7a4a"/><path d="M70 22 L76 6 L62 18 Z" fill="#2f7a4a"/>
+      <circle cx="50" cy="50" r="28" fill="#4fbf78"/>
+      <path d="M50 22 L46 30 L54 30 Z" fill="#2f7a4a"/><path d="M39 24 L36 32 L42 32 Z" fill="#2f7a4a"/><path d="M61 24 L58 32 L64 32 Z" fill="#2f7a4a"/>
+      <g class="blink"><ellipse cx="41" cy="46" rx="4.6" ry="6.2" fill="#123a20"/><ellipse cx="59" cy="46" rx="4.6" ry="6.2" fill="#123a20"/><circle cx="43" cy="43.5" r="1.7" fill="#fff"/><circle cx="61" cy="43.5" r="1.7" fill="#fff"/></g>
+      <ellipse cx="50" cy="64" rx="14" ry="10" fill="#7fdb9c"/>
+      <ellipse cx="45" cy="65" rx="1.6" ry="2.2" fill="#123a20"/><ellipse cx="55" cy="65" rx="1.6" ry="2.2" fill="#123a20"/>
+      <circle cx="33" cy="56" r="4.2" fill="#8fe0a8" opacity="0.8"/><circle cx="67" cy="56" r="4.2" fill="#8fe0a8" opacity="0.8"/>
+      <path d="M44 71 Q50 75 56 71" stroke="#123a20" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path class="twinkle" d="M50 78 Q46 86 50 92 Q54 86 50 78 Z" fill="#ffb347"/>` },
+
+  { name:"Night Owl", tag:"spooky", env:"nightsky", envColor:"#ffe98a",
+    bg:"linear-gradient(160deg,#2a2440,#3a325c 55%,#4a4070)", blob1:"#ffe98a", blob2:"#7ec8f0",
+    ring:"#ffe98a", eyebrow:"#c9c0e8", pill:"rgba(20,15,35,0.4)",
+    svg:`<path class="flap-l" d="M30 46 C8 36 2 50 14 56 C4 62 8 74 22 70" fill="#3a2e52"/>
+      <path class="flap-r" d="M70 46 C92 36 98 50 86 56 C96 62 92 74 78 70" fill="#3a2e52"/>
+      <path d="M34 24 L28 8 L42 20 Z" fill="#3a2e52"/><path d="M66 24 L72 8 L58 20 Z" fill="#3a2e52"/>
+      <circle cx="50" cy="54" r="28" fill="#4a3d68"/>
+      <circle cx="39" cy="52" r="13" fill="#ffe98a"/><circle cx="61" cy="52" r="13" fill="#ffe98a"/>
+      <g class="blink"><circle cx="39" cy="52" r="6.5" fill="#1a1428"/><circle cx="61" cy="52" r="6.5" fill="#1a1428"/><circle cx="41.5" cy="49.5" r="2" fill="#fff"/><circle cx="63.5" cy="49.5" r="2" fill="#fff"/></g>
+      <path d="M45 63 L55 63 L50 70 Z" fill="#f0a83d"/>
+      <path d="M40 79 L36 88 M45 79 L43 88" stroke="#f0a83d" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M55 79 L57 88 M60 79 L64 88" stroke="#f0a83d" stroke-width="2.4" stroke-linecap="round"/>` },
+
+  { name:"Flying Witch", tag:"spooky", env:"stars", envColor:"#c9a4ff",
+    bg:"linear-gradient(160deg,#4a3a14,#6a5420 55%,#8a6c2c)", blob1:"#e8c96a", blob2:"#3a2a52",
+    ring:"#8a6fd6", eyebrow:"#c9a8e8", pill:"rgba(25,15,40,0.4)",
+    svg:`<line x1="18" y1="86" x2="80" y2="36" stroke="#8a5a34" stroke-width="4" stroke-linecap="round"/>
+      <path d="M10 92 L26 84 L18 78 Z" fill="#c9986a"/>
+      <path class="wave" d="M66 66 C82 74 86 58 72 54 C84 50 80 36 66 42" fill="#3a2a52"/>
+      <path d="M28 22 L48 2 L68 22 Z" fill="#3a2a52"/><rect x="26" y="20" width="44" height="6" rx="3" fill="#2a1c3e"/>
+      <circle class="twinkle" cx="48" cy="2" r="3" fill="#c9a4ff"/>
+      <circle cx="48" cy="44" r="22" fill="#ffe0c9"/>
+      <g class="blink"><ellipse cx="40" cy="42" rx="4.2" ry="5.6" fill="#3a1c2e"/><ellipse cx="56" cy="42" rx="4.2" ry="5.6" fill="#3a1c2e"/><circle cx="42" cy="39.5" r="1.5" fill="#fff"/><circle cx="58" cy="39.5" r="1.5" fill="#fff"/></g>
+      <circle cx="32" cy="50" r="3.6" fill="#ff9ecb" opacity="0.8"/><circle cx="62" cy="50" r="3.6" fill="#ff9ecb" opacity="0.8"/>
+      <path d="M42 54 Q48 58 54 54" stroke="#3a1c2e" stroke-width="1.8" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Biblically Accurate Angel", tag:"spooky", env:"sun", envColor:"#ffe98a",
+    bg:"linear-gradient(160deg,#1a1408,#241c0c 55%,#2e2410)", blob1:"#ffe98a", blob2:"#e8b84b",
+    ring:"#ffe98a", eyebrow:"#e8d8a0", pill:"rgba(35,28,10,0.4)",
+    svg:`<path class="flap-l" d="M28 32 C6 18 0 40 10 50 C0 60 4 78 24 72" fill="#fff" opacity="0.92"/>
+      <path class="flap-r" d="M72 32 C94 18 100 40 90 50 C100 60 96 78 76 72" fill="#fff" opacity="0.92"/>
+      <ellipse cx="50" cy="52" rx="34" ry="26" fill="#fdfdfd" stroke="#d8d8d8" stroke-width="1.5"/>
+      <g class="blink">
+        <circle cx="50" cy="52" r="16" fill="#4fae7a"/>
+        <circle cx="50" cy="52" r="8" fill="#1a1a1a"/>
+        <circle cx="46" cy="48" r="2.6" fill="#fff"/>
+      </g>
+      <path d="M20 40 L14 36 M24 36 L20 30 M30 34 L28 26" stroke="#7a7a7a" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M80 40 L86 36 M76 36 L80 30 M70 34 L72 26" stroke="#7a7a7a" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="30" cy="64" r="4" fill="#ffb3cf" opacity="0.6"/><circle cx="70" cy="64" r="4" fill="#ffb3cf" opacity="0.6"/>` },
+
+  { name:"Moth Man", tag:"spooky", env:"dust", envColor:"#ff5c5c",
+    bg:"linear-gradient(160deg,#3a3a3c,#48484a 55%,#565456)", blob1:"#ff2d2d", blob2:"#5a5a5c",
+    ring:"#ff5c5c", eyebrow:"#e8b8b8", pill:"rgba(15,20,15,0.4)",
+    svg:`<path class="flap-l" d="M26 40 C0 26 -8 46 6 56 C-6 64 2 82 22 76" fill="#2a2a2e"/>
+      <path class="flap-r" d="M74 40 C100 26 108 46 94 56 C106 64 98 82 78 76" fill="#2a2a2e"/>
+      <path d="M40 24 L34 8 L46 20 Z" fill="#1e1e22"/><path d="M60 24 L66 8 L54 20 Z" fill="#1e1e22"/>
+      <ellipse cx="50" cy="56" rx="24" ry="30" fill="#1e1e22"/>
+      <circle cx="40" cy="46" r="12" fill="#ff2d2d" opacity="0.3"/><circle cx="60" cy="46" r="12" fill="#ff2d2d" opacity="0.3"/>
+      <g class="blink"><circle cx="40" cy="46" r="8" fill="#ff2d2d"/><circle cx="60" cy="46" r="8" fill="#ff2d2d"/><circle cx="40" cy="46" r="3.2" fill="#7a0a0a"/><circle cx="60" cy="46" r="3.2" fill="#7a0a0a"/></g>
+      <path d="M42 66 Q50 70 58 66" stroke="#0a0a0c" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="60" r="4" fill="#7a2a2a" opacity="0.5"/><circle cx="70" cy="60" r="4" fill="#7a2a2a" opacity="0.5"/>` },
+
+  { name:"Alien", tag:"spooky", env:"stars", envColor:"#39ff6a",
+    bg:"linear-gradient(160deg,#0a1a0e,#101e12 55%,#152416)", blob1:"#39ff6a", blob2:"#1c5c30",
+    ring:"#39ff6a", eyebrow:"#a8f5b8", pill:"rgba(10,25,15,0.4)",
+    svg:`<path d="M50 2 C74 2 90 22 88 46 C86 68 70 84 50 90 C30 84 14 68 12 46 C10 22 26 2 50 2 Z" fill="#39ff6a"/>
+      <g class="blink"><ellipse cx="38" cy="46" rx="9" ry="14" fill="#0a1a0e" transform="rotate(-12 38 46)"/><ellipse cx="62" cy="46" rx="9" ry="14" fill="#0a1a0e" transform="rotate(12 62 46)"/></g>
+      <ellipse cx="35" cy="40" rx="2" ry="3" fill="#c9ffd4" opacity="0.6"/>
+      <path d="M46 72 Q50 75 54 72" stroke="#1c7a3a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <circle cx="27" cy="58" r="3.8" fill="#c9ffd4" opacity="0.55"/><circle cx="73" cy="58" r="3.8" fill="#c9ffd4" opacity="0.55"/>` },
+
+  { name:"Unicorn", tag:"girly", env:"dust", envColor:"#d9a4ff",
+    bg:"linear-gradient(160deg,#241a3a,#38295c 55%,#4a3878)", blob1:"#e8d4ff", blob2:"#c9a4ff",
+    ring:"#d9a4ff", eyebrow:"#d4c2ec", pill:"rgba(35,25,55,0.4)",
+    svg:`<path class="wave" d="M28 30 C14 28 10 42 20 48 C12 54 16 66 28 64 C20 72 26 82 36 76" fill="none" stroke="#c9a4ff" stroke-width="7" stroke-linecap="round"/>
+      <path class="wave" d="M28 30 C14 28 10 42 20 48 C12 54 16 66 28 64 C20 72 26 82 36 76" fill="none" stroke="#ff9ecb" stroke-width="2.5" stroke-linecap="round" opacity="0.6" stroke-dasharray="2 7"/>
+      <path d="M50 4 L54 26 L46 26 Z" fill="#ffe98a" stroke="#f0c94d" stroke-width="1"/>
+      <circle class="twinkle" cx="50" cy="6" r="2" fill="#fff"/>
+      <path d="M30 26 L22 10 L38 22 Z" fill="#fdf9ff" stroke="#e8d8ff" stroke-width="1"/>
+      <path d="M70 26 L78 10 L62 22 Z" fill="#fdf9ff" stroke="#e8d8ff" stroke-width="1"/>
+      <circle cx="50" cy="48" r="24" fill="#fdf9ff"/>
+      <ellipse cx="50" cy="74" rx="16" ry="13" fill="#fdf9ff"/>
+      <ellipse cx="44" cy="76" rx="1.8" ry="2.6" fill="#c9a4ff"/><ellipse cx="56" cy="76" rx="1.8" ry="2.6" fill="#c9a4ff"/>
+      <path d="M44 84 Q50 88 56 84" stroke="#4a2e6b" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <g class="blink"><ellipse cx="40" cy="46" rx="4.8" ry="6.4" fill="#4a2e6b"/><ellipse cx="60" cy="46" rx="4.8" ry="6.4" fill="#4a2e6b"/><circle cx="42" cy="43" r="1.7" fill="#fff"/><circle cx="62" cy="43" r="1.7" fill="#fff"/></g>
+      <path d="M34 38 L38 34" stroke="#4a2e6b" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M66 38 L62 34" stroke="#4a2e6b" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="32" cy="54" r="4" fill="#ffb3e0" opacity="0.8"/><circle cx="68" cy="54" r="4" fill="#ffb3e0" opacity="0.8"/>` },
+
+  { name:"Ballerina Bow", tag:"girly", env:"confetti", envColor:["#ff8fc2","#ffc2e0","#fff5f8"],
+    bg:"linear-gradient(160deg,#3a1c2a,#5c2d44 55%,#7a3c5a)", blob1:"#ffd6e6", blob2:"#ff8fc2",
+    ring:"#ff8fc2", eyebrow:"#f0c9d9", pill:"rgba(60,25,40,0.4)",
+    svg:`<g class="bow-wobble">
+        <path d="M50 22 L26 6 C18 2 14 16 24 20 L50 22 Z" fill="#ff8fc2" stroke="#e85a9e" stroke-width="1.5"/>
+        <path d="M50 22 L74 6 C82 2 86 16 76 20 L50 22 Z" fill="#ff8fc2" stroke="#e85a9e" stroke-width="1.5"/>
+        <path d="M50 22 L30 10 C26 8 24 14 30 16 L50 22 Z" fill="#ffc2e0" opacity="0.85"/>
+        <path d="M50 22 L70 10 C74 8 76 14 70 16 L50 22 Z" fill="#ffc2e0" opacity="0.85"/>
+        <circle cx="50" cy="22" r="6" fill="#e85a9e"/>
+        <circle class="twinkle" cx="50" cy="22" r="2" fill="#fff"/>
+        <path class="wave" d="M46 27 Q40 42 44 56" stroke="#ff8fc2" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path class="wave" d="M54 27 Q60 42 56 56" stroke="#ff8fc2" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </g>
+      <circle cx="50" cy="60" r="27" fill="#fff5f8"/>
+      <g class="blink"><ellipse cx="41" cy="58" rx="4.6" ry="6.2" fill="#5a2a45"/><ellipse cx="59" cy="58" rx="4.6" ry="6.2" fill="#5a2a45"/><circle cx="43" cy="55.5" r="1.7" fill="#fff"/><circle cx="61" cy="55.5" r="1.7" fill="#fff"/></g>
+      <path d="M35 50 L39 46" stroke="#5a2a45" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M65 50 L61 46" stroke="#5a2a45" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="33" cy="66" r="4.6" fill="#ffb3cf"/><circle cx="67" cy="66" r="4.6" fill="#ffb3cf"/>
+      <path d="M44 70 Q50 75 56 70" stroke="#5a2a45" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M26 84 Q50 94 74 84 L74 90 Q50 100 26 90 Z" fill="#ffd6e6" stroke="#ffb3cf" stroke-width="1"/>
+      <circle class="twinkle" cx="18" cy="40" r="1.8" fill="#ffc2e0"/><circle class="twinkle" cx="82" cy="40" r="1.8" fill="#ffc2e0"/>` },
+
+  { name:"Butterfly", tag:"girly", env:"dust", envColor:"#ff9ecb",
+    bg:"linear-gradient(160deg,#0a1c1a,#122a26 55%,#183630)", blob1:"#3a6a5a", blob2:"#245045",
+    ring:"#ff9ecb", eyebrow:"#e0b8d8", pill:"rgba(35,18,45,0.4)",
+    svg:`<path class="flap-l" d="M46 32 C20 12 4 32 14 48 C4 60 16 80 40 66" fill="#ff9ecb"/>
+      <path class="flap-r" d="M54 32 C80 12 96 32 86 48 C96 60 84 80 60 66" fill="#ff9ecb"/>
+      <path class="flap-l" d="M46 32 C30 22 22 34 28 42" fill="#c9a4ff" opacity="0.7" style="transform-origin:38px 36px"/>
+      <path class="flap-r" d="M54 32 C70 22 78 34 72 42" fill="#c9a4ff" opacity="0.7" style="transform-origin:62px 36px"/>
+      <ellipse cx="50" cy="48" rx="9" ry="30" fill="#5a3a2a"/>
+      <path d="M44 20 Q38 8 30 10" stroke="#5a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M56 20 Q62 8 70 10" stroke="#5a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <g class="blink"><ellipse cx="45" cy="44" rx="2.6" ry="3.4" fill="#fff"/><ellipse cx="55" cy="44" rx="2.6" ry="3.4" fill="#fff"/></g>
+      <path d="M46 52 Q50 55 54 52" stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.8"/>` },
+
+  { name:"Strawberry", tag:"food", env:"none", envColor:"#ff6f7f",
+    bg:"linear-gradient(160deg,#160608,#20090c 55%,#2a0c10)", blob1:"#ff9d9d", blob2:"#ff5c6e",
+    ring:"#ff6f7f", eyebrow:"#f0b3b8", pill:"rgba(60,20,25,0.4)",
+    svg:`<g class="jiggle">
+        <path d="M50 26 Q42 8 34 16 Q44 20 50 26 Z" fill="#5fb04a"/>
+        <path d="M50 26 Q58 8 66 16 Q56 20 50 26 Z" fill="#5fb04a"/>
+        <path d="M50 26 Q40 12 30 24 Q42 24 50 26 Z" fill="#4a9c3a"/>
+        <path d="M50 26 Q60 12 70 24 Q58 24 50 26 Z" fill="#4a9c3a"/>
+        <path d="M50 10 L54 26 L46 26 Z" fill="#5fb04a"/>
+      </g>
+      <path d="M50 26 C24 26 14 52 18 70 C22 94 36 98 50 98 C64 98 78 94 82 70 C86 52 76 26 50 26 Z" fill="#ff5c6e"/>
+      <ellipse cx="34" cy="45" rx="6" ry="10" fill="#fff" opacity="0.22" transform="rotate(-20 34 45)"/>
+      <circle class="twinkle" cx="32" cy="52" r="1.8" fill="#ffe98a"/>
+      <circle class="twinkle" cx="68" cy="52" r="1.8" fill="#ffe98a" style="animation-delay:.5s"/>
+      <circle class="twinkle" cx="40" cy="72" r="1.8" fill="#ffe98a" style="animation-delay:.9s"/>
+      <circle class="twinkle" cx="60" cy="72" r="1.8" fill="#ffe98a" style="animation-delay:1.3s"/>
+      <circle cx="50" cy="86" r="1.8" fill="#ffe98a"/><circle cx="50" cy="60" r="1.8" fill="#ffe98a"/>
+      <g class="blink"><ellipse cx="40" cy="58" rx="4.4" ry="6" fill="#5a0f18"/><ellipse cx="60" cy="58" rx="4.4" ry="6" fill="#5a0f18"/><circle cx="42" cy="55.5" r="1.6" fill="#fff"/><circle cx="62" cy="55.5" r="1.6" fill="#fff"/></g>
+      <circle cx="32" cy="66" r="4.5" fill="#ffb3b3" opacity="0.85"/><circle cx="68" cy="66" r="4.5" fill="#ffb3b3" opacity="0.85"/>
+      <path d="M43 70 Q50 75 57 70" stroke="#5a0f18" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Teddy Bear", tag:"cute", env:"dust", envColor:"#e8c9a0",
+    bg:"linear-gradient(160deg,#160e06,#22160a 55%,#2c1c0e)", blob1:"#c9986a", blob2:"#a97a4a",
+    ring:"#c9986a", eyebrow:"#e0c2a0", pill:"rgba(30,20,10,0.4)",
+    svg:`<circle cx="24" cy="24" r="15" fill="#c9986a"/><circle cx="76" cy="24" r="15" fill="#c9986a"/>
+      <circle cx="24" cy="24" r="7.5" fill="#a97a4a"/><circle cx="76" cy="24" r="7.5" fill="#a97a4a"/>
+      <circle cx="50" cy="56" r="32" fill="#c9986a"/>
+      <ellipse cx="50" cy="65" rx="17" ry="13" fill="#e8c9a0"/>
+      <g class="blink"><ellipse cx="40" cy="50" rx="4.4" ry="6" fill="#3a2410"/><ellipse cx="60" cy="50" rx="4.4" ry="6" fill="#3a2410"/><circle cx="42" cy="47.5" r="1.6" fill="#fff"/><circle cx="62" cy="47.5" r="1.6" fill="#fff"/></g>
+      <ellipse cx="50" cy="60" rx="4" ry="3.2" fill="#3a2410"/>
+      <path d="M50 63 L50 68" stroke="#3a2410" stroke-width="1.6"/>
+      <path d="M42 70 Q50 75 58 70" stroke="#3a2410" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <circle cx="32" cy="62" r="4.4" fill="#ffb3cf" opacity="0.75"/><circle cx="68" cy="62" r="4.4" fill="#ffb3cf" opacity="0.75"/>` },
+
+  { name:"Flying Angel", tag:"cute", env:"stars", envColor:"#ffe98a",
+    bg:"linear-gradient(160deg,#1a1830,#242048 55%,#2e285c)", blob1:"#ffe98a", blob2:"#c9d4ff",
+    ring:"#ffe98a", eyebrow:"#cfd6f0", pill:"rgba(25,25,45,0.4)",
+    svg:`<path class="flap-l" d="M28 42 C6 30 0 46 12 54 C2 60 6 74 22 68" fill="#fff" opacity="0.95"/>
+      <path class="flap-r" d="M72 42 C94 30 100 46 88 54 C98 60 94 74 78 68" fill="#fff" opacity="0.95"/>
+      <ellipse class="twinkle" cx="50" cy="12" rx="14" ry="5" fill="none" stroke="#ffe98a" stroke-width="3" opacity="0.9"/>
+      <circle cx="50" cy="52" r="26" fill="#ffe0c9"/>
+      <path d="M30 68 Q50 82 70 68 L68 78 Q50 88 32 78 Z" fill="#fff5f8"/>
+      <g class="blink"><ellipse cx="41" cy="50" rx="4.6" ry="6" fill="#3a1c2e"/><ellipse cx="59" cy="50" rx="4.6" ry="6" fill="#3a1c2e"/><circle cx="43" cy="47.5" r="1.7" fill="#fff"/><circle cx="61" cy="47.5" r="1.7" fill="#fff"/></g>
+      <circle cx="33" cy="58" r="4.2" fill="#ff9ecb" opacity="0.8"/><circle cx="67" cy="58" r="4.2" fill="#ff9ecb" opacity="0.8"/>
+      <path d="M43 62 Q50 67 57 62" stroke="#3a1c2e" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Donut", tag:"food", env:"confetti", envColor:["#ff9ecf","#5cd6e0","#ffd94d","#7fd67f"],
+    bg:"linear-gradient(160deg,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffcba4", blob2:"#ff9ecf",
+    ring:"#ff9ecf", eyebrow:"#f0c2a8", pill:"rgba(60,35,20,0.4)",
+    svg:`<circle cx="50" cy="50" r="32" fill="none" stroke="#f0c99b" stroke-width="28"/>
+      <circle cx="50" cy="50" r="32" fill="none" stroke="#ff9ecf" stroke-width="21"/>
+      <rect x="30" y="16" width="7" height="3" rx="1.4" fill="#5cd6e0" transform="rotate(20 33 17)"/>
+      <rect x="48" y="10" width="7" height="3" rx="1.4" fill="#ffd94d" transform="rotate(-10 51 11)"/>
+      <rect x="62" y="16" width="7" height="3" rx="1.4" fill="#7fd67f" transform="rotate(30 65 17)"/>
+      <rect x="20" y="30" width="7" height="3" rx="1.4" fill="#c9a4ff" transform="rotate(50 23 31)"/>
+      <rect x="74" y="30" width="7" height="3" rx="1.4" fill="#5cd6e0" transform="rotate(-45 77 31)"/>
+      <g class="blink"><ellipse cx="40" cy="76" rx="4.4" ry="5.8" fill="#5a2a1a"/><ellipse cx="60" cy="76" rx="4.4" ry="5.8" fill="#5a2a1a"/><circle cx="42" cy="73.5" r="1.6" fill="#fff"/><circle cx="62" cy="73.5" r="1.6" fill="#fff"/></g>
+      <circle cx="33" cy="82" r="4" fill="#ff8fae" opacity="0.8"/><circle cx="67" cy="82" r="4" fill="#ff8fae" opacity="0.8"/>
+      <path d="M44 86 Q50 90 56 86" stroke="#5a2a1a" stroke-width="2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Ice Cream Cone", tag:"food", env:"dust", envColor:"#ffe0c9",
+    bg:"linear-gradient(160deg,#3a2418,#5c3826 55%,#7a4a32)", blob1:"#ffe0c9", blob2:"#e0a868",
+    ring:"#ffe0c9", eyebrow:"#f0c2a8", pill:"rgba(60,35,20,0.4)",
+    svg:`<path d="M30 60 L50 98 L70 60 Z" fill="#e0a868" stroke="#c98a4a" stroke-width="1"/>
+      <g opacity="0.5" stroke="#c98a4a" stroke-width="1.4">
+        <line x1="34" y1="66" x2="58" y2="90"/><line x1="38" y1="62" x2="64" y2="86"/>
+        <line x1="66" y1="66" x2="42" y2="90"/><line x1="62" y1="62" x2="36" y2="86"/>
+      </g>
+      <circle cx="50" cy="50" r="26" fill="#ffe0c9"/>
+      <path d="M26 48 Q50 34 74 48" stroke="#ffcfa8" stroke-width="3" fill="none" opacity="0.6"/>
+      <circle cx="50" cy="22" r="18" fill="#ffe8d6"/>
+      <path d="M34 20 Q50 10 66 20" stroke="#ffcfa8" stroke-width="2.5" fill="none" opacity="0.6"/>
+      <circle cx="50" cy="4" r="5.5" fill="#e0304f"/>
+      <path d="M50 -1 Q54 -6 58 -4" stroke="#4a9c3a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <g class="blink"><ellipse cx="40" cy="56" rx="4.6" ry="6" fill="#5a2a1a"/><ellipse cx="60" cy="56" rx="4.6" ry="6" fill="#5a2a1a"/><circle cx="42" cy="53.5" r="1.7" fill="#fff"/><circle cx="62" cy="53.5" r="1.7" fill="#fff"/></g>
+      <circle cx="33" cy="62" r="4.4" fill="#ff8fae" opacity="0.8"/><circle cx="67" cy="62" r="4.4" fill="#ff8fae" opacity="0.8"/>
+      <path d="M44 66 Q50 71 56 66" stroke="#5a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Matcha Latte", tag:"food", env:"steam", envColor:"#eef5e0",
+    bg:"linear-gradient(160deg,#0f2414,#1f3a1a 55%,#2a4a24)", blob1:"#9cc96a", blob2:"#7fae4a",
+    ring:"#9cc96a", eyebrow:"#c2e0a0", pill:"rgba(20,40,15,0.4)",
+    svg:`<path d="M26 22 L74 22 L69 92 Q50 98 31 92 Z" fill="#eef5e0"/>
+      <path d="M26 22 Q50 10 74 22 L73 36 Q50 46 27 36 Z" fill="#7fae4a"/>
+      <rect x="44" y="2" width="10" height="24" rx="3.5" fill="#f5f5f5"/>
+      <path d="M62 6 Q68 0 74 4 Q68 10 62 6 Z" fill="#7fae4a"/>
+      <path d="M64 8 Q66 2 70 0" stroke="#5f9c3a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <rect x="27" y="50" width="46" height="20" rx="5" fill="#c9d9a0"/>
+      <g class="blink"><ellipse cx="39" cy="60" rx="4.6" ry="6.2" fill="#2a4018"/><ellipse cx="61" cy="60" rx="4.6" ry="6.2" fill="#2a4018"/><circle cx="41" cy="57.5" r="1.7" fill="#fff"/><circle cx="63" cy="57.5" r="1.7" fill="#fff"/></g>
+      <path d="M42 71 Q50 76 58 71" stroke="#2a4018" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <circle cx="31" cy="66" r="4.2" fill="#f4a07a" opacity="0.8"/><circle cx="69" cy="66" r="4.2" fill="#f4a07a" opacity="0.8"/>` },
+
+  { name:"Martini Glass", tag:"food", env:"bubbles", envColor:"#cbd5e8",
+    bg:"linear-gradient(160deg,#0a0f1a,#141c2e 55%,#1e2a42)", blob1:"#cbd5e8", blob2:"#7fae4a",
+    ring:"#cbd5e8", eyebrow:"#b8c2d8", pill:"rgba(15,20,35,0.4)",
+    svg:`<path d="M14 12 L86 12 L50 56 Z" fill="#eaf2ff" opacity="0.9" stroke="#cbd5e8" stroke-width="2"/>
+      <line x1="50" y1="56" x2="50" y2="84" stroke="#cbd5e8" stroke-width="4"/>
+      <ellipse cx="50" cy="90" rx="20" ry="4.5" fill="#cbd5e8"/>
+      <rect x="76" y="2" width="2.4" height="14" fill="#c9986a"/><circle cx="77" cy="20" r="6" fill="#7fae4a"/><circle cx="77" cy="20" r="2.2" fill="#a9986a"/>
+      <g class="blink"><ellipse cx="40" cy="26" rx="4.4" ry="5.8" fill="#2a3a52"/><ellipse cx="56" cy="26" rx="4.4" ry="5.8" fill="#2a3a52"/><circle cx="42" cy="23.5" r="1.6" fill="#fff"/><circle cx="58" cy="23.5" r="1.6" fill="#fff"/></g>
+      <circle cx="32" cy="32" r="3.6" fill="#ffb3cf" opacity="0.75"/><circle cx="64" cy="32" r="3.6" fill="#ffb3cf" opacity="0.75"/>
+      <path d="M40 34 Q48 39 56 34" stroke="#2a3a52" stroke-width="2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Lollipop", tag:"food", env:"swirl", envColor:"#ff9ecb",
+    bg:"linear-gradient(160deg,#3a1420,#5c1d33 55%,#7a2a45)", blob1:"#ff9ecb", blob2:"#ff6f9c",
+    ring:"#ff6f9c", eyebrow:"#f0b8d0", pill:"rgba(60,20,40,0.4)",
+    svg:`<line x1="50" y1="84" x2="50" y2="100" stroke="#e8d8c9" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="50" cy="48" r="34" fill="#ff6f9c"/>
+      <path d="M50 18 A30 30 0 0 1 74 62" fill="none" stroke="#ffb3cf" stroke-width="4" stroke-linecap="round" opacity="0.35"/>
+      <g class="blink"><ellipse cx="40" cy="46" rx="5" ry="6.4" fill="#3a1420"/><ellipse cx="60" cy="46" rx="5" ry="6.4" fill="#3a1420"/><circle cx="42" cy="43.5" r="1.8" fill="#fff"/><circle cx="62" cy="43.5" r="1.8" fill="#fff"/></g>
+      <circle cx="32" cy="56" r="4.6" fill="#ffb3cf" opacity="0.85"/><circle cx="68" cy="56" r="4.6" fill="#ffb3cf" opacity="0.85"/>
+      <path d="M42 60 Q50 65 58 60" stroke="#3a1420" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Popsicle", tag:"food", env:"sun", envColor:"#ffe08a",
+    bg:"linear-gradient(160deg,#1c1006,#2a1608 55%,#361c0a)", blob1:"#ffb347", blob2:"#ff9433",
+    ring:"#ff9433", eyebrow:"#f0cf8a", pill:"rgba(60,35,10,0.4)",
+    svg:`<g class="wobble">
+        <rect x="46" y="80" width="8" height="18" rx="3" fill="#e8d8c9"/>
+        <path d="M50 6 C24 6 16 26 16 44 L16 74 Q16 84 26 84 L74 84 Q84 84 84 74 L84 44 C84 26 76 6 50 6 Z" fill="#ff9433"/>
+        <line x1="16" y1="44" x2="84" y2="44" stroke="#e0761a" stroke-width="3" opacity="0.4"/>
+        <g class="blink"><ellipse cx="40" cy="34" rx="4.8" ry="6.2" fill="#5a2a08"/><ellipse cx="60" cy="34" rx="4.8" ry="6.2" fill="#5a2a08"/><circle cx="42" cy="31.5" r="1.7" fill="#fff"/><circle cx="62" cy="31.5" r="1.7" fill="#fff"/></g>
+        <circle cx="32" cy="44" r="4.4" fill="#ffcf9e" opacity="0.85"/><circle cx="68" cy="44" r="4.4" fill="#ffcf9e" opacity="0.85"/>
+        <path d="M43 48 Q50 53 57 48" stroke="#5a2a08" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      </g>` },
+
+  { name:"Potion Bottle", tag:"magical", env:"stars", envColor:"#e0c9ff",
+    bg:"linear-gradient(160deg,#0a0614,#120a20 55%,#180e2c)", blob1:"#b98aff", blob2:"#8a4fd6",
+    ring:"#b98aff", eyebrow:"#c9a8e8", pill:"rgba(30,20,45,0.4)",
+    svg:`<circle class="float-up" cx="42" cy="50" r="2" fill="#e0c9ff" opacity="0.7"/>
+      <circle class="float-up" cx="58" cy="56" r="1.6" fill="#e0c9ff" opacity="0.6" style="animation-delay:.8s"/>
+      <path d="M40 20 L40 8 L60 8 L60 20 Q80 32 80 52 L80 82 Q80 92 68 92 L32 92 Q20 92 20 82 L20 52 Q20 32 40 20 Z" fill="#b98aff" opacity="0.88"/>
+      <rect x="37" y="2" width="26" height="8" rx="2.5" fill="#8a5a34"/>
+      <path d="M24 60 Q50 70 76 60 L76 82 Q76 88 68 88 L32 88 Q24 88 24 82 Z" fill="#8a4fd6" opacity="0.6"/>
+      <g class="blink"><ellipse cx="40" cy="66" rx="4.4" ry="5.8" fill="#2a1440"/><ellipse cx="60" cy="66" rx="4.4" ry="5.8" fill="#2a1440"/><circle cx="42" cy="63.5" r="1.6" fill="#fff"/><circle cx="62" cy="63.5" r="1.6" fill="#fff"/></g>
+      <circle cx="32" cy="72" r="4" fill="#e0b3ff" opacity="0.8"/><circle cx="68" cy="72" r="4" fill="#e0b3ff" opacity="0.8"/>
+      <path d="M42 77 Q50 81 58 77" stroke="#2a1440" stroke-width="2" fill="none" stroke-linecap="round"/>` },
+
+  { name:"Gift Box", tag:"trinket", env:"confetti", envColor:["#ff9ecb","#ffd166","#7fd6e0"],
+    bg:"linear-gradient(160deg,#3a1830,#5c2650 55%,#7a3468)", blob1:"#ffd6ea", blob2:"#ff9ecb",
+    ring:"#ff9ecb", eyebrow:"#f0c9dc", pill:"rgba(60,20,50,0.4)",
+    svg:`<g class="bow-wobble">
+        <path d="M50 20 L30 6 C24 2 20 12 28 16 L50 20 Z" fill="#ff9ecb" stroke="#e85a9e" stroke-width="1.5"/>
+        <path d="M50 20 L70 6 C76 2 80 12 72 16 L50 20 Z" fill="#ff9ecb" stroke="#e85a9e" stroke-width="1.5"/>
+        <circle cx="50" cy="20" r="5.5" fill="#e85a9e"/>
+      </g>
+      <rect x="18" y="26" width="64" height="66" rx="6" fill="#ffd166"/>
+      <rect x="18" y="26" width="64" height="16" fill="#ffb347"/>
+      <rect x="44" y="26" width="12" height="66" fill="#ffb347"/>
+      <g class="blink"><ellipse cx="40" cy="66" rx="4.6" ry="6" fill="#5a3a10"/><ellipse cx="60" cy="66" rx="4.6" ry="6" fill="#5a3a10"/><circle cx="42" cy="63.5" r="1.7" fill="#fff"/><circle cx="62" cy="63.5" r="1.7" fill="#fff"/></g>
+      <circle cx="33" cy="74" r="4.4" fill="#ff9ecb" opacity="0.8"/><circle cx="67" cy="74" r="4.4" fill="#ff9ecb" opacity="0.8"/>
+      <path d="M44 78 Q50 82 56 78" stroke="#5a3a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>` },
+];
+
+// ============ STATE & PERSISTENCE ============
+const LS_GOAL = 'stepTracker_goal';
+const LS_DAYS = 'stepTracker_days';
+const LS_THEME = 'stepTracker_themeIndex';
+
+function loadGoal(){ const v = parseInt(localStorage.getItem(LS_GOAL)); return (v && v > 0) ? v : 10000; }
+function saveGoal(v){ localStorage.setItem(LS_GOAL, String(v)); }
+function loadDays(){ try{ return JSON.parse(localStorage.getItem(LS_DAYS)) || {}; }catch(e){ return {}; } }
+function saveDays(obj){ localStorage.setItem(LS_DAYS, JSON.stringify(obj)); }
+function loadThemeIndex(){ const v = parseInt(localStorage.getItem(LS_THEME)); return (v>=0 && v<themes.length) ? v : 0; }
+function saveThemeIndex(i){ localStorage.setItem(LS_THEME, String(i)); }
+
+function dateKey(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function todayKey(){ return dateKey(new Date()); }
+
+let goal = loadGoal();
+let daysData = loadDays();
+let idx = loadThemeIndex();
+
+// ============ SHARED CONSTANTS ============
+const R = 124, CX = 140, CY = 140;
+const CIRC = 2 * Math.PI * R;
+
+// ============ DOM REFS ============
+const appEl = document.getElementById('app');
+const blob1 = document.getElementById('blob1');
+const blob2 = document.getElementById('blob2');
+const envField = document.getElementById('envField');
+const themeNameEl = document.getElementById('themeName');
+const themeTagEl = document.getElementById('themeTag');
+const mascotWrap = document.getElementById('mascotWrap');
+const mascotShadow = document.getElementById('mascotShadow');
+const mascotHalo = document.getElementById('mascotHalo');
+const ringProgress = document.getElementById('ringProgress');
+const dotsWrap = document.getElementById('dots');
+const trailParticles = document.getElementById('trailParticles');
+const orbitParticles = document.getElementById('orbitParticles');
+const mascotPulse = document.getElementById('mascotPulse');
+const stepsNumEl = document.getElementById('stepsNum');
+const stepsLabelEl = document.getElementById('stepsLabel');
+const pctOfGoalEl = document.getElementById('pctOfGoal');
+const distMiEl = document.getElementById('distMi');
+const todayDateEl = document.getElementById('todayDate');
+const trackBtn = document.getElementById('trackBtn');
+const trackStatus = document.getElementById('trackStatus');
+
+let mascotX = 0, mascotY = 0;
+
+// ============ MASCOT / THEME RENDERING (unchanged visual system) ============
+function colorFor(envColor, i){ return Array.isArray(envColor) ? envColor[i % envColor.length] : envColor; }
+
+function buildDots(){
+  dotsWrap.innerHTML = '';
+  themes.forEach((t,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===idx ? ' active' : '');
+    d.addEventListener('click', ()=> setTheme(i));
+    dotsWrap.appendChild(d);
+  });
+}
+
+function spawnEnv(theme){
+  envField.innerHTML = '';
+  const positions = [
+    {top:'12%',left:'14%'}, {top:'62%',left:'84%'}, {top:'40%',left:'88%'},
+    {top:'76%',left:'10%'}, {top:'10%',left:'66%'}, {top:'86%',left:'50%'}
+  ];
+  if(theme.env === 'sun'){
+    for(let i=0;i<6;i++){
+      const r = document.createElement('div');
+      r.className = 'sun-ray';
+      r.style.background = `linear-gradient(${theme.envColor}, transparent)`;
+      r.style.transform = `rotate(${i*60}deg) translateX(-50%)`;
+      r.style.animationDelay = (i*0.15) + 's';
+      envField.appendChild(r);
+    }
+  } else if(theme.env === 'stars' || theme.env === 'nightsky'){
+    positions.forEach((p,i)=>{
+      const s = document.createElement('div');
+      s.className = 'env-star';
+      s.style.top = p.top; s.style.left = p.left;
+      s.style.background = theme.envColor;
+      s.style.animationDelay = (i*0.4) + 's';
+      envField.appendChild(s);
+    });
+    if(theme.env === 'nightsky'){
+      const moon = document.createElement('div');
+      moon.className = 'env-moon';
+      [{top:'14px',left:'12px',size:'8px'},{top:'28px',left:'26px',size:'5px'},{top:'10px',left:'30px',size:'4px'}].forEach(c=>{
+        const cr = document.createElement('div');
+        cr.className = 'crater';
+        cr.style.top=c.top; cr.style.left=c.left; cr.style.width=c.size; cr.style.height=c.size;
+        moon.appendChild(cr);
+      });
+      envField.appendChild(moon);
+    }
+  } else if(theme.env === 'bubbles'){
+    positions.forEach((p,i)=>{
+      const b = document.createElement('div');
+      b.className = 'env-bubble';
+      const size = 6 + (i%3)*4;
+      b.style.width=size+'px'; b.style.height=size+'px'; b.style.top=p.top; b.style.left=p.left;
+      b.style.background = colorFor(theme.envColor,i)+'99';
+      b.style.animationDelay = (i*0.7)+'s';
+      envField.appendChild(b);
+    });
+  } else if(theme.env === 'embers'){
+    positions.forEach((p,i)=>{
+      const e = document.createElement('div');
+      e.className='env-ember'; const size=4+(i%2)*3;
+      e.style.width=size+'px'; e.style.height=size+'px'; e.style.top=p.top; e.style.left=p.left;
+      e.style.background=colorFor(theme.envColor,i);
+      e.style.boxShadow=`0 0 6px 2px ${colorFor(theme.envColor,i)}88`;
+      e.style.animationDelay=(i*0.5)+'s';
+      envField.appendChild(e);
+    });
+  } else if(theme.env === 'dust'){
+    positions.forEach((p,i)=>{
+      const d = document.createElement('div');
+      d.className='env-dust'; d.style.top=p.top; d.style.left=p.left;
+      d.style.background=colorFor(theme.envColor,i); d.style.animationDelay=(i*0.5)+'s';
+      envField.appendChild(d);
+    });
+  } else if(theme.env === 'confetti'){
+    positions.forEach((p,i)=>{
+      const c = document.createElement('div');
+      c.className='env-confetti'; c.style.top='-20px'; c.style.left=p.left;
+      c.style.background=colorFor(theme.envColor,i); c.style.animationDelay=(i*0.6)+'s';
+      envField.appendChild(c);
+    });
+  } else if(theme.env === 'steam'){
+    [{left:'40%'},{left:'50%'},{left:'60%'}].forEach((p,i)=>{
+      const s = document.createElement('div');
+      s.className='env-steam'; s.style.top='4%'; s.style.left=p.left;
+      s.style.background=theme.envColor+'55'; s.style.animationDelay=(i*0.6)+'s';
+      envField.appendChild(s);
+    });
+  } else if(theme.env === 'swirl'){
+    const sw = document.createElement('div');
+    sw.className='env-swirl'; sw.style.width='210px'; sw.style.height='210px';
+    sw.style.left='50%'; sw.style.top='46%'; sw.style.marginLeft='-105px'; sw.style.marginTop='-105px';
+    sw.style.borderColor = theme.envColor+'33'; sw.style.animationDuration='9s';
+    envField.appendChild(sw);
+  }
+}
+
+function positionMascotOnRing(pct){
+  const angleDeg = -90 + (360 * pct);
+  const angleRad = angleDeg * Math.PI / 180;
+  mascotX = CX + R * Math.cos(angleRad);
+  mascotY = CY + R * Math.sin(angleRad);
+  mascotWrap.style.left = (mascotX - 37) + 'px';
+  mascotWrap.style.top  = (mascotY - 37) + 'px';
+  mascotShadow.style.left = (mascotX - 19) + 'px';
+  mascotShadow.style.top  = (mascotY + 24) + 'px';
+  mascotHalo.style.left = (mascotX - 66) + 'px';
+  mascotHalo.style.top  = (mascotY - 66) + 'px';
+}
+
+function spawnTrailParticles(theme){
+  trailParticles.innerHTML = '';
+  const offsets = [{dx:-18,dy:-6,delay:0,size:6},{dx:16,dy:4,delay:0.9,size:5},{dx:-6,dy:14,delay:1.7,size:4}];
+  offsets.forEach((o,i)=>{
+    const p = document.createElement('div');
+    p.className='trail-p'; p.style.width=o.size+'px'; p.style.height=o.size+'px';
+    p.style.left=(mascotX+o.dx)+'px'; p.style.top=(mascotY+o.dy)+'px';
+    p.style.background = colorFor(theme.envColor,i);
+    p.style.setProperty('--dx',(o.dx>0?10:-10)+'px'); p.style.animationDelay=o.delay+'s';
+    trailParticles.appendChild(p);
+  });
+}
+
+function spawnOrbitAndPulse(theme){
+  orbitParticles.innerHTML = '';
+  const specs = [{dir:'cw',rad:40,dur:3.2,size:6,delay:0},{dir:'ccw',rad:30,dur:4.6,size:4.5,delay:0.6}];
+  specs.forEach((s,i)=>{
+    const wrap = document.createElement('div');
+    wrap.style.position='absolute'; wrap.style.left=mascotX+'px'; wrap.style.top=mascotY+'px'; wrap.style.width='0'; wrap.style.height='0';
+    const dot = document.createElement('div');
+    dot.className = 'orbit-dot ' + (s.dir==='cw'?'orbit-cw':'orbit-ccw');
+    dot.style.width=s.size+'px'; dot.style.height=s.size+'px';
+    dot.style.marginLeft=(-s.size/2)+'px'; dot.style.marginTop=(-s.size/2)+'px';
+    dot.style.background = colorFor(theme.envColor,i);
+    dot.style.setProperty('--rad',s.rad+'px'); dot.style.setProperty('--dur',s.dur+'s');
+    dot.style.animationDelay=s.delay+'s';
+    wrap.appendChild(dot); orbitParticles.appendChild(wrap);
+  });
+  mascotPulse.innerHTML = '';
+  const pulse = document.createElement('div');
+  pulse.className='mascot-pulse'; pulse.style.left=(mascotX-20)+'px'; pulse.style.top=(mascotY-20)+'px';
+  pulse.style.borderColor = theme.ring;
+  mascotPulse.appendChild(pulse);
+}
+
+function currentPct(){
+  const steps = daysData[todayKey()] || 0;
+  return Math.max(0, Math.min(1, steps / goal));
+}
+
+function setTheme(i, skipSave){
+  idx = (i + themes.length) % themes.length;
+  const t = themes[idx];
+  const pct = currentPct();
+
+  appEl.style.background = t.bg;
+  blob1.style.background = t.blob1;
+  blob2.style.background = t.blob2;
+  themeNameEl.textContent = t.name;
+  themeNameEl.style.color = t.ring;
+  themeNameEl.style.textShadow = `0 0 24px ${t.ring}55`;
+  themeTagEl.textContent = t.tag;
+  ringProgress.style.stroke = t.ring;
+
+  mascotWrap.innerHTML = `<svg viewBox="0 0 100 100">${t.svg}</svg>`;
+  positionMascotOnRing(pct);
+  spawnTrailParticles(t);
+  spawnOrbitAndPulse(t);
+  mascotHalo.style.background = `radial-gradient(circle, ${t.ring}bb 0%, ${t.ring}00 70%)`;
+
+  buildDots();
+  spawnEnv(t);
+
+  ringProgress.style.strokeDashoffset = CIRC * (1 - pct);
+
+  if(!skipSave) saveThemeIndex(idx);
+}
+
+document.getElementById('prevBtn').addEventListener('click', ()=> setTheme(idx-1));
+document.getElementById('nextBtn').addEventListener('click', ()=> setTheme(idx+1));
+
+// ============ TODAY STATS ============
+function refreshTodayStats(){
+  const steps = daysData[todayKey()] || 0;
+  const pct = currentPct();
+  stepsNumEl.textContent = steps.toLocaleString();
+  stepsLabelEl.textContent = `of ${goal.toLocaleString()} steps`;
+  pctOfGoalEl.textContent = Math.round(pct*100) + '%';
+  const miles = (steps * 0.762) / 1609.34;
+  distMiEl.textContent = miles.toFixed(1) + 'mi';
+  positionMascotOnRing(pct);
+  spawnTrailParticles(themes[idx]);
+  spawnOrbitAndPulse(themes[idx]);
+  ringProgress.style.strokeDashoffset = CIRC * (1 - pct);
+}
+
+function addSteps(n){
+  const k = todayKey();
+  daysData[k] = (daysData[k] || 0) + n;
+  saveDays(daysData);
+  refreshTodayStats();
+  if(document.getElementById('view-week').classList.contains('active')) renderWeek();
+  if(document.getElementById('view-month').classList.contains('active')) renderMonth();
+}
+
+// ============ STEP DETECTION ============
+let tracking = false;
+let stepBuffer = [];
+const BUFFER_SIZE = 12;
+const STEP_THRESHOLD = 1.15; // deviation from rolling baseline, m/s^2 — tune per device if needed
+const MIN_STEP_INTERVAL = 280; // ms
+let lastStepTime = 0;
+
+function handleMotion(event){
+  const acc = event.accelerationIncludingGravity;
+  if(!acc || acc.x === null || acc.x === undefined) return;
+  const mag = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+  stepBuffer.push(mag);
+  if(stepBuffer.length > BUFFER_SIZE) stepBuffer.shift();
+  const avg = stepBuffer.reduce((a,b)=>a+b,0) / stepBuffer.length;
+  const now = Date.now();
+  if((mag - avg) > STEP_THRESHOLD && (now - lastStepTime) > MIN_STEP_INTERVAL){
+    lastStepTime = now;
+    addSteps(1);
+  }
+}
+
+function startTracking(){
+  const supported = typeof window.DeviceMotionEvent !== 'undefined';
+  if(!supported){
+    trackStatus.textContent = "This browser doesn't support motion sensors.";
+    return;
+  }
+  const begin = ()=>{
+    window.addEventListener('devicemotion', handleMotion);
+    tracking = true;
+    trackBtn.textContent = 'Stop Tracking';
+    trackBtn.className = 'track-btn stop';
+    trackStatus.textContent = 'Tracking your steps — keep the app open.';
+    document.getElementById('motionStatusText').textContent = 'Motion access granted. Tracking active while this page is open.';
+  };
+  if(typeof DeviceMotionEvent.requestPermission === 'function'){
+    DeviceMotionEvent.requestPermission().then(state=>{
+      if(state === 'granted'){ begin(); }
+      else{
+        trackStatus.textContent = 'Motion permission denied — enable it in Settings > Safari.';
+        document.getElementById('motionStatusText').textContent = 'Motion permission denied.';
+      }
+    }).catch(()=>{
+      trackStatus.textContent = 'Could not request motion permission.';
+    });
+  } else {
+    begin();
+  }
+}
+
+function stopTracking(){
+  window.removeEventListener('devicemotion', handleMotion);
+  tracking = false;
+  trackBtn.textContent = 'Start Tracking';
+  trackBtn.className = 'track-btn start';
+  trackStatus.textContent = 'Tracking paused.';
+}
+
+trackBtn.addEventListener('click', ()=>{
+  if(tracking) stopTracking(); else startTracking();
+});
+
+document.getElementById('testStepsBtn').addEventListener('click', ()=> addSteps(10));
+
+// ============ WEEK VIEW ============
+let weekOffset = 0; // 0 = current week
+function startOfWeek(d){
+  const nd = new Date(d);
+  const day = nd.getDay();
+  nd.setDate(nd.getDate() - day);
+  nd.setHours(0,0,0,0);
+  return nd;
+}
+function renderWeek(){
+  const base = new Date();
+  base.setDate(base.getDate() + weekOffset*7);
+  const start = startOfWeek(base);
+  const dowLabels = ['S','M','T','W','T','F','S'];
+  const strip = document.getElementById('weekStrip');
+  strip.innerHTML = '';
+  const todayK = todayKey();
+  const t = themes[idx];
+  for(let i=0;i<7;i++){
+    const d = new Date(start);
+    d.setDate(start.getDate()+i);
+    const k = dateKey(d);
+    const steps = daysData[k] || 0;
+    const met = steps >= goal;
+    const isToday = k === todayK;
+    const col = document.createElement('div');
+    col.className = 'week-day';
+    col.innerHTML = `
+      <div class="dow">${dowLabels[i]}</div>
+      <div class="cell ${met?'filled':''} ${isToday?'today':''}" style="${met? 'background:'+t.ring+';' : ''}">${d.getDate()}</div>
+    `;
+    strip.appendChild(col);
+  }
+  const endDate = new Date(start); endDate.setDate(start.getDate()+6);
+  const fmt = (dd)=> dd.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  document.getElementById('weekLabel').textContent = `${fmt(start)} – ${fmt(endDate)}`;
+}
+document.getElementById('weekPrevBtn').addEventListener('click', ()=>{ weekOffset--; renderWeek(); });
+document.getElementById('weekNextBtn').addEventListener('click', ()=>{ weekOffset++; renderWeek(); });
+
+// ============ MONTH VIEW ============
+let monthCursor = new Date(); monthCursor.setDate(1);
+function renderMonth(){
+  const y = monthCursor.getFullYear(), m = monthCursor.getMonth();
+  document.getElementById('monthLabel').textContent = monthCursor.toLocaleDateString(undefined,{month:'long', year:'numeric'});
+
+  const dowEl = document.getElementById('monthDow');
+  if(!dowEl.dataset.built){
+    ['S','M','T','W','T','F','S'].forEach(l=>{
+      const c = document.createElement('div'); c.className='month-dow'; c.textContent=l; dowEl.appendChild(c);
+    });
+    dowEl.dataset.built = '1';
+  }
+
+  const grid = document.getElementById('monthGrid');
+  grid.innerHTML = '';
+  const firstDay = new Date(y,m,1).getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const todayK = todayKey();
+  const t = themes[idx];
+
+  for(let i=0;i<firstDay;i++){
+    const cell = document.createElement('div'); cell.className='month-cell empty'; grid.appendChild(cell);
+  }
+  for(let day=1; day<=daysInMonth; day++){
+    const d = new Date(y,m,day);
+    const k = dateKey(d);
+    const steps = daysData[k] || 0;
+    const met = steps >= goal;
+    const isToday = k === todayK;
+    const cell = document.createElement('div');
+    cell.className = `month-cell ${met?'filled':''} ${isToday?'today':''}`;
+    if(met) cell.style.background = t.ring;
+    cell.textContent = day;
+    grid.appendChild(cell);
+  }
+}
+document.getElementById('monthPrevBtn').addEventListener('click', ()=>{ monthCursor.setMonth(monthCursor.getMonth()-1); renderMonth(); });
+document.getElementById('monthNextBtn').addEventListener('click', ()=>{ monthCursor.setMonth(monthCursor.getMonth()+1); renderMonth(); });
+
+// ============ SETTINGS ============
+const goalInput = document.getElementById('goalInput');
+goalInput.value = goal;
+function applyGoal(v){
+  v = Math.max(500, Math.round(v/100)*100);
+  goal = v; goalInput.value = v; saveGoal(v);
+  refreshTodayStats(); renderWeek(); renderMonth();
+}
+goalInput.addEventListener('change', ()=> applyGoal(parseInt(goalInput.value)||10000));
+document.getElementById('goalMinus').addEventListener('click', ()=> applyGoal((parseInt(goalInput.value)||10000) - 500));
+document.getElementById('goalPlus').addEventListener('click', ()=> applyGoal((parseInt(goalInput.value)||10000) + 500));
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('Clear all saved step history on this device?')){
+    daysData = {}; saveDays(daysData);
+    refreshTodayStats(); renderWeek(); renderMonth();
+  }
+});
+
+// ============ NAV ============
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view === 'week') renderWeek();
+    if(btn.dataset.view === 'month') renderMonth();
+  });
+});
+
+// ============ INIT ============
+todayDateEl.textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+setTheme(idx, true);
+refreshTodayStats();
+
+</script>
+</body>
+</html>
