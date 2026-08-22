@@ -195,7 +195,10 @@
   }
   .add-tile svg { width: 22px; height: 22px; }
 
-  .edit-toggle-row { display: flex; justify-content: flex-end; margin-top: 4px; }
+  .edit-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .day-toggle { display: flex; background: var(--chip); border-radius: 100px; padding: 3px; gap: 2px; }
+  .day-btn { border: none; background: none; color: var(--ink-soft); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 100px; }
+  .day-btn.active { background: var(--purple); color: white; }
   .pill-btn {
     border: none; background: var(--card); color: var(--ink);
     font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 100px;
@@ -283,6 +286,10 @@
   <main>
     <div class="view active" id="view-buttons">
       <div class="edit-toggle-row">
+        <div class="day-toggle" id="day-toggle">
+          <button class="day-btn active" data-day="today" onclick="setViewDay('today')">Today</button>
+          <button class="day-btn" data-day="yesterday" onclick="setViewDay('yesterday')">Yesterday</button>
+        </div>
         <button class="pill-btn" id="edit-toggle" onclick="toggleEdit()">Edit</button>
       </div>
       <div id="buttons-normal"></div>
@@ -339,6 +346,13 @@
   function pad(n) { return n < 10 ? '0'+n : ''+n; }
   function dateStr(d) { return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
   function todayStr() { return dateStr(new Date()); }
+  function yesterdayStr() {
+    var d = new Date();
+    d.setDate(d.getDate() - 1);
+    return dateStr(d);
+  }
+  var viewDay = 'today';
+  function viewDateStr() { return viewDay === 'today' ? todayStr() : yesterdayStr(); }
   function daysInMonth(year, monthIndex) { return new Date(year, monthIndex+1, 0).getDate(); }
   function parseDate(s) { var p = s.split('-'); return new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])); }
 
@@ -372,12 +386,12 @@
     );
   }
 
-  function isDoneToday(habit) { return habit.dates.indexOf(todayStr()) !== -1; }
+  function isDoneToday(habit) { return habit.dates.indexOf(viewDateStr()) !== -1; }
 
   function toggleComplete(id) {
     var h = habits.find(function(x){ return x.id === id; });
     if (!h) return;
-    var t = todayStr();
+    var t = viewDateStr();
     var idx = h.dates.indexOf(t);
     if (idx === -1) { h.dates.push(t); } else { h.dates.splice(idx, 1); }
     saveHabits(habits);
@@ -444,9 +458,20 @@
   }
 
   function updateHeader() {
-    var now = new Date();
+    var d = viewDay === 'today' ? new Date() : (function(){ var x = new Date(); x.setDate(x.getDate()-1); return x; })();
     var opts = { weekday: 'long', month: 'long', day: 'numeric' };
-    document.getElementById('header-sub').textContent = now.toLocaleDateString(undefined, opts);
+    document.getElementById('header-title').textContent = viewDay === 'today' ? 'Today' : 'Yesterday';
+    document.getElementById('header-sub').textContent = d.toLocaleDateString(undefined, opts);
+  }
+
+  function setViewDay(day) {
+    viewDay = day;
+    editMode = false;
+    document.getElementById('edit-toggle').textContent = 'Edit';
+    document.getElementById('edit-toggle').classList.remove('on');
+    document.querySelectorAll('.day-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.day === day); });
+    document.getElementById('edit-toggle').style.display = day === 'today' ? '' : 'none';
+    renderButtons();
   }
 
   function renderNormalGrid() {
