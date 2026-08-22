@@ -907,9 +907,47 @@ function addSteps(n){
 let tracking = false;
 let stepBuffer = [];
 const BUFFER_SIZE = 12;
-const STEP_THRESHOLD = 1.15; // deviation from rolling baseline, m/s^2 — tune per device if needed
-const MIN_STEP_INTERVAL = 280; // ms
-let lastStepTime = 0;
+const STEP_THRESHOLD = 1.35;         // deviation from rolling baseline to register a "pulse" — raised to ignore ordinary handling
+const RESET_RATIO = 0.4;             // must settle back down below this fraction of threshold to close the pulse (hysteresis)
+const MIN_STEP_INTERVAL = 300;       // ms — fastest plausible step-to-step gap
+const MAX_STEP_INTERVAL = 1100;      // ms — slowest plausible gap; longer than this breaks the walking streak
+
+let motionState = 'low';             // 'low' = below threshold, 'high' = mid-pulse
+let inStreak = false;                // are we currently in a confirmed walking rhythm?
+let lastCandidateTime = 0;
+let pendingFirstCandidate = null;    // a single unconfirmed pulse, waiting to see if a rhythmic follow-up arrives
+
+function registerCandidatePulse(now){
+  if(inStreak){
+    const gap = now - lastCandidateTime;
+    if(gap < MIN_STEP_INTERVAL){
+      return; // bounce/noise right after a counted step — ignore, don't break the streak
+    } else if(gap <= MAX_STEP_INTERVAL){
+      addSteps(1);
+      lastCandidateTime = now;
+    } else {
+      // gap too long — walking rhythm broken, start over
+      inStreak = false;
+      pendingFirstCandidate = now;
+    }
+  } else {
+    if(pendingFirstCandidate === null){
+      pendingFirstCandidate = now;
+    } else {
+      const gap = now - pendingFirstCandidate;
+      if(gap >= MIN_STEP_INTERVAL && gap <= MAX_STEP_INTERVAL){
+        // two rhythmic pulses in a row — confirmed walking, credit both and start the streak
+        addSteps(2);
+        inStreak = true;
+        lastCandidateTime = now;
+        pendingFirstCandidate = null;
+      } else {
+        // not rhythmic — treat this pulse as a fresh possible start instead
+        pendingFirstCandidate = now;
+      }
+    }
+  }
+}
 
 function handleMotion(event){
   const acc = event.accelerationIncludingGravity;
@@ -918,10 +956,14 @@ function handleMotion(event){
   stepBuffer.push(mag);
   if(stepBuffer.length > BUFFER_SIZE) stepBuffer.shift();
   const avg = stepBuffer.reduce((a,b)=>a+b,0) / stepBuffer.length;
+  const dev = mag - avg;
   const now = Date.now();
-  if((mag - avg) > STEP_THRESHOLD && (now - lastStepTime) > MIN_STEP_INTERVAL){
-    lastStepTime = now;
-    addSteps(1);
+
+  if(motionState === 'low' && dev > STEP_THRESHOLD){
+    motionState = 'high';
+  } else if(motionState === 'high' && dev < STEP_THRESHOLD * RESET_RATIO){
+    motionState = 'low';
+    registerCandidatePulse(now);
   }
 }
 
