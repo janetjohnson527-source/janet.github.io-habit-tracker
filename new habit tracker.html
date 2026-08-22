@@ -176,14 +176,6 @@
     max-width: 100%;
     overflow-wrap: break-word;
   }
-  .check-badge {
-    position: absolute; top: 4px; right: 4px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: rgba(255,255,255,0.92);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.9);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .check-badge svg { width: 10px; height: 10px; }
 
   .add-tile {
     aspect-ratio: 1;
@@ -512,13 +504,6 @@
           '<div class="mouth sleepy" style="border-color:'+sleepyStroke+'"></div>';
       }
       btn.appendChild(face);
-
-      if (done) {
-        var badge = document.createElement('div');
-        badge.className = 'check-badge';
-        badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="'+h.color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
-        btn.appendChild(badge);
-      }
 
       var nameEl = document.createElement('div');
       nameEl.className = 'habit-name';
