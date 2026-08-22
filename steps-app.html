@@ -906,11 +906,11 @@ function addSteps(n){
 // ============ STEP DETECTION ============
 let tracking = false;
 let stepBuffer = [];
-const BUFFER_SIZE = 12;
-const STEP_THRESHOLD = 1.35;         // deviation from rolling baseline to register a "pulse" — raised to ignore ordinary handling
-const RESET_RATIO = 0.4;             // must settle back down below this fraction of threshold to close the pulse (hysteresis)
+const BUFFER_SIZE = 30;
+const STEP_THRESHOLD = 1.2;          // deviation from rolling baseline to register a "pulse"
+const RESET_RATIO = 0.5;             // must dip below this fraction of threshold to re-arm for the next pulse (hysteresis)
 const MIN_STEP_INTERVAL = 300;       // ms — fastest plausible step-to-step gap
-const MAX_STEP_INTERVAL = 1100;      // ms — slowest plausible gap; longer than this breaks the walking streak
+const MAX_STEP_INTERVAL = 1200;      // ms — slowest plausible gap; longer than this breaks the walking streak
 
 let motionState = 'low';             // 'low' = below threshold, 'high' = mid-pulse
 let inStreak = false;                // are we currently in a confirmed walking rhythm?
@@ -961,9 +961,9 @@ function handleMotion(event){
 
   if(motionState === 'low' && dev > STEP_THRESHOLD){
     motionState = 'high';
+    registerCandidatePulse(now);       // fire immediately on the rising edge
   } else if(motionState === 'high' && dev < STEP_THRESHOLD * RESET_RATIO){
-    motionState = 'low';
-    registerCandidatePulse(now);
+    motionState = 'low';               // just re-arms for the next pulse — doesn't need to fire anything itself
   }
 }
 
