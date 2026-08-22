@@ -34,6 +34,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; height: 100%;
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI", Roboto, sans-serif;
     color: var(--ink);
     background: linear-gradient(160deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
@@ -42,7 +43,8 @@
   #app {
     max-width: 480px;
     margin: 0 auto;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
   }
@@ -265,18 +267,9 @@
 
   /* last month comparison */
   .cmp-row { background: var(--card); border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-  .cmp-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .cmp-top { display: flex; align-items: center; gap: 8px; }
   .cmp-top .name { font-weight: 800; font-size: 14px; }
-  .cmp-bars { display: flex; flex-direction: column; gap: 6px; }
-  .cmp-bar-line { display: flex; align-items: center; gap: 8px; }
-  .cmp-bar-label { font-size: 11px; color: var(--ink-soft); width: 74px; flex-shrink: 0; font-weight: 700; }
-  .cmp-track { flex: 1; height: 9px; background: var(--track); border-radius: 100px; }
-  .cmp-fill { height: 100%; border-radius: 100px; }
-  .cmp-fill.faded { opacity: 0.4; }
-  .cmp-delta { font-size: 12px; font-weight: 800; margin-left: auto; }
-  .delta-up { color: #33C48F; }
-  .delta-down { color: var(--danger); }
-  .delta-flat { color: var(--ink-soft); }
+  .trend-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; }
   .new-tag { font-size: 11px; font-weight: 700; color: var(--ink-soft); background: var(--chip); padding: 3px 8px; border-radius: 100px; }
 </style>
 </head>
@@ -414,7 +407,9 @@
 
   function currentMonthPercent(habit) {
     var now = new Date();
-    var r = activeDaysAndCompletions(habit, now.getFullYear(), now.getMonth(), now.getDate());
+    var year = now.getFullYear(), month = now.getMonth();
+    var totalDays = daysInMonth(year, month);
+    var r = activeDaysAndCompletions(habit, year, month, totalDays);
     if (r.active <= 0) return null;
     return Math.round((r.done / r.active) * 100);
   }
@@ -424,8 +419,7 @@
     var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     var lmYear = lm.getFullYear(), lmMonth = lm.getMonth();
     var lmDays = daysInMonth(lmYear, lmMonth);
-    var throughDay = Math.min(now.getDate(), lmDays);
-    var r = activeDaysAndCompletions(habit, lmYear, lmMonth, throughDay);
+    var r = activeDaysAndCompletions(habit, lmYear, lmMonth, lmDays);
     if (r.active <= 0) return null;
     return Math.round((r.done / r.active) * 100);
   }
@@ -737,56 +731,70 @@
     });
   }
 
+  function pace(habit, year, monthIndex, throughDay) {
+    var r = activeDaysAndCompletions(habit, year, monthIndex, throughDay);
+    if (r.active <= 0) return null;
+    return r.done / r.active;
+  }
+
+  function paceThisMonth(habit) {
+    var now = new Date();
+    return pace(habit, now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  function paceLastMonthMatched(habit) {
+    var now = new Date();
+    var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    var lmYear = lm.getFullYear(), lmMonth = lm.getMonth();
+    var lmDays = daysInMonth(lmYear, lmMonth);
+    var throughDay = Math.min(now.getDate(), lmDays);
+    return pace(habit, lmYear, lmMonth, throughDay);
+  }
+
+  function trendFor(habit) {
+    var cur = paceThisMonth(habit);
+    var last = paceLastMonthMatched(habit);
+    if (cur === null || last === null) return null;
+    var diffPoints = (cur - last) * 100;
+    if (Math.abs(diffPoints) < 3) return 'same';
+    return diffPoints > 0 ? 'up' : 'down';
+  }
+
+  var TREND_ICON = {
+    up: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#33C48F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+    down: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FF6B85" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    same: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--ink-soft)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>'
+  };
+  var TREND_LABEL = { up: 'trending up', down: 'trending down', same: 'holding steady' };
+  var TREND_COLOR = { up: '#33C48F', down: '#FF6B85', same: 'var(--ink-soft)' };
+
   function renderLastMonth() {
     var list = document.getElementById('lm-list');
     var now = new Date();
     var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     document.getElementById('lm-label').textContent =
-      'First ' + now.getDate() + ' day' + (now.getDate() === 1 ? '' : 's') + ': ' +
-      now.toLocaleDateString(undefined, { month: 'long' }) + ' vs ' +
-      lm.toLocaleDateString(undefined, { month: 'long' });
+      'Your pace so far ' + now.toLocaleDateString(undefined, { month: 'long' }) +
+      ' vs the same point in ' + lm.toLocaleDateString(undefined, { month: 'long' });
     list.innerHTML = '';
     if (habits.length === 0) {
       list.innerHTML = emptyState('No habits yet', 'Add one from the habits tab to compare months.');
       return;
     }
     habits.forEach(function(h) {
-      var cur = currentMonthPercent(h);
-      var last = lastMonthPercent(h);
+      var trend = trendFor(h);
       var el = document.createElement('div');
       el.className = 'cmp-row';
-      var top = '<div class="cmp-top"><span class="dot" style="background:'+h.color+'"></span><span class="name">'+escapeHtml(h.name)+'</span>';
-      if (last === null) {
-        top += '<span class="new-tag" style="margin-left:auto;">no data last month</span></div>';
-        el.innerHTML = top +
-          '<div class="cmp-bars">'+
-            cmpLine('this month', cur, h.color, false)+
-          '</div>';
-      } else {
-        var delta = (cur === null ? 0 : cur) - last;
-        var deltaClass = delta > 0 ? 'delta-up' : (delta < 0 ? 'delta-down' : 'delta-flat');
-        var deltaSign = delta > 0 ? '+' : '';
-        top += '<span class="cmp-delta '+deltaClass+'">'+deltaSign+delta+'%</span></div>';
-        el.innerHTML = top +
-          '<div class="cmp-bars">'+
-            cmpLine('this month', cur, h.color, false)+
-            cmpLine('last month', last, h.color, true)+
-          '</div>';
-      }
+      var right = trend === null
+        ? '<span class="new-tag">no data last month</span>'
+        : '<span class="trend-badge" style="color:'+TREND_COLOR[trend]+'">'+TREND_ICON[trend]+'<span>'+TREND_LABEL[trend]+'</span></span>';
+      el.innerHTML =
+        '<div class="cmp-top" style="margin-bottom:0;">'+
+          '<span class="dot" style="background:'+h.color+'"></span>'+
+          '<span class="name">'+escapeHtml(h.name)+'</span>'+
+          '<span style="margin-left:auto;">'+right+'</span>'+
+        '</div>';
       list.appendChild(el);
     });
-  }
-
-  function cmpLine(label, pct, color, faded) {
-    var val = pct === null ? 0 : pct;
-    var halo = faded
-      ? '0 0 11px rgba(255,255,255,0.95), 0 0 3px rgba(255,255,255,1)'
-      : '0 0 7px rgba(255,255,255,0.55), 0 0 2px rgba(255,255,255,0.7)';
-    return '<div class="cmp-bar-line">'+
-      '<span class="cmp-bar-label">'+label+'</span>'+
-      '<div class="cmp-track"><div class="cmp-fill'+(faded?' faded':'')+'" style="width:'+val+'%;background:'+color+';box-shadow:'+halo+'"></div></div>'+
-      '<span style="font-size:12px;font-weight:800;width:34px;text-align:right;">'+(pct === null ? '\u2013' : val+'%')+'</span>'+
-    '</div>';
   }
 
   function emptyState(title, sub) {
