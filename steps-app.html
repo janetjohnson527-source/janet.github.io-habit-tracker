@@ -915,7 +915,8 @@ const MAX_STEP_INTERVAL = 1200;      // ms — slowest plausible gap; longer tha
 let motionState = 'low';             // 'low' = below threshold, 'high' = mid-pulse
 let inStreak = false;                // are we currently in a confirmed walking rhythm?
 let lastCandidateTime = 0;
-let pendingFirstCandidate = null;    // a single unconfirmed pulse, waiting to see if a rhythmic follow-up arrives
+let pendingPulses = [];              // consecutive unconfirmed pulses, waiting to see if a sustained rhythm forms
+const CONFIRM_STREAK = 4;            // need this many rhythmic pulses in a row before it counts as real walking
 
 function registerCandidatePulse(now){
   if(inStreak){
@@ -928,24 +929,29 @@ function registerCandidatePulse(now){
     } else {
       // gap too long — walking rhythm broken, start over
       inStreak = false;
-      pendingFirstCandidate = now;
+      pendingPulses = [now];
+    }
+    return;
+  }
+
+  if(pendingPulses.length === 0){
+    pendingPulses.push(now);
+    return;
+  }
+
+  const gap = now - pendingPulses[pendingPulses.length - 1];
+  if(gap >= MIN_STEP_INTERVAL && gap <= MAX_STEP_INTERVAL){
+    pendingPulses.push(now);
+    if(pendingPulses.length >= CONFIRM_STREAK){
+      // sustained rhythm confirmed — this is a real walk, not a one-off handling burst
+      addSteps(pendingPulses.length);
+      inStreak = true;
+      lastCandidateTime = now;
+      pendingPulses = [];
     }
   } else {
-    if(pendingFirstCandidate === null){
-      pendingFirstCandidate = now;
-    } else {
-      const gap = now - pendingFirstCandidate;
-      if(gap >= MIN_STEP_INTERVAL && gap <= MAX_STEP_INTERVAL){
-        // two rhythmic pulses in a row — confirmed walking, credit both and start the streak
-        addSteps(2);
-        inStreak = true;
-        lastCandidateTime = now;
-        pendingFirstCandidate = null;
-      } else {
-        // not rhythmic — treat this pulse as a fresh possible start instead
-        pendingFirstCandidate = now;
-      }
-    }
+    // rhythm broken before confirming — a short burst like picking up the phone stops here
+    pendingPulses = [now];
   }
 }
 
