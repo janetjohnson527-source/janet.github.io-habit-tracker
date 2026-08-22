@@ -262,6 +262,8 @@
   .bar-row-top .name { font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 8px; }
   .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .bar-row-top .pct { font-weight: 800; font-size: 14px; }
+  .pct-group { display: flex; align-items: baseline; gap: 6px; }
+  .days-count { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
   .bar-track { height: 12px; background: var(--track); border-radius: 100px; }
   .bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
   .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
@@ -419,23 +421,16 @@
     return { active: active, done: done };
   }
 
-  function currentMonthPercent(habit) {
+  function currentMonthStats(habit) {
     var now = new Date();
     var year = now.getFullYear(), month = now.getMonth();
     var totalDays = daysInMonth(year, month);
-    var r = activeDaysAndCompletions(habit, year, month, totalDays);
-    if (r.active <= 0) return null;
-    return Math.round((r.done / r.active) * 100);
-  }
-
-  function lastMonthPercent(habit) {
-    var now = new Date();
-    var lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    var lmYear = lm.getFullYear(), lmMonth = lm.getMonth();
-    var lmDays = daysInMonth(lmYear, lmMonth);
-    var r = activeDaysAndCompletions(habit, lmYear, lmMonth, lmDays);
-    if (r.active <= 0) return null;
-    return Math.round((r.done / r.active) * 100);
+    var done = 0;
+    for (var i = 0; i < habit.dates.length; i++) {
+      var d = parseDate(habit.dates[i]);
+      if (d.getFullYear() === year && d.getMonth() === month) done++;
+    }
+    return { done: done, total: totalDays, percent: Math.round((done / totalDays) * 100) };
   }
 
   function faceSVG(size, strokeColor) {
@@ -737,21 +732,21 @@
       return;
     }
     var rows = habits.map(function(h) {
-      var pct = currentMonthPercent(h);
-      return { h: h, pct: pct === null ? -1 : pct };
+      var stats = currentMonthStats(h);
+      return { h: h, stats: stats };
     });
-    rows.sort(function(a, b) { return b.pct - a.pct; });
+    rows.sort(function(a, b) { return b.stats.percent - a.stats.percent; });
     rows.forEach(function(row) {
       var h = row.h;
-      var pct = row.pct === -1 ? null : row.pct;
+      var stats = row.stats;
       var el = document.createElement('div');
       el.className = 'bar-row';
       el.innerHTML =
         '<div class="bar-row-top">'+
           '<div class="name"><span class="dot" style="background:'+h.color+'"></span>'+escapeHtml(h.name)+'</div>'+
-          '<div class="pct">'+(pct === null ? 'new' : pct + '%')+'</div>'+
+          '<div class="pct-group"><span class="days-count">'+stats.done+'/'+stats.total+' days</span><span class="pct">'+stats.percent + '%</span></div>'+
         '</div>'+
-        '<div class="bar-track"><div class="bar-fill" style="width:'+(pct||0)+'%;background:'+h.color+';box-shadow:0 0 9px rgba(255,255,255,0.55), 0 0 2px rgba(255,255,255,0.7)"></div></div>';
+        '<div class="bar-track"><div class="bar-fill" style="width:'+stats.percent+'%;background:'+h.color+';box-shadow:0 0 9px rgba(255,255,255,0.55), 0 0 2px rgba(255,255,255,0.7)"></div></div>';
       list.appendChild(el);
     });
   }
