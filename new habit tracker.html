@@ -337,6 +337,11 @@
         <div id="history-list"></div>
       </div>
       <div id="history-yearly" style="display:none;">
+        <div class="day-toggle" id="period-toggle" style="margin-bottom:12px;">
+          <button class="day-btn" data-period="3" onclick="setYearlyPeriod(3)">3M</button>
+          <button class="day-btn" data-period="6" onclick="setYearlyPeriod(6)">6M</button>
+          <button class="day-btn active" data-period="12" onclick="setYearlyPeriod(12)">1Y</button>
+        </div>
         <p class="section-label" id="yearly-label">This year</p>
         <svg id="yearly-svg" viewBox="0 0 300 150" style="width:100%; overflow:visible;"></svg>
         <p style="font-size:10px; color:var(--ink-soft); margin:4px 2px 14px;" id="yearly-range"></p>
@@ -507,19 +512,27 @@
     return monthStats(habit, now.getFullYear(), now.getMonth());
   }
 
-  function past12Months() {
+  function pastNMonths(n) {
     var arr = [];
     var now = new Date();
-    for (var i = 11; i >= 0; i--) {
+    for (var i = n - 1; i >= 0; i--) {
       var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       arr.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString(undefined, { month: 'short' }) });
     }
     return arr;
   }
+  function past12Months() { return pastNMonths(12); }
 
   var historyMode = 'monthly';
   var selectedHistoryIdx = 11;
   var hiddenHabitIds = {};
+  var yearlyPeriod = 12;
+
+  function setYearlyPeriod(n) {
+    yearlyPeriod = n;
+    document.querySelectorAll('#period-toggle .day-btn').forEach(function(b){ b.classList.toggle('active', parseInt(b.dataset.period, 10) === n); });
+    renderHistoryYearly();
+  }
 
   function setHistoryMode(mode) {
     historyMode = mode;
@@ -568,9 +581,12 @@
   }
 
   function renderHistoryYearly() {
-    var months = past12Months();
+    var months = pastNMonths(yearlyPeriod);
+    var n = months.length;
+    var periodLabel = yearlyPeriod === 3 ? 'Last 3 months' : (yearlyPeriod === 6 ? 'Last 6 months' : 'This year');
+    document.getElementById('yearly-label').textContent = periodLabel;
     document.getElementById('yearly-range').textContent =
-      months[0].label + ' \u2013 ' + months[11].label;
+      months[0].label + ' \u2013 ' + months[n - 1].label;
     var svg = document.getElementById('yearly-svg');
     var w = 300, h = 150, chartH = 130, top = 10;
     var lines = '<line x1="0" y1="'+top+'" x2="'+w+'" y2="'+top+'" style="stroke:var(--track)" stroke-width="1"/>'+
@@ -579,7 +595,7 @@
     var polylines = habits.map(function(h) {
       var pts = months.map(function(m, i) {
         var pct = monthStats(h, m.year, m.month).percent;
-        var x = (i / 11) * w;
+        var x = n > 1 ? (i / (n - 1)) * w : w / 2;
         var y = top + chartH - (pct / 100) * chartH;
         return x.toFixed(1) + ',' + y.toFixed(1);
       }).join(' ');
