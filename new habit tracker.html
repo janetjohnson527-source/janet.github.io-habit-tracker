@@ -194,6 +194,12 @@
   .day-toggle { display: flex; background: var(--chip); border-radius: 100px; padding: 3px; gap: 2px; }
   .day-btn { border: none; background: none; color: var(--ink-soft); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 100px; }
   .day-btn.active { background: var(--purple); color: white; }
+  .months { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; padding-bottom: 2px; }
+  .mchip { flex-shrink: 0; border: none; padding: 7px 13px; border-radius: 100px; font-size: 12px; font-weight: 700; background: var(--chip); color: var(--ink-soft); }
+  .mchip.on { background: var(--purple); color: white; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--ink); border: none; background: none; padding: 4px 0; }
+  .legend-item.off { opacity: 0.35; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .pill-btn {
     border: none; background: var(--card); color: var(--ink);
     font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 100px;
@@ -302,6 +308,23 @@
       <p class="section-label" id="lm-label">Same days-elapsed comparison</p>
       <div id="lm-list"></div>
     </div>
+
+    <div class="view" id="view-history">
+      <div class="day-toggle" id="history-toggle" style="margin-bottom:14px;">
+        <button class="day-btn active" data-mode="monthly" onclick="setHistoryMode('monthly')">Monthly</button>
+        <button class="day-btn" data-mode="yearly" onclick="setHistoryMode('yearly')">Yearly</button>
+      </div>
+      <div id="history-monthly">
+        <div class="months" id="months-picker"></div>
+        <div id="history-list"></div>
+      </div>
+      <div id="history-yearly" style="display:none;">
+        <p class="section-label" id="yearly-label">This year</p>
+        <svg id="yearly-svg" viewBox="0 0 300 150" style="width:100%; overflow:visible;"></svg>
+        <p style="font-size:10px; color:var(--ink-soft); margin:4px 2px 14px;" id="yearly-range"></p>
+        <div id="yearly-legend" style="display:flex; flex-wrap:wrap; gap:10px 16px;"></div>
+      </div>
+    </div>
   </main>
 
   <nav>
@@ -316,6 +339,10 @@
     <button data-view="lastmonth" onclick="switchView('lastmonth')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>
       vs last month
+    </button>
+    <button data-view="history" onclick="switchView('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      history
     </button>
   </nav>
 </div>
@@ -416,9 +443,7 @@
     return { active: active, done: done };
   }
 
-  function currentMonthStats(habit) {
-    var now = new Date();
-    var year = now.getFullYear(), month = now.getMonth();
+  function monthStats(habit, year, month) {
     var totalDays = daysInMonth(year, month);
     var done = 0;
     for (var i = 0; i < habit.dates.length; i++) {
@@ -426,6 +451,112 @@
       if (d.getFullYear() === year && d.getMonth() === month) done++;
     }
     return { done: done, total: totalDays, percent: Math.round((done / totalDays) * 100) };
+  }
+
+  function currentMonthStats(habit) {
+    var now = new Date();
+    return monthStats(habit, now.getFullYear(), now.getMonth());
+  }
+
+  function past12Months() {
+    var arr = [];
+    var now = new Date();
+    for (var i = 11; i >= 0; i--) {
+      var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      arr.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString(undefined, { month: 'short' }) });
+    }
+    return arr;
+  }
+
+  var historyMode = 'monthly';
+  var selectedHistoryIdx = 11;
+  var hiddenHabitIds = {};
+
+  function setHistoryMode(mode) {
+    historyMode = mode;
+    document.querySelectorAll('#history-toggle .day-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.mode === mode); });
+    document.getElementById('history-monthly').style.display = mode === 'monthly' ? 'block' : 'none';
+    document.getElementById('history-yearly').style.display = mode === 'yearly' ? 'block' : 'none';
+    if (mode === 'monthly') renderHistoryMonthly(); else renderHistoryYearly();
+  }
+
+  function renderHistory() {
+    if (historyMode === 'monthly') renderHistoryMonthly(); else renderHistoryYearly();
+  }
+
+  function renderHistoryMonthly() {
+    var months = past12Months();
+    var picker = document.getElementById('months-picker');
+    picker.innerHTML = '';
+    months.forEach(function(m, i) {
+      var chip = document.createElement('button');
+      chip.className = 'mchip' + (i === selectedHistoryIdx ? ' on' : '');
+      chip.textContent = m.label;
+      chip.onclick = function() { selectedHistoryIdx = i; renderHistoryMonthly(); };
+      picker.appendChild(chip);
+    });
+    var sel = months[selectedHistoryIdx];
+    var list = document.getElementById('history-list');
+    list.innerHTML = '';
+    if (habits.length === 0) {
+      list.innerHTML = emptyState('No habits yet', 'Add one from the habits tab to see history here.');
+      return;
+    }
+    var rows = habits.map(function(h) { return { h: h, stats: monthStats(h, sel.year, sel.month) }; });
+    rows.sort(function(a, b) { return b.stats.percent - a.stats.percent; });
+    rows.forEach(function(row) {
+      var h = row.h, stats = row.stats;
+      var el = document.createElement('div');
+      el.className = 'bar-row';
+      el.innerHTML =
+        '<div class="bar-row-top">'+
+          '<div class="name"><span class="dot" style="background:'+h.color+'"></span>'+escapeHtml(h.name)+'</div>'+
+          '<div class="pct-group"><span class="days-count">'+stats.done+'/'+stats.total+' days</span><span class="pct">'+stats.percent+'%</span></div>'+
+        '</div>'+
+        '<div class="bar-track"><div class="bar-fill" style="width:'+stats.percent+'%;background:'+h.color+';box-shadow:0 0 9px rgba(255,255,255,0.55), 0 0 2px rgba(255,255,255,0.7)"></div></div>';
+      list.appendChild(el);
+    });
+  }
+
+  function renderHistoryYearly() {
+    var months = past12Months();
+    document.getElementById('yearly-range').textContent =
+      months[0].label + ' \u2013 ' + months[11].label;
+    var svg = document.getElementById('yearly-svg');
+    var w = 300, h = 150, chartH = 130, top = 10;
+    var lines = '<line x1="0" y1="'+top+'" x2="'+w+'" y2="'+top+'" style="stroke:var(--track)" stroke-width="1"/>'+
+      '<line x1="0" y1="'+(top+chartH/2)+'" x2="'+w+'" y2="'+(top+chartH/2)+'" style="stroke:var(--track)" stroke-width="1"/>'+
+      '<line x1="0" y1="'+(top+chartH)+'" x2="'+w+'" y2="'+(top+chartH)+'" style="stroke:var(--track)" stroke-width="1"/>';
+    var polylines = habits.map(function(h) {
+      var pts = months.map(function(m, i) {
+        var pct = monthStats(h, m.year, m.month).percent;
+        var x = (i / 11) * w;
+        var y = top + chartH - (pct / 100) * chartH;
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      var hidden = hiddenHabitIds[h.id];
+      return '<polyline id="yline-'+h.id+'" points="'+pts+'" fill="none" stroke="'+h.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:'+(hidden?0.08:1)+'"/>';
+    }).join('');
+    svg.innerHTML = lines + polylines;
+
+    var legend = document.getElementById('yearly-legend');
+    legend.innerHTML = '';
+    if (habits.length === 0) {
+      legend.innerHTML = emptyState('No habits yet', 'Add one from the habits tab to see yearly trends.');
+      return;
+    }
+    habits.forEach(function(h) {
+      var item = document.createElement('button');
+      item.className = 'legend-item' + (hiddenHabitIds[h.id] ? ' off' : '');
+      item.innerHTML = '<span class="legend-dot" style="background:'+h.color+'"></span>'+escapeHtml(h.name);
+      item.onclick = function() {
+        hiddenHabitIds[h.id] = !hiddenHabitIds[h.id];
+        item.classList.toggle('off', !!hiddenHabitIds[h.id]);
+        var line = document.getElementById('yline-'+h.id);
+        if (line) line.style.opacity = hiddenHabitIds[h.id] ? 0.08 : 1;
+      };
+      legend.appendChild(item);
+    });
   }
 
   function faceSVG(size, strokeColor) {
@@ -459,7 +590,7 @@
     editMode = false;
     document.getElementById('edit-toggle').textContent = 'Edit';
     document.getElementById('edit-toggle').classList.remove('on');
-    document.querySelectorAll('.day-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.day === day); });
+    document.querySelectorAll('#day-toggle .day-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.day === day); });
     document.getElementById('edit-toggle').style.display = day === 'today' ? '' : 'none';
     renderButtons();
   }
@@ -702,11 +833,12 @@
     document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
     document.getElementById('view-' + view).classList.add('active');
     document.querySelectorAll('nav button').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
-    var titles = { buttons: 'Today', dashboard: 'This month', lastmonth: 'vs last month' };
+    var titles = { buttons: 'Today', dashboard: 'This month', lastmonth: 'vs last month', history: 'History' };
     document.getElementById('header-title').textContent = titles[view];
     if (view === 'buttons') updateHeader();
     if (view === 'dashboard') renderDashboard();
     if (view === 'lastmonth') renderLastMonth();
+    if (view === 'history') renderHistory();
   }
 
   function renderDashboard() {
