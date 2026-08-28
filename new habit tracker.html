@@ -89,7 +89,7 @@
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--line);
     display: flex;
-    padding: 4px 8px calc(env(safe-area-inset-bottom, 0px) + 20px);
+    padding: 4px 8px env(safe-area-inset-bottom, 0px);
     gap: 4px;
   }
   nav button {
@@ -352,6 +352,37 @@
 
 <script>
   var COLORS = ["#FF4D3D","#E11D48","#FF6F59","#C1440E","#FF7A1A","#FFB627","#D98E04","#F5B700","#FFDE59","#C6E100","#84CC16","#00E676","#2ECC71","#10B981","#059669","#14B8A6","#00E5CC","#00C2D1","#0083C9","#2FA8FF","#0047AB","#2B6CB8","#4F46E5","#6C7BFF","#8B5CF6","#4A148C","#A21CAF","#D946EF","#FF00A8","#F43F8C","#FF9AC1","#BE185D","#6E1C3A","#D2001F"];
+
+  var PRESET_HABITS = [
+    { name: "bank account check", color: "#2ECC71" },
+    { name: "shower", color: "#0083C9" },
+    { name: "spent no money", color: "#BE185D" },
+    { name: "mouthwash", color: "#8B5CF6" },
+    { name: "sunscreen", color: "#D98E04" },
+    { name: "strength training", color: "#E11D48" },
+    { name: "water goal", color: "#0047AB" },
+    { name: "walking pad", color: "#C1440E" },
+    { name: "vitamins", color: "#A21CAF" },
+    { name: "collagen", color: "#FF6F59" },
+    { name: "stretch", color: "#C6E100" },
+    { name: "posture exercise", color: "#059669" },
+    { name: "draw", color: "#6C7BFF" },
+    { name: "clean something", color: "#84CC16" },
+    { name: "brush teeth twice", color: "#14B8A6" },
+    { name: "floss", color: "#4F46E5" },
+    { name: "zoloft", color: "#FF9AC1" },
+    { name: "lymphatic drainage", color: "#2B6CB8" },
+    { name: "no skin picking", color: "#FF4D3D" }
+  ];
+
+  function importPresetHabits() {
+    if (!confirm('Add all 19 habits from your old board? This adds them as brand-new habits with no history.')) return;
+    PRESET_HABITS.forEach(function(p) {
+      habits.push({ id: uid(), name: p.name, color: p.color, dates: [], createdAt: todayStr() });
+    });
+    saveHabits(habits);
+    renderButtons();
+  }
 
   var STORE_KEY = "habitTracker_habits_v1";
   var editMode = false;
@@ -660,6 +691,17 @@
     var container = document.getElementById('buttons-normal');
     container.innerHTML = '';
     container.appendChild(grid);
+
+    if (habits.length === 0) {
+      var restoreRow = document.createElement('div');
+      restoreRow.style.cssText = 'text-align:center; margin-top:14px;';
+      var restoreBtn = document.createElement('button');
+      restoreBtn.className = 'pill-btn';
+      restoreBtn.textContent = 'Restore my 19 saved habits';
+      restoreBtn.onclick = importPresetHabits;
+      restoreRow.appendChild(restoreBtn);
+      container.appendChild(restoreRow);
+    }
   }
 
   function renderEditList() {
