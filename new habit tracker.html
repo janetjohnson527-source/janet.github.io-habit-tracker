@@ -14,11 +14,20 @@
 <title>Habit Tracker</title>
 <script>
   function setAppHeight() {
-    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--app-height', h + 'px');
   }
   setAppHeight();
   window.addEventListener('resize', setAppHeight);
   window.addEventListener('orientationchange', setAppHeight);
+  window.addEventListener('load', setAppHeight);
+  document.addEventListener('DOMContentLoaded', setAppHeight);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', setAppHeight);
+  }
+  setTimeout(setAppHeight, 50);
+  setTimeout(setAppHeight, 300);
+  setTimeout(setAppHeight, 1000);
 </script>
 <style>
   :root {
