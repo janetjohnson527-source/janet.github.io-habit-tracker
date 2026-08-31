@@ -1012,9 +1012,8 @@
       nameInput.classList.toggle("complete-strike", newStatus === "complete");
 
       setTimeout(function(){
-        chip.className = "status-chip " + newStatus;
-        chip.innerHTML = chipContentHTML(newStatus);
         save();
+        renderToday();
       }, 400);
     });
     row.appendChild(chip);
@@ -1183,7 +1182,9 @@
     if(day.tasks.length === 0){
       tasksList.appendChild(el("div","empty-state","No tasks yet. <strong>Add one below</strong>, or set up recurring tasks that fill in automatically."));
     } else {
-      day.tasks.forEach(function(t){ tasksList.appendChild(buildTaskRow(t, key)); });
+      var sortedTasks = day.tasks.filter(function(t){ return t.status === "complete"; })
+        .concat(day.tasks.filter(function(t){ return t.status !== "complete"; }));
+      sortedTasks.forEach(function(t){ tasksList.appendChild(buildTaskRow(t, key)); });
     }
 
     var meetingsList = document.getElementById("meetings-list");
