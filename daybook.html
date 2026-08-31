@@ -249,7 +249,8 @@
     align-items:center;
     gap:8px;
   }
-  .panel-title svg{flex-shrink:0;}
+  .panel-title svg{flex-shrink:0; transition:transform .2s ease;}
+  .panel-head:hover .panel-title svg{transform:rotate(-8deg) scale(1.15);}
 
   .panel-todo .panel-title{color:var(--todo-accent);}
   .panel-todo .add-trigger{color:var(--todo-accent);}
@@ -334,11 +335,49 @@
   .status-chip.in-progress{background:var(--status-prog); color:var(--status-prog-ink); box-shadow:0 2px 10px rgba(255,213,0,0.3);}
   .status-chip.complete{background:var(--status-done); color:var(--status-done-ink); box-shadow:0 2px 10px rgba(34,224,107,0.3);}
 
-  .item-main{flex:1; min-width:0;}
+  .meeting-done{
+    border:1.5px solid var(--line);
+    background:transparent;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    padding:5px 10px 5px 7px;
+    white-space:nowrap;
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink-faint);
+    transition:transform .1s ease, border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .meeting-done:hover{transform:scale(1.05); border-color:var(--ink-faint); color:var(--ink-soft);}
+  .meeting-done:active{transform:scale(0.95);}
+  .meeting-done.done{
+    border-color:var(--status-done);
+    background:var(--status-done);
+    color:var(--status-done-ink);
+    box-shadow:0 2px 10px rgba(34,224,107,0.3);
+  }
+  .meeting-happened{opacity:0.6;}
+
+  .item-main{flex:1; min-width:0; display:flex; align-items:center; gap:6px;}
+  .note-badge{
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    color:var(--ink-faint);
+    cursor:pointer;
+  }
+  .note-badge.hidden{display:none;}
+  .panel-todo .note-badge{color:var(--todo-accent);}
+  .panel-meetings .note-badge{color:var(--meetings-accent);}
   .item-name{
     border:none;
     background:transparent;
     width:100%;
+    flex:1;
+    min-width:0;
     font-size:14px;
     font-weight:500;
     color:var(--ink);
@@ -398,6 +437,17 @@
     flex-shrink:0;
   }
   .item-delete:hover{background:var(--status-not-bg); color:var(--status-not);}
+
+  .item-carry{
+    color:var(--ink-faint);
+    background:transparent;
+    border:none;
+    padding:5px;
+    border-radius:5px;
+    flex-shrink:0;
+  }
+  .item-carry:hover{background:var(--line-soft); color:var(--ink-soft);}
+  .panel-todo .item-carry:hover{background:rgba(255,79,163,0.14); color:var(--todo-accent);}
 
   .item-note{
     margin:2px 10px 6px 32px;
@@ -554,6 +604,7 @@
   .mini-dot.complete{background:var(--status-done);}
   .mini-item .mini-name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .mini-item.complete .mini-name{color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--line-soft);}
+  .mini-item.happened{opacity:0.6;}
   .mini-time{font-family:var(--font-mono); font-size:11px; color:var(--meetings-accent); flex-shrink:0; width:52px;}
   .day-empty{font-size:12px; color:var(--ink-faint); padding:3px 0;}
 
@@ -648,6 +699,19 @@
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
   svg{display:block;}
+
+  .confetti-bit{
+    position:fixed;
+    width:6px; height:6px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:9999;
+    animation:confetti-burst .6s ease-out forwards;
+  }
+  @keyframes confetti-burst{
+    0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3); opacity:0; }
+  }
 
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-track{background:var(--paper);}
@@ -896,6 +960,64 @@
     showToast._tm = setTimeout(function(){ t.classList.remove("show"); }, 2200);
   }
 
+  var CONFETTI_COLORS = ["#FF4646","#FFD500","#22E06B","#4D8DFF","#FF4FA3","#B15CFF"];
+  function spawnConfetti(originEl){
+    var rect = originEl.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var count = 8;
+    for(var i = 0; i < count; i++){
+      var bit = document.createElement("span");
+      bit.className = "confetti-bit";
+      var angle = (Math.PI * 2 * i / count) + (Math.random() * 0.4 - 0.2);
+      var dist = 26 + Math.random() * 18;
+      bit.style.left = cx + "px";
+      bit.style.top = cy + "px";
+      bit.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      bit.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
+      bit.style.setProperty("--dy", (Math.sin(angle) * dist) + "px");
+      document.body.appendChild(bit);
+      (function(el){ setTimeout(function(){ el.remove(); }, 650); })(bit);
+    }
+  }
+
+  function parseDateKey(key){
+    var parts = key.split("-");
+    return new Date(parseInt(parts[0],10), parseInt(parts[1],10) - 1, parseInt(parts[2],10));
+  }
+
+  // Bring already-generated today/future days back in sync with the current
+  // recurring templates. Past days are left alone (history stays accurate).
+  // Runs whenever the Manage Recurring modal is closed, since that's the one
+  // place templates change. Without this, a day that was viewed (and cached)
+  // before a template was added or edited would never pick up the change —
+  // this was the cause of recurring meetings "dropping off" future dates.
+  function resyncFutureDays(){
+    var todayKey = dkey(todayMidnight());
+    Object.keys(state.days).forEach(function(key){
+      if(key < todayKey) return;
+      var day = state.days[key];
+      var wd = parseDateKey(key).getDay();
+
+      var validTaskIds = state.templates.tasks.filter(function(t){ return t.days.indexOf(wd) !== -1; }).map(function(t){ return t.id; });
+      day.tasks = day.tasks.filter(function(t){ return !t.templateId || validTaskIds.indexOf(t.templateId) !== -1; });
+      state.templates.tasks.forEach(function(t){
+        if(t.days.indexOf(wd) === -1) return;
+        var exists = day.tasks.some(function(dt){ return dt.templateId === t.id; });
+        if(!exists) day.tasks.push({ id: uid(), name: t.name, status: "not-started", note: "", templateId: t.id });
+      });
+
+      var validMeetingIds = state.templates.meetings.filter(function(m){ return m.days.indexOf(wd) !== -1; }).map(function(m){ return m.id; });
+      day.meetings = day.meetings.filter(function(m){ return !m.templateId || validMeetingIds.indexOf(m.templateId) !== -1; });
+      state.templates.meetings.forEach(function(m){
+        if(m.days.indexOf(wd) === -1) return;
+        var exists = day.meetings.some(function(dm){ return dm.templateId === m.id; });
+        if(!exists) day.meetings.push({ id: uid(), name: m.name, time: m.time || "", note: "", templateId: m.id });
+      });
+      day.meetings.sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+    });
+  }
+
   // ---------- day data ----------
   function ensureDay(dateObj){
     var key = dkey(dateObj);
@@ -930,7 +1052,9 @@
     var icons = {
       note: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
       trash: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
-      check: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+      check: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+      carry: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="17" y2="12"/><polyline points="11 6 17 12 11 18"/><line x1="20" y1="6" x2="20" y2="18"/></svg>',
+      notebook: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h11a2 2 0 0 1 2 2V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V3.5Z"/><line x1="8.3" y1="8" x2="14.5" y2="8"/><line x1="8.3" y1="12" x2="14.5" y2="12"/><line x1="2.5" y1="3.5" x2="2.5" y2="21"/></svg>'
     };
     return icons[name] || "";
   }
@@ -946,6 +1070,12 @@
       inner =
         '<path d="M2.6 6.4 Q4.4 5 6.2 6.4" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
         '<path d="M9.8 6.4 Q11.6 5 13.4 6.4" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
+        '<path d="M3 4.5 L3.3 3.9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>' +
+        '<path d="M5.8 4.5 L5.5 3.9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>' +
+        '<path d="M10.4 4.5 L10.1 3.9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>' +
+        '<path d="M13 4.5 L13.3 3.9" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>' +
+        '<circle cx="4" cy="9.1" r="0.9" fill="currentColor" opacity="0.22"/>' +
+        '<circle cx="12" cy="9.1" r="0.9" fill="currentColor" opacity="0.22"/>' +
         '<path d="M6.4 10.6 Q8 11.5 9.6 10.6" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>' +
         '<path d="M11.6 1.6 L14.2 1.6 L11.6 4 L14.2 4" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
     } else if(status === "in-progress"){
@@ -956,6 +1086,8 @@
         '<circle cx="11.4" cy="6.6" r="1.3" fill="currentColor"/>' +
         '<circle cx="5" cy="6.15" r="0.4" fill="#fff" opacity="0.85"/>' +
         '<circle cx="11.8" cy="6.15" r="0.4" fill="#fff" opacity="0.85"/>' +
+        '<circle cx="3" cy="8.7" r="1" fill="currentColor" opacity="0.28"/>' +
+        '<circle cx="13" cy="8.7" r="1" fill="currentColor" opacity="0.28"/>' +
         '<path d="M4 10 Q8 13 12 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
     } else {
       inner =
@@ -963,7 +1095,9 @@
         '<path d="M9.4 6.2 Q11.5 4.1 13.6 6.2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
         '<circle cx="2.6" cy="9.8" r="1.1" fill="currentColor" opacity="0.35"/>' +
         '<circle cx="13.4" cy="9.8" r="1.1" fill="currentColor" opacity="0.35"/>' +
-        '<path d="M2.6 9 Q8 15.2 13.4 9" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>';
+        '<path d="M2.6 9 Q8 15.2 13.4 9" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round"/>' +
+        '<path d="M13.2 1.1 L13.55 1.9 L14.35 2.25 L13.55 2.6 L13.2 3.4 L12.85 2.6 L12.05 2.25 L12.85 1.9 Z" fill="currentColor" opacity="0.4"/>' +
+        '<path d="M2 1.5 L2.25 2.05 L2.8 2.3 L2.25 2.55 L2 3.1 L1.75 2.55 L1.2 2.3 L1.75 2.05 Z" fill="currentColor" opacity="0.35"/>';
     }
     return '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">' + inner + '</svg>';
   }
@@ -984,6 +1118,13 @@
   }
   function chipContentHTML(status){
     return '<span class="chip-content">' + chipInnerHTML(status) + '</span>';
+  }
+
+  function meetingDoneInnerHTML(done){
+    if(done){
+      return faceIcon("complete") + "<span>DONE!</span>";
+    }
+    return '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="5.3"/></svg><span>MARK DONE</span>';
   }
 
   function buildTaskRow(task, dayKey){
@@ -1010,6 +1151,7 @@
 
       task.status = newStatus;
       nameInput.classList.toggle("complete-strike", newStatus === "complete");
+      if(newStatus === "complete") spawnConfetti(chip);
 
       setTimeout(function(){
         save();
@@ -1019,6 +1161,9 @@
     row.appendChild(chip);
 
     var main = el("div","item-main");
+    var noteBadge = el("span","note-badge" + (task.note ? "" : " hidden"), svgIcon("notebook"));
+    noteBadge.title = "Has notes";
+    main.appendChild(noteBadge);
     var nameInput = el("input","item-name" + (task.status === "complete" ? " complete-strike" : ""));
     nameInput.type = "text";
     nameInput.value = task.name;
@@ -1033,6 +1178,20 @@
     noteBtn.type = "button";
     noteBtn.title = "Notes";
     row.appendChild(noteBtn);
+
+    if(task.status !== "complete"){
+      var carryBtn = el("button","item-carry", svgIcon("carry"));
+      carryBtn.type = "button";
+      carryBtn.title = "Carry to next day";
+      carryBtn.addEventListener("click", function(){
+        var nextDate = addDays(viewedDate, 1);
+        var nextDay = ensureDay(nextDate);
+        nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", templateId: null });
+        save();
+        showToast("Carried to " + MONTH_NAMES[nextDate.getMonth()].slice(0,3) + " " + nextDate.getDate());
+      });
+      row.appendChild(carryBtn);
+    }
 
     var delBtn = el("button","item-delete", svgIcon("trash"));
     delBtn.type = "button";
@@ -1052,11 +1211,15 @@
     noteArea.addEventListener("change", function(){
       task.note = noteArea.value;
       noteBtn.classList.toggle("has-note", !!task.note);
+      noteBadge.classList.toggle("hidden", !task.note);
       save();
     });
     noteWrap.appendChild(noteArea);
     noteBtn.addEventListener("click", function(){
       noteWrap.classList.toggle("open");
+    });
+    noteBadge.addEventListener("click", function(){
+      noteWrap.classList.add("open");
     });
 
     var wrapper = document.createDocumentFragment();
@@ -1068,7 +1231,21 @@
   function buildMeetingRow(meeting, dayKey){
     var row = el("div","item-row");
 
-    var timeInput = el("input","item-time");
+    var doneBtn = el("button","meeting-done" + (meeting.done ? " done" : ""), meetingDoneInnerHTML(!!meeting.done));
+    doneBtn.type = "button";
+    doneBtn.title = "Mark as happened";
+    doneBtn.addEventListener("click", function(){
+      meeting.done = !meeting.done;
+      doneBtn.classList.toggle("done", meeting.done);
+      doneBtn.innerHTML = meetingDoneInnerHTML(meeting.done);
+      nameInput.classList.toggle("meeting-happened", meeting.done);
+      timeInput.classList.toggle("meeting-happened", meeting.done);
+      if(meeting.done) spawnConfetti(doneBtn);
+      save();
+    });
+    row.appendChild(doneBtn);
+
+    var timeInput = el("input","item-time" + (meeting.done ? " meeting-happened" : ""));
     timeInput.type = "time";
     timeInput.value = meeting.time || "";
     timeInput.addEventListener("change", function(){
@@ -1079,7 +1256,10 @@
     row.appendChild(timeInput);
 
     var main = el("div","item-main");
-    var nameInput = el("input","item-name");
+    var noteBadge = el("span","note-badge" + (meeting.note ? "" : " hidden"), svgIcon("notebook"));
+    noteBadge.title = "Has notes";
+    main.appendChild(noteBadge);
+    var nameInput = el("input","item-name" + (meeting.done ? " meeting-happened" : ""));
     nameInput.type = "text";
     nameInput.value = meeting.name;
     nameInput.addEventListener("change", function(){
@@ -1112,11 +1292,15 @@
     noteArea.addEventListener("change", function(){
       meeting.note = noteArea.value;
       noteBtn.classList.toggle("has-note", !!meeting.note);
+      noteBadge.classList.toggle("hidden", !meeting.note);
       save();
     });
     noteWrap.appendChild(noteArea);
     noteBtn.addEventListener("click", function(){
       noteWrap.classList.toggle("open");
+    });
+    noteBadge.addEventListener("click", function(){
+      noteWrap.classList.add("open");
     });
 
     var wrapper = document.createDocumentFragment();
@@ -1258,7 +1442,7 @@
         body.appendChild(el("div","day-empty","—"));
       } else {
         day.meetings.slice().sort(function(a,b){ return (a.time||"").localeCompare(b.time||""); }).forEach(function(m){
-          var mi = el("div","mini-item");
+          var mi = el("div","mini-item" + (m.done ? " happened" : ""));
           mi.innerHTML = '<span class="mini-time">' + (m.time ? fmtTime(m.time) : "—") + '</span><span class="mini-name">' + escapeHtml(m.name) + '</span>';
           body.appendChild(mi);
         });
@@ -1373,6 +1557,7 @@
   backdrop.addEventListener("click", function(e){ if(e.target === backdrop) closeModal(); });
   function closeModal(){
     backdrop.classList.remove("open");
+    resyncFutureDays();
     save();
     if(currentView === "today") renderToday(); else renderWeek();
   }
