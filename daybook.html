@@ -7,7 +7,7 @@
 <title>Daybook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Fredoka:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#0A0A0F;
@@ -15,7 +15,7 @@
     --surface-raised:#1F1F29;
     --ink:#FFFFFF;
     --ink-soft:#B6B5C4;
-    --ink-faint:#6C6B7C;
+    --ink-faint:#A19FBA;
     --line:#2A2A36;
     --line-soft:#1D1D27;
     --accent:#4D8DFF;
@@ -23,30 +23,41 @@
     --accent-soft:#122140;
     --status-not:#FF4646;
     --status-not-bg:#340D0D;
+    --status-not-ink:#3D0808;
     --status-prog:#FFD500;
     --status-prog-bg:#332B04;
+    --status-prog-ink:#3A2E00;
     --status-done:#22E06B;
     --status-done-bg:#06331A;
-    --time-accent:#FFA53D;
-    --idea-accent:#B15CFF;
+    --status-done-ink:#04331A;
+    --todo-accent:#FF4FA3;
+    --meetings-accent:#4D8DFF;
+    --ideas-accent:#FFD500;
     --radius-sm:6px;
     --radius:10px;
     --radius-lg:16px;
     --shadow-card: 0 1px 2px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.35);
     --font-display: 'Baloo 2', 'Nunito', sans-serif;
-    --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'IBM Plex Mono', 'SFMono-Regular', monospace;
   }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--paper);
+    background:
+      radial-gradient(760px circle at 8% -8%, rgba(77,141,255,0.20), transparent 58%),
+      radial-gradient(620px circle at 96% 4%, rgba(255,165,61,0.16), transparent 55%),
+      radial-gradient(680px circle at 30% 105%, rgba(177,92,255,0.18), transparent 55%),
+      radial-gradient(560px circle at 92% 100%, rgba(34,224,107,0.12), transparent 55%),
+      var(--paper);
+    background-attachment:fixed;
     color:var(--ink);
     font-family:var(--font-body);
     font-size:14px;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
+    min-height:100vh;
   }
   button{font-family:inherit;}
   input,textarea,select{font-family:inherit; font-size:inherit; color:inherit;}
@@ -127,13 +138,14 @@
     padding:7px 16px;
     border-radius:999px;
     font-size:13px;
-    font-weight:500;
+    font-weight:600;
     color:var(--ink-soft);
+    transition:color .12s ease;
   }
   .tabbtn.active{
-    background:var(--surface);
-    color:var(--ink);
-    box-shadow:var(--shadow-card);
+    background:var(--accent);
+    color:#0B142B;
+    box-shadow:0 2px 10px rgba(77,141,255,0.4);
   }
 
   .btn{
@@ -142,27 +154,27 @@
     padding:7px 14px;
     border-radius:8px;
     font-size:13px;
-    font-weight:500;
+    font-weight:600;
     color:var(--ink);
     display:inline-flex;
     align-items:center;
     gap:6px;
-    transition:border-color .12s ease, background .12s ease;
+    transition:border-color .12s ease, background .12s ease, transform .1s ease;
   }
-  .btn:hover{border-color:var(--ink-faint);}
+  .btn:hover{border-color:var(--accent); color:var(--accent-hover); transform:translateY(-1px);}
   .btn.primary{
     background:var(--accent);
     border-color:var(--accent);
-    color:#fff;
+    color:#0B142B;
   }
-  .btn.primary:hover{background:var(--accent-hover); border-color:var(--accent-hover);}
+  .btn.primary:hover{background:var(--accent-hover); border-color:var(--accent-hover); color:#0B142B;}
   .btn.ghost{
     border-color:transparent;
     background:transparent;
     color:var(--ink-soft);
     padding:7px 10px;
   }
-  .btn.ghost:hover{background:var(--line-soft); color:var(--ink);}
+  .btn.ghost:hover{background:var(--line-soft); color:var(--accent-hover); border-color:transparent; transform:translateY(-1px);}
   .btn.small{padding:5px 10px; font-size:12px;}
   .btn.icon{padding:6px 8px;}
 
@@ -208,12 +220,14 @@
 
   section.panel{
     background:var(--surface);
-    border:1px solid var(--line);
     border-radius:var(--radius-lg);
     box-shadow:var(--shadow-card);
     overflow:hidden;
   }
   .panel + .panel{margin-top:20px;}
+  .panel-todo{border:1.5px solid var(--todo-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(255,79,163,0.16);}
+  .panel-meetings{border:1.5px solid var(--meetings-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(77,141,255,0.16);}
+  .panel-ideas{border:1.5px solid var(--ideas-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(255,213,0,0.16);}
 
   .panel-head{
     display:flex;
@@ -222,35 +236,36 @@
     padding:14px 18px;
     border-bottom:1px solid var(--line-soft);
   }
+  .panel-todo .panel-head{background:rgba(255,79,163,0.09);}
+  .panel-meetings .panel-head{background:rgba(77,141,255,0.09);}
+  .panel-ideas .panel-head{background:rgba(255,213,0,0.09);}
+
   .panel-title{
     font-size:12.5px;
     font-weight:700;
     letter-spacing:0.03em;
     color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
   }
-  .panel-title::before{
-    content:"";
-    display:inline-block;
-    width:7px; height:7px;
-    border-radius:50%;
-    background:currentColor;
-    margin-right:8px;
-    vertical-align:middle;
-  }
-  .panel-accent-blue{border-left:4px solid var(--accent);}
-  .panel-accent-blue .panel-title{color:var(--accent);}
-  .panel-accent-blue .add-trigger{color:var(--accent-hover);}
-  .panel-accent-blue .add-trigger:hover{background:var(--accent-soft);}
+  .panel-title svg{flex-shrink:0;}
 
-  .panel-accent-orange{border-left:4px solid var(--time-accent);}
-  .panel-accent-orange .panel-title{color:var(--time-accent);}
-  .panel-accent-orange .add-trigger{color:var(--time-accent);}
-  .panel-accent-orange .add-trigger:hover{background:#332204;}
+  .panel-todo .panel-title{color:var(--todo-accent);}
+  .panel-todo .add-trigger{color:var(--todo-accent);}
+  .panel-todo .add-trigger:hover{background:rgba(255,79,163,0.14);}
+  .panel-todo .item-row:hover{background:rgba(255,79,163,0.10);}
 
-  .panel-accent-violet{border-left:4px solid var(--idea-accent);}
-  .panel-accent-violet .panel-title{color:var(--idea-accent);}
-  .panel-accent-violet .add-trigger{color:var(--idea-accent);}
-  .panel-accent-violet .add-trigger:hover{background:#241035;}
+  .panel-meetings .panel-title{color:var(--meetings-accent);}
+  .panel-meetings .add-trigger{color:var(--accent-hover);}
+  .panel-meetings .add-trigger:hover{background:var(--accent-soft);}
+  .panel-meetings .item-row:hover{background:rgba(77,141,255,0.10);}
+
+  .panel-ideas .panel-title{color:var(--ideas-accent);}
+  .panel-ideas .add-trigger{color:var(--ideas-accent);}
+  .panel-ideas .add-trigger:hover{background:rgba(255,213,0,0.14);}
+  .panel-ideas .idea-item:hover{background:rgba(255,213,0,0.10);}
+
   .panel-body{padding:6px 8px 12px;}
 
   /* item rows */
@@ -261,7 +276,7 @@
     padding:10px 10px;
     border-radius:8px;
   }
-  .item-row:hover{background:var(--paper);}
+  .item-row:hover{background:rgba(255,255,255,0.04);}
   .item-row .grip{
     color:var(--line);
     font-size:12px;
@@ -270,29 +285,54 @@
   }
 
   .status-chip{
+    position:relative;
+    overflow:hidden;
     border:none;
     border-radius:999px;
     font-size:11.5px;
     font-weight:700;
     letter-spacing:0.02em;
-    padding:5px 12px 5px 8px;
+    padding:0;
     white-space:nowrap;
     flex-shrink:0;
     display:inline-flex;
     align-items:center;
-    gap:6px;
     transition:transform .1s ease;
   }
   .status-chip:hover{transform:scale(1.05);}
-  @keyframes chip-pop{
-    0%{transform:scale(1) rotate(0deg);}
-    45%{transform:scale(1.18) rotate(-6deg);}
-    100%{transform:scale(1) rotate(0deg);}
+  .status-chip:active{transform:scale(0.95);}
+  .chip-content{
+    position:relative;
+    z-index:2;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 12px 5px 8px;
   }
-  .status-chip.pop{animation:chip-pop .32s ease;}
-  .status-chip.not-started{background:var(--status-not-bg); color:var(--status-not);}
-  .status-chip.in-progress{background:var(--status-prog-bg); color:var(--status-prog);}
-  .status-chip.complete{background:var(--status-done-bg); color:var(--status-done);}
+  .chip-fill{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    transform:scaleX(0);
+    transform-origin:left center;
+  }
+  .chip-fill.grow{
+    transition:transform .38s cubic-bezier(.45,1.2,.55,1);
+    transform:scaleX(1);
+  }
+  .chip-check{
+    flex-shrink:0;
+  }
+  .chip-check path{
+    stroke-dasharray:14;
+    stroke-dashoffset:14;
+    animation:check-draw .3s ease forwards;
+    animation-delay:.08s;
+  }
+  @keyframes check-draw{ to{ stroke-dashoffset:0; } }
+  .status-chip.not-started{background:var(--status-not); color:var(--status-not-ink); box-shadow:0 2px 10px rgba(255,70,70,0.35);}
+  .status-chip.in-progress{background:var(--status-prog); color:var(--status-prog-ink); box-shadow:0 2px 10px rgba(255,213,0,0.3);}
+  .status-chip.complete{background:var(--status-done); color:var(--status-done-ink); box-shadow:0 2px 10px rgba(34,224,107,0.3);}
 
   .item-main{flex:1; min-width:0;}
   .item-name{
@@ -304,9 +344,15 @@
     color:var(--ink);
     padding:4px 2px;
     border-radius:5px;
+    transition:color .25s ease;
   }
   .item-name:focus{background:var(--paper);}
-  .item-name.complete-strike{color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--line);}
+  .item-name.complete-strike{
+    color:var(--ink-faint);
+    text-decoration:line-through;
+    text-decoration-color:var(--status-done);
+    text-decoration-thickness:2px;
+  }
 
   .item-time{
     font-family:var(--font-mono);
@@ -314,7 +360,7 @@
     font-weight:500;
     border:1px solid transparent;
     background:transparent;
-    color:var(--time-accent);
+    color:var(--meetings-accent);
     width:88px;
     padding:4px 6px;
     border-radius:5px;
@@ -425,7 +471,7 @@
     display:flex; align-items:center; justify-content:center;
     color:transparent;
   }
-  .idea-check.done{background:var(--idea-accent); border-color:var(--idea-accent); color:#fff;}
+  .idea-check.done{background:var(--ideas-accent); border-color:var(--ideas-accent); color:#fff;}
   .idea-text{
     flex:1;
     border:none;
@@ -469,7 +515,7 @@
     flex-direction:column;
     min-height:160px;
   }
-  .day-card.is-today{border-color:var(--accent);}
+  .day-card.is-today{border-color:var(--accent); box-shadow:var(--shadow-card), 0 0 0 1px rgba(77,141,255,0.2), 0 6px 22px rgba(77,141,255,0.22);}
   .day-card-head{
     width:100%;
     text-align:left;
@@ -477,8 +523,9 @@
     background:var(--paper);
     padding:11px 13px;
     border-bottom:1px solid var(--line-soft);
+    transition:background .12s ease;
   }
-  .day-card-head:hover{background:var(--line-soft);}
+  .day-card-head:hover{background:var(--accent-soft);}
   .day-card-weekday{font-size:11.5px; font-weight:600; letter-spacing:0.03em; color:var(--ink-soft);}
   .day-card-date{font-family:var(--font-display); font-size:17px; font-weight:560; margin-top:1px;}
   .day-card-body{padding:8px 12px 12px; flex:1;}
@@ -497,7 +544,7 @@
   .mini-dot.complete{background:var(--status-done);}
   .mini-item .mini-name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .mini-item.complete .mini-name{color:var(--ink-faint); text-decoration:line-through; text-decoration-color:var(--line-soft);}
-  .mini-time{font-family:var(--font-mono); font-size:11px; color:var(--time-accent); flex-shrink:0; width:52px;}
+  .mini-time{font-family:var(--font-mono); font-size:11px; color:var(--meetings-accent); flex-shrink:0; width:52px;}
   .day-empty{font-size:12px; color:var(--ink-faint); padding:3px 0;}
 
   /* ---------- modal ---------- */
@@ -657,9 +704,9 @@
   <div id="view-today">
     <div class="app-grid">
       <div>
-        <section class="panel panel-accent-blue">
+        <section class="panel panel-todo">
           <div class="panel-head">
-            <div class="panel-title">TO DO</div>
+            <div class="panel-title"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4 L4 5.5 L6.5 2.5"/><line x1="8.5" y1="4" x2="14" y2="4"/><path d="M2.5 10.5 L4 12 L6.5 9"/><line x1="8.5" y1="11" x2="14" y2="11"/></svg>TO DO</div>
           </div>
           <div class="panel-body" id="tasks-list"></div>
           <div class="add-row">
@@ -672,9 +719,9 @@
           </div>
         </section>
 
-        <section class="panel panel-accent-orange">
+        <section class="panel panel-meetings">
           <div class="panel-head">
-            <div class="panel-title">MEETINGS</div>
+            <div class="panel-title"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8.5" r="5.5"/><path d="M8 5.5 V8.5 L10.3 10"/><path d="M6 1.5 H10"/></svg>MEETINGS</div>
           </div>
           <div class="panel-body" id="meetings-list"></div>
           <div class="add-row">
@@ -690,9 +737,9 @@
       </div>
 
       <aside>
-        <section class="panel panel-accent-violet">
+        <section class="panel panel-ideas">
           <div class="panel-head">
-            <div class="panel-title">RUNNING LIST</div>
+            <div class="panel-title"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5 L9.4 6 L14 7.5 L9.4 9 L8 13.5 L6.6 9 L2 7.5 L6.6 6 Z"/></svg>RUNNING LIST</div>
           </div>
           <div class="panel-body" id="ideas-list"></div>
           <div class="add-row">
@@ -911,15 +958,54 @@
     return '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">' + inner + '</svg>';
   }
 
+  var STATUS_BG_VAR = {"not-started":"--status-not","in-progress":"--status-prog","complete":"--status-done"};
+  var STATUS_INK_VAR = {"not-started":"--status-not-ink","in-progress":"--status-prog-ink","complete":"--status-done-ink"};
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function statusColor(status){ return cssVar(STATUS_BG_VAR[status]); }
+  function statusInk(status){ return cssVar(STATUS_INK_VAR[status]); }
+
+  function chipInnerHTML(status){
+    var check = status === "complete"
+      ? '<svg class="chip-check" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.2 L5 9.2 L10 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : "";
+    return faceIcon(status) + check + "<span>" + STATUS_LABEL[status] + "</span>";
+  }
+  function chipContentHTML(status){
+    return '<span class="chip-content">' + chipInnerHTML(status) + '</span>';
+  }
+
   function buildTaskRow(task, dayKey){
     var row = el("div","item-row");
 
-    var chip = el("button","status-chip " + task.status, faceIcon(task.status) + "<span>" + STATUS_LABEL[task.status] + "</span>");
+    var chip = el("button","status-chip " + task.status, chipContentHTML(task.status));
     chip.type = "button";
     chip.addEventListener("click", function(){
-      chip.classList.add("pop");
-      task.status = nextStatus(task.status);
-      setTimeout(function(){ save(); renderToday(); }, 260);
+      if(chip.classList.contains("filling")) return;
+      var newStatus = nextStatus(task.status);
+
+      var fill = document.createElement("span");
+      fill.className = "chip-fill";
+      fill.style.background = statusColor(newStatus);
+      chip.insertBefore(fill, chip.firstChild);
+
+      var content = chip.querySelector(".chip-content");
+      content.style.color = statusInk(newStatus);
+      content.innerHTML = chipInnerHTML(newStatus);
+
+      chip.classList.add("filling");
+      void fill.offsetWidth;
+      fill.classList.add("grow");
+
+      task.status = newStatus;
+      nameInput.classList.toggle("complete-strike", newStatus === "complete");
+
+      setTimeout(function(){
+        chip.className = "status-chip " + newStatus;
+        chip.innerHTML = chipContentHTML(newStatus);
+        save();
+      }, 400);
     });
     row.appendChild(chip);
 
