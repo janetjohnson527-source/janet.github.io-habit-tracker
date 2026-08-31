@@ -369,15 +369,25 @@
   .item-time:hover, .item-time:focus{border-color:var(--line); background:var(--paper);}
 
   .item-note-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
     color:var(--ink-faint);
     background:transparent;
     border:none;
-    padding:5px;
-    border-radius:5px;
+    padding:5px 8px 5px 6px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
     flex-shrink:0;
+    white-space:nowrap;
   }
   .item-note-toggle:hover{background:var(--line-soft); color:var(--ink-soft);}
   .item-note-toggle.has-note{color:var(--accent);}
+  .panel-todo .item-note-toggle{color:rgba(255,79,163,0.6);}
+  .panel-todo .item-note-toggle:hover, .panel-todo .item-note-toggle.has-note{color:var(--todo-accent); background:rgba(255,79,163,0.12);}
+  .panel-meetings .item-note-toggle{color:rgba(77,141,255,0.6);}
+  .panel-meetings .item-note-toggle:hover, .panel-meetings .item-note-toggle.has-note{color:var(--meetings-accent); background:var(--accent-soft);}
 
   .item-delete{
     color:var(--ink-faint);
@@ -1020,7 +1030,7 @@
     main.appendChild(nameInput);
     row.appendChild(main);
 
-    var noteBtn = el("button","item-note-toggle" + (task.note ? " has-note" : ""), svgIcon("note"));
+    var noteBtn = el("button","item-note-toggle" + (task.note ? " has-note" : ""), svgIcon("note") + "<span>Notes</span>");
     noteBtn.type = "button";
     noteBtn.title = "Notes";
     row.appendChild(noteBtn);
@@ -1038,7 +1048,7 @@
 
     var noteWrap = el("div","item-note");
     var noteArea = document.createElement("textarea");
-    noteArea.placeholder = "Completion notes...";
+    noteArea.placeholder = "Add notes or details...";
     noteArea.value = task.note || "";
     noteArea.addEventListener("change", function(){
       task.note = noteArea.value;
@@ -1080,7 +1090,7 @@
     main.appendChild(nameInput);
     row.appendChild(main);
 
-    var noteBtn = el("button","item-note-toggle" + (meeting.note ? " has-note" : ""), svgIcon("note"));
+    var noteBtn = el("button","item-note-toggle" + (meeting.note ? " has-note" : ""), svgIcon("note") + "<span>Notes</span>");
     noteBtn.type = "button";
     noteBtn.title = "Notes";
     row.appendChild(noteBtn);
@@ -1098,7 +1108,7 @@
 
     var noteWrap = el("div","item-note");
     var noteArea = document.createElement("textarea");
-    noteArea.placeholder = "Notes...";
+    noteArea.placeholder = "Add notes or details...";
     noteArea.value = meeting.note || "";
     noteArea.addEventListener("change", function(){
       meeting.note = noteArea.value;
@@ -1132,7 +1142,7 @@
     text.className = "idea-text" + (idea.done ? " done" : "");
     text.value = idea.text;
     text.rows = 1;
-    autoGrow(text);
+    requestAnimationFrame(function(){ autoGrow(text); });
     text.addEventListener("input", function(){ autoGrow(text); });
     text.addEventListener("change", function(){
       idea.text = text.value.trim() || idea.text;
