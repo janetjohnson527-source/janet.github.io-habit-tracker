@@ -495,12 +495,30 @@
     border:1px solid transparent;
     background:transparent;
     color:var(--meetings-accent);
-    width:88px;
-    padding:4px 6px;
+    width:82px;
+    padding:4px 4px;
     border-radius:5px;
     flex-shrink:0;
   }
   .item-time:hover, .item-time:focus{border-color:var(--line); background:var(--paper);}
+
+  .item-time-sep{
+    color:var(--ink-faint);
+    font-size:12px;
+    flex-shrink:0;
+    padding-top:4px;
+  }
+  .duration-badge{
+    font-size:11px;
+    font-weight:600;
+    color:var(--meetings-accent);
+    background:var(--accent-soft);
+    padding:3px 8px;
+    border-radius:999px;
+    flex-shrink:0;
+    white-space:nowrap;
+    margin-top:2px;
+  }
 
   .item-note-toggle{
     display:inline-flex;
@@ -768,15 +786,16 @@
     font-size:13.5px;
   }
   .template-row-top input[type=time]{
-    width:104px;
+    width:92px;
     border:1px solid var(--line);
     background:var(--paper);
     color:var(--ink);
     border-radius:7px;
-    padding:6px 8px;
+    padding:6px 6px;
     font-size:13px;
     font-family:var(--font-mono);
   }
+  .template-time-sep{color:var(--ink-faint); font-size:13px; flex-shrink:0;}
   .day-toggles{
     display:flex; gap:5px; margin-top:9px;
   }
@@ -927,6 +946,7 @@
             <button class="add-trigger" data-add-trigger="meeting" type="button">+ Add meeting</button>
             <div class="add-form" data-add-form="meeting">
               <input type="time" data-add-input="meeting-time" value="09:00">
+              <input type="time" data-add-input="meeting-endtime" value="09:30">
               <input type="text" placeholder="Meeting name" data-add-input="meeting-name">
               <button class="btn small primary" data-add-submit="meeting" type="button">Add</button>
               <button class="btn small ghost" data-add-cancel="meeting" type="button">Cancel</button>
@@ -1318,6 +1338,19 @@
     return h12 + ":" + m + " " + ap;
   }
 
+  function meetingDuration(start, end){
+    if(!start || !end) return null;
+    var sParts = start.split(":"), eParts = end.split(":");
+    var sMin = parseInt(sParts[0],10) * 60 + parseInt(sParts[1],10);
+    var eMin = parseInt(eParts[0],10) * 60 + parseInt(eParts[1],10);
+    var diff = eMin - sMin;
+    if(diff <= 0) return null;
+    if(diff < 60) return "(" + diff + " min)";
+    var hours = Math.floor(diff / 60);
+    var mins = diff % 60;
+    return mins === 0 ? "(" + hours + "h)" : "(" + hours + "h " + mins + "m)";
+  }
+
   function showToast(msg){
     var t = document.getElementById("toast");
     t.textContent = msg;
@@ -1378,7 +1411,7 @@
       state.templates.meetings.forEach(function(m){
         if(m.days.indexOf(wd) === -1) return;
         var exists = day.meetings.some(function(dm){ return dm.templateId === m.id; });
-        if(!exists) day.meetings.push({ id: uid(), name: m.name, time: m.time || "", note: "", templateId: m.id });
+        if(!exists) day.meetings.push({ id: uid(), name: m.name, time: m.time || "", endTime: m.endTime || "", note: "", templateId: m.id });
       });
       day.meetings.sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
     });
@@ -1397,7 +1430,7 @@
       var meetings = state.templates.meetings
         .filter(function(m){ return m.days.indexOf(wd) !== -1; })
         .map(function(m){
-          return { id: uid(), name: m.name, time: m.time || "", note: "", templateId: m.id };
+          return { id: uid(), name: m.name, time: m.time || "", endTime: m.endTime || "", note: "", templateId: m.id };
         });
       meetings.sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
       state.days[key] = { tasks: tasks, meetings: meetings, ooo: false };
@@ -1621,6 +1654,26 @@
     });
     row.appendChild(timeInput);
 
+    var timeSep = el("span","item-time-sep", "–");
+    row.appendChild(timeSep);
+
+    var endTimeInput = el("input","item-time" + (meeting.done ? " meeting-happened" : ""));
+    endTimeInput.type = "time";
+    endTimeInput.value = meeting.endTime || "";
+    endTimeInput.title = "End time";
+    endTimeInput.addEventListener("change", function(){
+      meeting.endTime = endTimeInput.value;
+      save();
+      renderToday();
+    });
+    row.appendChild(endTimeInput);
+
+    var durationText = meetingDuration(meeting.time, meeting.endTime);
+    if(durationText){
+      var durationBadge = el("span","duration-badge", durationText);
+      row.appendChild(durationBadge);
+    }
+
     var main = el("div","item-main");
     var noteBadge = el("span","note-badge" + (meeting.note ? "" : " hidden"), svgIcon("notebook"));
     noteBadge.title = "Has notes";
@@ -1749,7 +1802,8 @@
     if(day.meetings.length === 0){
       meetingsList.appendChild(el("div","empty-state","No meetings on the books."));
     } else {
-      day.meetings.forEach(function(m){ meetingsList.appendChild(buildMeetingRow(m, key)); });
+      var sortedMeetings = day.meetings.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+      sortedMeetings.forEach(function(m){ meetingsList.appendChild(buildMeetingRow(m, key)); });
     }
   }
 
@@ -1896,10 +1950,11 @@
   wireAddForm("meeting", function(form){
     var nameInput = form.querySelector('[data-add-input="meeting-name"]');
     var timeInput = form.querySelector('[data-add-input="meeting-time"]');
+    var endTimeInput = form.querySelector('[data-add-input="meeting-endtime"]');
     var name = nameInput.value.trim();
     if(!name) return false;
     var day = ensureDay(viewedDate);
-    day.meetings.push({ id: uid(), name: name, time: timeInput.value || "", note: "", templateId: null });
+    day.meetings.push({ id: uid(), name: name, time: timeInput.value || "", endTime: endTimeInput.value || "", note: "", templateId: null });
     save();
     renderToday();
     return true;
@@ -1975,6 +2030,16 @@
       timeInput.value = item.time || "";
       timeInput.addEventListener("change", function(){ item.time = timeInput.value; });
       top.appendChild(timeInput);
+
+      var sep = el("span","template-time-sep", "–");
+      top.appendChild(sep);
+
+      var endTimeInput = document.createElement("input");
+      endTimeInput.type = "time";
+      endTimeInput.title = "End time";
+      endTimeInput.value = item.endTime || "";
+      endTimeInput.addEventListener("change", function(){ item.endTime = endTimeInput.value; });
+      top.appendChild(endTimeInput);
     }
 
     var nameInput = document.createElement("input");
@@ -2015,7 +2080,7 @@
     renderTemplateGroup("tasks", document.getElementById("template-tasks"), false);
   });
   document.getElementById("add-template-meeting").addEventListener("click", function(){
-    state.templates.meetings.push({ id: uid(), name: "New recurring meeting", time: "09:00", days: [1,2,3,4,5] });
+    state.templates.meetings.push({ id: uid(), name: "New recurring meeting", time: "09:00", endTime: "09:30", days: [1,2,3,4,5] });
     renderTemplateGroup("meetings", document.getElementById("template-meetings"), true);
   });
 
