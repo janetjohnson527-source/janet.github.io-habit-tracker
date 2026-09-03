@@ -577,7 +577,8 @@
     padding:7px 9px;
     font-size:13px;
     background:var(--paper);
-    resize:vertical;
+    resize:none;
+    overflow:hidden;
     min-height:44px;
   }
 
@@ -1594,6 +1595,8 @@
     var noteArea = document.createElement("textarea");
     noteArea.placeholder = "Add notes or details...";
     noteArea.value = task.note || "";
+    noteArea.rows = 1;
+    noteArea.addEventListener("input", function(){ autoGrow(noteArea); });
     noteArea.addEventListener("change", function(){
       task.note = noteArea.value;
       noteBtn.classList.toggle("has-note", !!task.note);
@@ -1603,9 +1606,11 @@
     noteWrap.appendChild(noteArea);
     noteBtn.addEventListener("click", function(){
       noteWrap.classList.toggle("open");
+      if(noteWrap.classList.contains("open")) autoGrow(noteArea);
     });
     noteBadge.addEventListener("click", function(){
       noteWrap.classList.add("open");
+      autoGrow(noteArea);
     });
 
     var wrapper = document.createDocumentFragment();
@@ -1695,6 +1700,8 @@
     var noteArea = document.createElement("textarea");
     noteArea.placeholder = "Add notes or details...";
     noteArea.value = meeting.note || "";
+    noteArea.rows = 1;
+    noteArea.addEventListener("input", function(){ autoGrow(noteArea); });
     noteArea.addEventListener("change", function(){
       meeting.note = noteArea.value;
       noteBtn.classList.toggle("has-note", !!meeting.note);
@@ -1704,9 +1711,11 @@
     noteWrap.appendChild(noteArea);
     noteBtn.addEventListener("click", function(){
       noteWrap.classList.toggle("open");
+      if(noteWrap.classList.contains("open")) autoGrow(noteArea);
     });
     noteBadge.addEventListener("click", function(){
       noteWrap.classList.add("open");
+      autoGrow(noteArea);
     });
 
     var wrapper = document.createDocumentFragment();
