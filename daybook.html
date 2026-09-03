@@ -555,15 +555,23 @@
   .item-delete:hover{background:var(--status-not-bg); color:var(--status-not);}
 
   .item-carry{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
     color:var(--ink-faint);
     background:transparent;
     border:none;
-    padding:5px;
-    border-radius:5px;
+    padding:5px 6px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
     flex-shrink:0;
+    white-space:nowrap;
   }
   .item-carry:hover{background:var(--line-soft); color:var(--ink-soft);}
   .panel-todo .item-carry:hover{background:rgba(255,79,163,0.14); color:var(--todo-accent);}
+  .item-carry.carried{color:var(--todo-accent); background:rgba(255,79,163,0.12);}
+  .item-carry.carried:hover{background:rgba(255,79,163,0.2);}
 
   .item-note{
     margin:2px 10px 6px 32px;
@@ -1567,14 +1575,19 @@
     row.appendChild(noteBtn);
 
     if(task.status !== "complete"){
-      var carryBtn = el("button","item-carry", svgIcon("carry"));
+      var carriedDate = task.carriedTo ? parseDateKey(task.carriedTo) : null;
+      var carryLabel = carriedDate ? "Added to " + DAY_NAMES[carriedDate.getDay()].slice(0,3) : "";
+      var carryBtn = el("button","item-carry" + (task.carriedTo ? " carried" : ""),
+        svgIcon("carry") + (carryLabel ? "<span>" + carryLabel + "</span>" : ""));
       carryBtn.type = "button";
-      carryBtn.title = "Carry to next day";
+      carryBtn.title = task.carriedTo ? "Carried forward — click to carry again" : "Carry to next day";
       carryBtn.addEventListener("click", function(){
         var nextDate = addDays(viewedDate, 1);
         var nextDay = ensureDay(nextDate);
         nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", templateId: null });
+        task.carriedTo = dkey(nextDate);
         save();
+        renderToday();
         showToast("Carried to " + MONTH_NAMES[nextDate.getMonth()].slice(0,3) + " " + nextDate.getDate());
       });
       row.appendChild(carryBtn);
