@@ -779,6 +779,56 @@
     font-size:12px; font-weight:600; color:var(--ink-soft); letter-spacing:0.02em;
     margin:20px 0 10px;
   }
+  .paste-textarea{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:13px;
+    font-family:var(--font-mono);
+    resize:vertical;
+    margin-top:6px;
+  }
+  .helptext code{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 5px;
+    font-family:var(--font-mono);
+    font-size:11px;
+  }
+  #paste-preview{max-height:320px; overflow-y:auto;}
+  .paste-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-top:8px;
+  }
+  .paste-row input[type=time]{
+    width:88px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:7px;
+    padding:6px 6px;
+    font-size:12.5px;
+    font-family:var(--font-mono);
+  }
+  .paste-row input[type=text]{
+    flex:1;
+    min-width:0;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:7px;
+    padding:7px 9px;
+    font-size:13px;
+  }
   .template-row{
     border:1px solid var(--line);
     border-radius:10px;
@@ -941,6 +991,7 @@
           <div class="panel-body" id="tasks-list"></div>
           <div class="add-row">
             <button class="add-trigger" data-add-trigger="task" type="button">+ Add task</button>
+            <button class="add-trigger" id="btn-paste-tasks" type="button">Paste tasks</button>
             <div class="add-form" data-add-form="task">
               <input type="text" placeholder="Task name" data-add-input="task-name">
               <button class="btn small primary" data-add-submit="task" type="button">Add</button>
@@ -956,6 +1007,7 @@
           <div class="panel-body" id="meetings-list"></div>
           <div class="add-row">
             <button class="add-trigger" data-add-trigger="meeting" type="button">+ Add meeting</button>
+            <button class="add-trigger" id="btn-paste-meetings" type="button">Paste meetings</button>
             <div class="add-form" data-add-form="meeting">
               <input type="time" data-add-input="meeting-time" value="09:00">
               <input type="time" data-add-input="meeting-endtime" value="09:30">
@@ -1015,6 +1067,56 @@
     <div class="modal-foot">
       <span class="helptext">Toggle the days each item repeats on.</span>
       <button class="btn primary" id="modal-done" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="paste-modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Add meetings from text</h2>
+      <button class="btn ghost icon" id="paste-modal-close" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="helptext">Paste a list of meetings, one per line — works great with a list I hand you after reading a calendar screenshot. Try a format like <code>9:00 AM - 9:30 AM | Team Standup</code>. End time and AM/PM are optional.</p>
+      <textarea id="paste-input" class="paste-textarea" rows="5" placeholder="9:00 AM - 9:30 AM | Team Standup
+2:00 PM | Budget Review
+15:00 | Quick sync"></textarea>
+      <button class="btn small" id="paste-parse-btn" type="button">Parse</button>
+
+      <div class="modal-section-title" id="paste-preview-title" style="display:none;">Review before adding</div>
+      <div id="paste-preview"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="helptext" id="paste-count"></span>
+      <button class="btn primary" id="paste-confirm-btn" type="button">Add meetings</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="paste-tasks-modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Add tasks from text</h2>
+      <button class="btn ghost icon" id="paste-tasks-modal-close" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="helptext">Paste a list of action items, one per line — great for a meeting-notes summary I hand you, or your own bullet list. Bullets, checkboxes, and numbering (like <code>- </code>, <code>[ ] </code>, <code>1. </code>) get stripped automatically.</p>
+      <textarea id="paste-tasks-input" class="paste-textarea" rows="6" placeholder="- Send updated deck to Kylie
+- Follow up with Naseem on filter bug
+1. Draft Q3 curation summary"></textarea>
+      <button class="btn small" id="paste-tasks-parse-btn" type="button">Parse</button>
+
+      <div class="modal-section-title" id="paste-tasks-preview-title" style="display:none;">Review before adding</div>
+      <div id="paste-tasks-preview"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="helptext" id="paste-tasks-count"></span>
+      <button class="btn primary" id="paste-tasks-confirm-btn" type="button">Add tasks</button>
     </div>
   </div>
 </div>
@@ -2012,6 +2114,237 @@
     save();
     if(currentView === "today") renderToday(); else renderWeek();
   }
+
+  // ---------- paste meetings modal ----------
+  function parseTimeToken(tok){
+    if(!tok) return "";
+    tok = tok.trim();
+    var m = tok.match(/^(\d{1,2}):?(\d{2})?\s*(am|pm)?$/i);
+    if(!m) return "";
+    var h = parseInt(m[1],10);
+    var min = m[2] || "00";
+    var ap = m[3] ? m[3].toLowerCase() : null;
+    if(ap === "pm" && h !== 12) h += 12;
+    if(ap === "am" && h === 12) h = 0;
+    if(h > 23 || h < 0) return "";
+    return String(h).padStart(2,"0") + ":" + min;
+  }
+
+  function parseMeetingLine(line){
+    line = line.trim();
+    if(!line) return null;
+    var name = "", timeStr = "";
+    var pipeIdx = line.indexOf("|");
+    if(pipeIdx !== -1){
+      timeStr = line.slice(0, pipeIdx).trim();
+      name = line.slice(pipeIdx + 1).trim();
+    } else {
+      var rangeMatch = line.match(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[:\-]?\s*(.*)$/i);
+      var singleMatch = line.match(/^(\d{1,2}:\d{2}\s*(?:am|pm)?|\d{1,2}\s*(?:am|pm))\s*[:\-]?\s*(.*)$/i);
+      if(rangeMatch && rangeMatch[3]){
+        timeStr = rangeMatch[1] + " - " + rangeMatch[2];
+        name = rangeMatch[3].trim();
+      } else if(singleMatch && singleMatch[2]){
+        timeStr = singleMatch[1];
+        name = singleMatch[2].trim();
+      } else {
+        name = line;
+      }
+    }
+    var start = "", end = "";
+    if(timeStr){
+      var parts = timeStr.split(/-|–|—|\bto\b/i).map(function(s){ return s.trim(); }).filter(Boolean);
+      if(parts[0]) start = parseTimeToken(parts[0]);
+      if(parts[1]) end = parseTimeToken(parts[1]);
+    }
+    if(!name) name = line;
+    return { name: name, time: start, endTime: end };
+  }
+
+  var parsedMeetings = [];
+
+  function parsePasteText(){
+    var text = document.getElementById("paste-input").value;
+    var lines = text.split("\n");
+    parsedMeetings = [];
+    lines.forEach(function(line){
+      var result = parseMeetingLine(line);
+      if(result && result.name){
+        result._tempId = uid();
+        parsedMeetings.push(result);
+      }
+    });
+    renderPastePreview();
+  }
+
+  function renderPastePreview(){
+    var preview = document.getElementById("paste-preview");
+    var title = document.getElementById("paste-preview-title");
+    var count = document.getElementById("paste-count");
+    preview.innerHTML = "";
+    title.style.display = parsedMeetings.length ? "block" : "none";
+    parsedMeetings.forEach(function(parsed){
+      preview.appendChild(buildPastePreviewRow(parsed));
+    });
+    count.textContent = parsedMeetings.length
+      ? (parsedMeetings.length + " meeting" + (parsedMeetings.length === 1 ? "" : "s") + " ready to add")
+      : "";
+  }
+
+  function buildPastePreviewRow(parsed){
+    var row = el("div","paste-row");
+
+    var startInput = document.createElement("input");
+    startInput.type = "time";
+    startInput.value = parsed.time || "";
+    startInput.addEventListener("change", function(){ parsed.time = startInput.value; });
+    row.appendChild(startInput);
+
+    var sep = el("span","template-time-sep", "–");
+    row.appendChild(sep);
+
+    var endInput = document.createElement("input");
+    endInput.type = "time";
+    endInput.value = parsed.endTime || "";
+    endInput.addEventListener("change", function(){ parsed.endTime = endInput.value; });
+    row.appendChild(endInput);
+
+    var nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = parsed.name || "";
+    nameInput.addEventListener("change", function(){ parsed.name = nameInput.value.trim() || parsed.name; });
+    row.appendChild(nameInput);
+
+    var removeBtn = el("button","btn ghost icon", svgIcon("trash"));
+    removeBtn.type = "button";
+    removeBtn.title = "Remove";
+    removeBtn.addEventListener("click", function(){
+      parsedMeetings = parsedMeetings.filter(function(p){ return p._tempId !== parsed._tempId; });
+      renderPastePreview();
+    });
+    row.appendChild(removeBtn);
+
+    return row;
+  }
+
+  var pasteBackdrop = document.getElementById("paste-modal-backdrop");
+  document.getElementById("btn-paste-meetings").addEventListener("click", function(){
+    document.getElementById("paste-input").value = "";
+    parsedMeetings = [];
+    renderPastePreview();
+    pasteBackdrop.classList.add("open");
+  });
+  document.getElementById("paste-modal-close").addEventListener("click", closePasteModal);
+  pasteBackdrop.addEventListener("click", function(e){ if(e.target === pasteBackdrop) closePasteModal(); });
+  function closePasteModal(){ pasteBackdrop.classList.remove("open"); }
+
+  document.getElementById("paste-parse-btn").addEventListener("click", parsePasteText);
+  document.getElementById("paste-input").addEventListener("paste", function(){
+    setTimeout(parsePasteText, 30);
+  });
+
+  document.getElementById("paste-confirm-btn").addEventListener("click", function(){
+    if(parsedMeetings.length === 0) return;
+    var day = ensureDay(viewedDate);
+    parsedMeetings.forEach(function(p){
+      day.meetings.push({ id: uid(), name: p.name, time: p.time || "", endTime: p.endTime || "", note: "", templateId: null });
+    });
+    var addedCount = parsedMeetings.length;
+    save();
+    closePasteModal();
+    renderToday();
+    showToast("Added " + addedCount + " meeting" + (addedCount === 1 ? "" : "s"));
+  });
+
+  // ---------- paste tasks modal ----------
+  function cleanTaskLine(line){
+    line = line.trim();
+    line = line.replace(/^\[\s*[xX]?\s*\]\s*/, "");
+    line = line.replace(/^[☐☑✓✔]\s*/, "");
+    line = line.replace(/^[-*•–—]\s+/, "");
+    line = line.replace(/^\d+[\.\)]\s+/, "");
+    line = line.replace(/^(todo|to-do|action item|action|follow[\s-]?up)\s*:\s*/i, "");
+    return line.trim();
+  }
+
+  var parsedTasks = [];
+
+  function parseTasksText(){
+    var text = document.getElementById("paste-tasks-input").value;
+    var lines = text.split("\n");
+    parsedTasks = [];
+    lines.forEach(function(line){
+      var cleaned = cleanTaskLine(line);
+      if(cleaned){
+        parsedTasks.push({ name: cleaned, _tempId: uid() });
+      }
+    });
+    renderTasksPastePreview();
+  }
+
+  function renderTasksPastePreview(){
+    var preview = document.getElementById("paste-tasks-preview");
+    var title = document.getElementById("paste-tasks-preview-title");
+    var count = document.getElementById("paste-tasks-count");
+    preview.innerHTML = "";
+    title.style.display = parsedTasks.length ? "block" : "none";
+    parsedTasks.forEach(function(parsed){
+      preview.appendChild(buildTaskPastePreviewRow(parsed));
+    });
+    count.textContent = parsedTasks.length
+      ? (parsedTasks.length + " task" + (parsedTasks.length === 1 ? "" : "s") + " ready to add")
+      : "";
+  }
+
+  function buildTaskPastePreviewRow(parsed){
+    var row = el("div","paste-row");
+
+    var nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = parsed.name || "";
+    nameInput.addEventListener("change", function(){ parsed.name = nameInput.value.trim() || parsed.name; });
+    row.appendChild(nameInput);
+
+    var removeBtn = el("button","btn ghost icon", svgIcon("trash"));
+    removeBtn.type = "button";
+    removeBtn.title = "Remove";
+    removeBtn.addEventListener("click", function(){
+      parsedTasks = parsedTasks.filter(function(p){ return p._tempId !== parsed._tempId; });
+      renderTasksPastePreview();
+    });
+    row.appendChild(removeBtn);
+
+    return row;
+  }
+
+  var pasteTasksBackdrop = document.getElementById("paste-tasks-modal-backdrop");
+  document.getElementById("btn-paste-tasks").addEventListener("click", function(){
+    document.getElementById("paste-tasks-input").value = "";
+    parsedTasks = [];
+    renderTasksPastePreview();
+    pasteTasksBackdrop.classList.add("open");
+  });
+  document.getElementById("paste-tasks-modal-close").addEventListener("click", closePasteTasksModal);
+  pasteTasksBackdrop.addEventListener("click", function(e){ if(e.target === pasteTasksBackdrop) closePasteTasksModal(); });
+  function closePasteTasksModal(){ pasteTasksBackdrop.classList.remove("open"); }
+
+  document.getElementById("paste-tasks-parse-btn").addEventListener("click", parseTasksText);
+  document.getElementById("paste-tasks-input").addEventListener("paste", function(){
+    setTimeout(parseTasksText, 30);
+  });
+
+  document.getElementById("paste-tasks-confirm-btn").addEventListener("click", function(){
+    if(parsedTasks.length === 0) return;
+    var day = ensureDay(viewedDate);
+    parsedTasks.forEach(function(p){
+      day.tasks.push({ id: uid(), name: p.name, status: "not-started", note: "", templateId: null });
+    });
+    var addedCount = parsedTasks.length;
+    save();
+    closePasteTasksModal();
+    renderToday();
+    showToast("Added " + addedCount + " task" + (addedCount === 1 ? "" : "s"));
+  });
 
   function renderTemplateModal(){
     renderTemplateGroup("tasks", document.getElementById("template-tasks"), false);
