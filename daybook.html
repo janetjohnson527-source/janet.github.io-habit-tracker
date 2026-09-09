@@ -496,12 +496,25 @@
     flex-shrink:0;
     display:inline-flex;
     align-items:center;
+    justify-content:center;
     color:var(--ink-faint);
     cursor:pointer;
+    padding:4px;
+    border-radius:7px;
+    transition:transform .12s ease;
   }
+  .note-badge:hover{transform:scale(1.15);}
   .note-badge.hidden{display:none;}
-  .panel-todo .note-badge{color:var(--todo-accent);}
-  .panel-meetings .note-badge{color:var(--meetings-accent);}
+  .panel-todo .note-badge{
+    color:var(--todo-accent);
+    background:color-mix(in srgb, var(--todo-accent) 16%, transparent);
+    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--todo-accent) 60%, transparent));
+  }
+  .panel-meetings .note-badge{
+    color:var(--meetings-accent);
+    background:color-mix(in srgb, var(--meetings-accent) 16%, transparent);
+    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--meetings-accent) 60%, transparent));
+  }
   .item-name{
     border:none;
     background:transparent;
@@ -571,10 +584,20 @@
   }
   .item-note-toggle:hover{background:var(--line-soft); color:var(--ink-soft);}
   .item-note-toggle.has-note{color:var(--accent);}
-  .panel-todo .item-note-toggle{color:rgba(255,79,163,0.6);}
-  .panel-todo .item-note-toggle:hover, .panel-todo .item-note-toggle.has-note{color:var(--todo-accent); background:rgba(255,79,163,0.12);}
-  .panel-meetings .item-note-toggle{color:rgba(77,141,255,0.6);}
-  .panel-meetings .item-note-toggle:hover, .panel-meetings .item-note-toggle.has-note{color:var(--meetings-accent); background:var(--accent-soft);}
+  .panel-todo .item-note-toggle{color:color-mix(in srgb, var(--todo-accent) 60%, transparent);}
+  .panel-todo .item-note-toggle:hover{color:var(--todo-accent); background:color-mix(in srgb, var(--todo-accent) 12%, transparent);}
+  .panel-todo .item-note-toggle.has-note{
+    color:var(--todo-accent);
+    background:color-mix(in srgb, var(--todo-accent) 14%, transparent);
+    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--todo-accent) 55%, transparent));
+  }
+  .panel-meetings .item-note-toggle{color:color-mix(in srgb, var(--meetings-accent) 60%, transparent);}
+  .panel-meetings .item-note-toggle:hover{color:var(--meetings-accent); background:var(--accent-soft);}
+  .panel-meetings .item-note-toggle.has-note{
+    color:var(--meetings-accent);
+    background:var(--accent-soft);
+    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--meetings-accent) 55%, transparent));
+  }
 
   .item-delete{
     color:var(--ink-faint);
@@ -1621,7 +1644,7 @@
       trash: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
       check: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
       carry: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="17" y2="12"/><polyline points="11 6 17 12 11 18"/><line x1="20" y1="6" x2="20" y2="18"/></svg>',
-      notebook: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h11a2 2 0 0 1 2 2V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V3.5Z"/><line x1="8.3" y1="8" x2="14.5" y2="8"/><line x1="8.3" y1="12" x2="14.5" y2="12"/><line x1="2.5" y1="3.5" x2="2.5" y2="21"/></svg>'
+      notebook: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h11a2 2 0 0 1 2 2V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V3.5Z"/><line x1="8.3" y1="8" x2="14.5" y2="8"/><line x1="8.3" y1="12" x2="14.5" y2="12"/><line x1="2.5" y1="3.5" x2="2.5" y2="21"/></svg>'
     };
     return icons[name] || "";
   }
