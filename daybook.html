@@ -33,6 +33,7 @@
     --todo-accent:#FF4FA3;
     --meetings-accent:#4D8DFF;
     --ideas-accent:#FFD500;
+    --star-color:#FFC72C;
     --blob1:rgba(77,141,255,0.20);
     --blob2:rgba(255,165,61,0.16);
     --blob3:rgba(177,92,255,0.18);
@@ -480,12 +481,17 @@
     border:none;
     padding:3px;
     border-radius:5px;
-    transition:transform .1s ease, color .12s ease, opacity .12s ease;
+    transition:transform .1s ease, color .12s ease, opacity .12s ease, filter .12s ease;
   }
   .item-row:hover .priority-star{opacity:0.45;}
   .priority-star:hover{opacity:0.9 !important; color:var(--ink-soft); transform:scale(1.15);}
-  .priority-star.active{opacity:1 !important; color:#FFC72C; transform:scale(1.08);}
-  .priority-star.active:hover{color:#FFD75E; transform:scale(1.18);}
+  .priority-star.active{
+    opacity:1 !important;
+    color:var(--star-color);
+    transform:scale(1.15);
+    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--star-color) 70%, transparent));
+  }
+  .priority-star.active:hover{transform:scale(1.28);}
   .note-badge{
     flex-shrink:0;
     display:inline-flex;
@@ -1181,7 +1187,7 @@
       "status-not":"#FF4646", "status-not-bg":"#340D0D", "status-not-ink":"#3D0808",
       "status-prog":"#FFD500", "status-prog-bg":"#332B04", "status-prog-ink":"#3A2E00",
       "status-done":"#22E06B", "status-done-bg":"#06331A", "status-done-ink":"#04331A",
-      "todo-accent":"#FF4FA3", "meetings-accent":"#4D8DFF", "ideas-accent":"#FFD500",
+      "todo-accent":"#FF4FA3", "meetings-accent":"#4D8DFF", "ideas-accent":"#FFD500", "star-color":"#FFC72C",
       "blob1":"rgba(77,141,255,0.20)", "blob2":"rgba(255,165,61,0.16)", "blob3":"rgba(177,92,255,0.18)", "blob4":"rgba(34,224,107,0.12)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1193,7 +1199,7 @@
       "status-not":"#FF6FA0", "status-not-bg":"#3A0F26", "status-not-ink":"#3D0A20",
       "status-prog":"#FFD54F", "status-prog-bg":"#3A2E06", "status-prog-ink":"#3A2405",
       "status-done":"#7CE6B0", "status-done-bg":"#0C3322", "status-done-ink":"#0A3320",
-      "todo-accent":"#FF7BC4", "meetings-accent":"#FFD54F", "ideas-accent":"#D9A6FF",
+      "todo-accent":"#FF7BC4", "meetings-accent":"#FFD54F", "ideas-accent":"#D9A6FF", "star-color":"#FFE066",
       "blob1":"rgba(255,123,196,0.22)", "blob2":"rgba(255,213,79,0.14)", "blob3":"rgba(217,166,255,0.20)", "blob4":"rgba(255,180,220,0.14)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1205,7 +1211,7 @@
       "status-not":"#FF3B3B", "status-not-bg":"#330808", "status-not-ink":"#F2EAD9",
       "status-prog":"#B6FF3B", "status-prog-bg":"#243306", "status-prog-ink":"#233005",
       "status-done":"#8B5CF6", "status-done-bg":"#1E1233", "status-done-ink":"#F2EAD9",
-      "todo-accent":"#FF6B1A", "meetings-accent":"#8B5CF6", "ideas-accent":"#B6FF3B",
+      "todo-accent":"#FF6B1A", "meetings-accent":"#8B5CF6", "ideas-accent":"#B6FF3B", "star-color":"#FFD23F",
       "blob1":"rgba(255,107,26,0.18)", "blob2":"rgba(139,92,246,0.20)", "blob3":"rgba(182,255,59,0.10)", "blob4":"rgba(255,59,59,0.12)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1217,7 +1223,7 @@
       "status-not":"#FF7A5C", "status-not-bg":"#331509", "status-not-ink":"#331509",
       "status-prog":"#FFD166", "status-prog-bg":"#332905", "status-prog-ink":"#332405",
       "status-done":"#3FE0A5", "status-done-bg":"#053325", "status-done-ink":"#053325",
-      "todo-accent":"#FF7A5C", "meetings-accent":"#22C3E6", "ideas-accent":"#3FE0A5",
+      "todo-accent":"#FF7A5C", "meetings-accent":"#22C3E6", "ideas-accent":"#3FE0A5", "star-color":"#FFD166",
       "blob1":"rgba(34,195,230,0.22)", "blob2":"rgba(63,224,165,0.16)", "blob3":"rgba(255,209,102,0.12)", "blob4":"rgba(255,122,92,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1229,7 +1235,7 @@
       "status-not":"#FF4D6D", "status-not-bg":"#3A0C18", "status-not-ink":"#3A0C18",
       "status-prog":"#FFB84D", "status-prog-bg":"#3A2705", "status-prog-ink":"#3A2205",
       "status-done":"#FF8FCB", "status-done-bg":"#3A0E2A", "status-done-ink":"#3A0E2A",
-      "todo-accent":"#FF6F61", "meetings-accent":"#9B5DE5", "ideas-accent":"#FFB84D",
+      "todo-accent":"#FF6F61", "meetings-accent":"#9B5DE5", "ideas-accent":"#FFB84D", "star-color":"#FFB84D",
       "blob1":"rgba(255,111,97,0.20)", "blob2":"rgba(155,93,229,0.18)", "blob3":"rgba(255,184,77,0.14)", "blob4":"rgba(255,143,203,0.12)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1241,7 +1247,7 @@
       "status-not":"#FF6B9D", "status-not-bg":"#3A1224", "status-not-ink":"#3A1224",
       "status-prog":"#FFD86B", "status-prog-bg":"#3A2E06", "status-prog-ink":"#3A2405",
       "status-done":"#5CE1E6", "status-done-bg":"#04353A", "status-done-ink":"#04353A",
-      "todo-accent":"#FF6B9D", "meetings-accent":"#8B7FFF", "ideas-accent":"#5CE1E6",
+      "todo-accent":"#FF6B9D", "meetings-accent":"#8B7FFF", "ideas-accent":"#5CE1E6", "star-color":"#FFFFFF",
       "blob1":"rgba(139,127,255,0.22)", "blob2":"rgba(92,225,230,0.14)", "blob3":"rgba(255,107,157,0.14)", "blob4":"rgba(255,216,107,0.08)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1253,7 +1259,7 @@
       "status-not":"#E0664A", "status-not-bg":"#3A1A0E", "status-not-ink":"#3A1A0E",
       "status-prog":"#E8B23D", "status-prog-bg":"#3A2C07", "status-prog-ink":"#3A2405",
       "status-done":"#4FB8A0", "status-done-bg":"#083A2E", "status-done-ink":"#083A2E",
-      "todo-accent":"#E0664A", "meetings-accent":"#8FBF5C", "ideas-accent":"#E8B23D",
+      "todo-accent":"#E0664A", "meetings-accent":"#8FBF5C", "ideas-accent":"#E8B23D", "star-color":"#E8B23D",
       "blob1":"rgba(143,191,92,0.18)", "blob2":"rgba(232,178,61,0.14)", "blob3":"rgba(224,102,74,0.10)", "blob4":"rgba(79,184,160,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1265,7 +1271,7 @@
       "status-not":"#FF3B3B", "status-not-bg":"#330808", "status-not-ink":"#330808",
       "status-prog":"#F5FF3B", "status-prog-bg":"#33300A", "status-prog-ink":"#2E2C05",
       "status-done":"#3BFFDB", "status-done-bg":"#053330", "status-done-ink":"#053330",
-      "todo-accent":"#FF2E9A", "meetings-accent":"#3BE6FF", "ideas-accent":"#F5FF3B",
+      "todo-accent":"#FF2E9A", "meetings-accent":"#3BE6FF", "ideas-accent":"#F5FF3B", "star-color":"#F5FF3B",
       "blob1":"rgba(255,46,154,0.20)", "blob2":"rgba(59,230,255,0.18)", "blob3":"rgba(245,255,59,0.10)", "blob4":"rgba(139,92,246,0.14)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1277,7 +1283,7 @@
       "status-not":"#C97B6B", "status-not-bg":"#331C14", "status-not-ink":"#331C14",
       "status-prog":"#D9B15C", "status-prog-bg":"#332905", "status-prog-ink":"#2E2405",
       "status-done":"#8FA679", "status-done-bg":"#1E2A17", "status-done-ink":"#1A2413",
-      "todo-accent":"#D98C8C", "meetings-accent":"#8FA679", "ideas-accent":"#D9B15C",
+      "todo-accent":"#D98C8C", "meetings-accent":"#8FA679", "ideas-accent":"#D9B15C", "star-color":"#D9B15C",
       "blob1":"rgba(217,140,140,0.18)", "blob2":"rgba(143,166,121,0.16)", "blob3":"rgba(217,177,92,0.12)", "blob4":"rgba(201,123,107,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1289,7 +1295,7 @@
       "status-not":"#FF3355", "status-not-bg":"#330A12", "status-not-ink":"#330A12",
       "status-prog":"#FFE22F", "status-prog-bg":"#332C05", "status-prog-ink":"#2E2805",
       "status-done":"#2FFFD0", "status-done-bg":"#05332C", "status-done-ink":"#05332C",
-      "todo-accent":"#FF2FD0", "meetings-accent":"#2FE0FF", "ideas-accent":"#FFE22F",
+      "todo-accent":"#FF2FD0", "meetings-accent":"#2FE0FF", "ideas-accent":"#FFE22F", "star-color":"#FFE22F",
       "blob1":"rgba(255,47,208,0.20)", "blob2":"rgba(47,224,255,0.18)", "blob3":"rgba(255,226,47,0.12)", "blob4":"rgba(47,255,208,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
@@ -1301,7 +1307,7 @@
       "status-not":"#8B0000", "status-not-bg":"#240404", "status-not-ink":"#EDE3DA",
       "status-prog":"#6B7A3B", "status-prog-bg":"#1E2408", "status-prog-ink":"#EDE3DA",
       "status-done":"#5C1A66", "status-done-bg":"#1A0A1E", "status-done-ink":"#EDE3DA",
-      "todo-accent":"#B0121F", "meetings-accent":"#5C1A66", "ideas-accent":"#6B7A3B",
+      "todo-accent":"#B0121F", "meetings-accent":"#5C1A66", "ideas-accent":"#6B7A3B", "star-color":"#FF3B3B",
       "blob1":"rgba(176,18,31,0.20)", "blob2":"rgba(92,26,102,0.16)", "blob3":"rgba(107,122,59,0.08)", "blob4":"rgba(176,18,31,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     }
@@ -1652,7 +1658,7 @@
     var attrs = active
       ? 'fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"'
       : 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"';
-    return '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
+    return '<svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
   }
 
   var STATUS_BG_VAR = {"not-started":"--status-not","in-progress":"--status-prog","complete":"--status-done"};
