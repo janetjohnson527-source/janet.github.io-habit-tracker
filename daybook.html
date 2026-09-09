@@ -346,6 +346,16 @@
   }
   .panel-title svg{flex-shrink:0; transition:transform .2s ease;}
   .panel-head:hover .panel-title svg{transform:rotate(-8deg) scale(1.15);}
+  .panel-total{
+    font-family:var(--font-mono);
+    font-size:11px;
+    font-weight:500;
+    color:var(--meetings-accent);
+    background:var(--accent-soft);
+    padding:3px 9px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
 
   .panel-todo .panel-title{color:var(--todo-accent);}
   .panel-todo .add-trigger{color:var(--todo-accent);}
@@ -460,6 +470,22 @@
   .meeting-happened{opacity:0.6;}
 
   .item-main{flex:1; min-width:0; display:flex; align-items:center; gap:6px;}
+  .priority-star{
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    color:var(--ink-faint);
+    opacity:0;
+    background:transparent;
+    border:none;
+    padding:3px;
+    border-radius:5px;
+    transition:transform .1s ease, color .12s ease, opacity .12s ease;
+  }
+  .item-row:hover .priority-star{opacity:0.45;}
+  .priority-star:hover{opacity:0.9 !important; color:var(--ink-soft); transform:scale(1.15);}
+  .priority-star.active{opacity:1 !important; color:#FFC72C; transform:scale(1.08);}
+  .priority-star.active:hover{color:#FFD75E; transform:scale(1.18);}
   .note-badge{
     flex-shrink:0;
     display:inline-flex;
@@ -473,9 +499,9 @@
   .item-name{
     border:none;
     background:transparent;
-    width:100%;
-    flex:1;
-    min-width:0;
+    width:40px;
+    max-width:100%;
+    flex:0 1 auto;
     font-size:14px;
     font-weight:500;
     color:var(--ink);
@@ -747,6 +773,14 @@
   .mini-item.happened{opacity:0.6;}
   .mini-time{font-family:var(--font-mono); font-size:11px; color:var(--meetings-accent); flex-shrink:0; width:52px;}
   .day-empty{font-size:12px; color:var(--ink-faint); padding:3px 0;}
+  .day-card-total{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--meetings-accent);
+    padding-top:6px;
+    margin-top:4px;
+    border-top:1px solid var(--line-soft);
+  }
 
   /* ---------- modal ---------- */
   .modal-backdrop{
@@ -976,6 +1010,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
+      <span class="panel-total" id="week-total"></span>
       <button class="btn small" id="btn-jump-thisweek" type="button">This week</button>
     </div>
   </header>
@@ -1003,6 +1038,7 @@
         <section class="panel panel-meetings">
           <div class="panel-head">
             <div class="panel-title"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8.5" r="5.5"/><path d="M8 5.5 V8.5 L10.3 10"/><path d="M6 1.5 H10"/></svg>MEETINGS</div>
+            <span class="panel-total" id="meetings-total"></span>
           </div>
           <div class="panel-body" id="meetings-list"></div>
           <div class="add-row">
@@ -1452,17 +1488,29 @@
     return h12 + ":" + m + " " + ap;
   }
 
-  function meetingDuration(start, end){
+  function meetingDurationMinutes(start, end){
     if(!start || !end) return null;
     var sParts = start.split(":"), eParts = end.split(":");
     var sMin = parseInt(sParts[0],10) * 60 + parseInt(sParts[1],10);
     var eMin = parseInt(eParts[0],10) * 60 + parseInt(eParts[1],10);
     var diff = eMin - sMin;
-    if(diff <= 0) return null;
-    if(diff < 60) return "(" + diff + " min)";
-    var hours = Math.floor(diff / 60);
-    var mins = diff % 60;
-    return mins === 0 ? "(" + hours + "h)" : "(" + hours + "h " + mins + "m)";
+    return diff > 0 ? diff : null;
+  }
+  function formatMinutes(mins){
+    if(mins < 60) return mins + " min";
+    var hours = Math.floor(mins / 60);
+    var rem = mins % 60;
+    return rem === 0 ? (hours + "h") : (hours + "h " + rem + "m");
+  }
+  function meetingDuration(start, end){
+    var mins = meetingDurationMinutes(start, end);
+    return mins === null ? null : "(" + formatMinutes(mins) + ")";
+  }
+  function dayMeetingMinutes(day){
+    return day.meetings.reduce(function(sum, m){
+      var mins = meetingDurationMinutes(m.time, m.endTime);
+      return sum + (mins || 0);
+    }, 0);
   }
 
   function showToast(msg){
@@ -1599,6 +1647,14 @@
     return '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">' + inner + '</svg>';
   }
 
+  function starIcon(active){
+    var path = "M12 3.5 14.5 9.3 20.8 9.9 16 14 17.4 20.2 12 16.9 6.6 20.2 8 14 3.2 9.9 9.5 9.3Z";
+    var attrs = active
+      ? 'fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"'
+      : 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"';
+    return '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
+  }
+
   var STATUS_BG_VAR = {"not-started":"--status-not","in-progress":"--status-prog","complete":"--status-done"};
   var STATUS_INK_VAR = {"not-started":"--status-not-ink","in-progress":"--status-prog-ink","complete":"--status-done-ink"};
   function cssVar(name){
@@ -1664,12 +1720,27 @@
     var nameInput = el("input","item-name" + (task.status === "complete" ? " complete-strike" : ""));
     nameInput.type = "text";
     nameInput.value = task.name;
+    nameInput.addEventListener("input", function(){ sizeNameInput(nameInput); });
     nameInput.addEventListener("change", function(){
       task.name = nameInput.value.trim() || task.name;
+      sizeNameInput(nameInput);
       save();
     });
     main.appendChild(nameInput);
+
+    var priorityBtn = el("button","priority-star" + (task.priority ? " active" : ""), starIcon(!!task.priority));
+    priorityBtn.type = "button";
+    priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
+    priorityBtn.addEventListener("click", function(){
+      task.priority = !task.priority;
+      priorityBtn.classList.toggle("active", task.priority);
+      priorityBtn.innerHTML = starIcon(task.priority);
+      priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
+      save();
+    });
+    main.appendChild(priorityBtn);
     row.appendChild(main);
+    requestAnimationFrame(function(){ sizeNameInput(nameInput); });
 
     var noteBtn = el("button","item-note-toggle" + (task.note ? " has-note" : ""), svgIcon("note") + "<span>Notes</span>");
     noteBtn.type = "button";
@@ -1686,7 +1757,7 @@
       carryBtn.addEventListener("click", function(){
         var nextDate = addDays(viewedDate, 1);
         var nextDay = ensureDay(nextDate);
-        nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", templateId: null });
+        nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", priority: !!task.priority, templateId: null });
         task.carriedTo = dkey(nextDate);
         save();
         renderToday();
@@ -1788,12 +1859,27 @@
     var nameInput = el("input","item-name" + (meeting.done ? " meeting-happened" : ""));
     nameInput.type = "text";
     nameInput.value = meeting.name;
+    nameInput.addEventListener("input", function(){ sizeNameInput(nameInput); });
     nameInput.addEventListener("change", function(){
       meeting.name = nameInput.value.trim() || meeting.name;
+      sizeNameInput(nameInput);
       save();
     });
     main.appendChild(nameInput);
+
+    var meetingPriorityBtn = el("button","priority-star" + (meeting.priority ? " active" : ""), starIcon(!!meeting.priority));
+    meetingPriorityBtn.type = "button";
+    meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
+    meetingPriorityBtn.addEventListener("click", function(){
+      meeting.priority = !meeting.priority;
+      meetingPriorityBtn.classList.toggle("active", meeting.priority);
+      meetingPriorityBtn.innerHTML = starIcon(meeting.priority);
+      meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
+      save();
+    });
+    main.appendChild(meetingPriorityBtn);
     row.appendChild(main);
+    requestAnimationFrame(function(){ sizeNameInput(nameInput); });
 
     var noteBtn = el("button","item-note-toggle" + (meeting.note ? " has-note" : ""), svgIcon("note") + "<span>Notes</span>");
     noteBtn.type = "button";
@@ -1881,6 +1967,21 @@
     ta.style.height = (ta.scrollHeight) + "px";
   }
 
+  var _measureCanvas = null;
+  function measureTextWidth(text, font){
+    if(!_measureCanvas) _measureCanvas = document.createElement("canvas");
+    var ctx = _measureCanvas.getContext("2d");
+    ctx.font = font;
+    return ctx.measureText(text).width;
+  }
+  function sizeNameInput(input){
+    var cs = getComputedStyle(input);
+    var font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+    var text = input.value || input.placeholder || "";
+    var w = measureTextWidth(text, font);
+    input.style.width = Math.max(24, Math.ceil(w) + 10) + "px";
+  }
+
   // ---------- render: today view ----------
   function renderToday(){
     var key = dkey(viewedDate);
@@ -1916,6 +2017,9 @@
       var sortedMeetings = day.meetings.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
       sortedMeetings.forEach(function(m){ meetingsList.appendChild(buildMeetingRow(m, key)); });
     }
+
+    var totalMins = dayMeetingMinutes(day);
+    document.getElementById("meetings-total").textContent = totalMins > 0 ? formatMinutes(totalMins) + " today" : "";
   }
 
   function renderIdeas(){
@@ -1942,11 +2046,13 @@
     var grid = document.getElementById("week-grid");
     grid.innerHTML = "";
     var todayKey = dkey(todayMidnight());
+    var weekTotalMins = 0;
 
     for(var i=0;i<5;i++){
       var d = addDays(start,i);
       var key = dkey(d);
       var day = ensureDay(d);
+      weekTotalMins += dayMeetingMinutes(day);
 
       var card = el("div","day-card" + (key === todayKey ? " is-today" : "") + (day.ooo ? " is-ooo" : ""));
 
@@ -1992,11 +2098,17 @@
           mi.innerHTML = '<span class="mini-time">' + (m.time ? fmtTime(m.time) : "—") + '</span><span class="mini-name">' + escapeHtml(m.name) + '</span>';
           body.appendChild(mi);
         });
+        var dayMins = dayMeetingMinutes(day);
+        if(dayMins > 0){
+          body.appendChild(el("div","day-card-total", formatMinutes(dayMins) + " total"));
+        }
       }
 
       card.appendChild(body);
       grid.appendChild(card);
     }
+
+    document.getElementById("week-total").textContent = weekTotalMins > 0 ? formatMinutes(weekTotalMins) + " this week" : "";
   }
 
   function escapeHtml(s){
