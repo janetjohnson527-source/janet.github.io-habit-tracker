@@ -475,13 +475,14 @@
     flex-shrink:0;
     display:inline-flex;
     align-items:center;
+    gap:5px;
     color:var(--ink-faint);
     opacity:0;
     background:transparent;
     border:none;
     padding:3px;
-    border-radius:5px;
-    transition:transform .1s ease, color .12s ease, opacity .12s ease, filter .12s ease;
+    border-radius:999px;
+    transition:transform .12s ease, color .12s ease, opacity .12s ease, filter .12s ease, background .12s ease, padding .12s ease;
   }
   .item-row:hover .priority-star{opacity:0.45;}
   .priority-star:hover{opacity:0.9 !important; color:var(--ink-soft); transform:scale(1.15);}
@@ -489,9 +490,18 @@
     opacity:1 !important;
     color:var(--star-color);
     transform:scale(1.15);
-    filter:drop-shadow(0 0 4px color-mix(in srgb, var(--star-color) 70%, transparent));
+    padding:4px 11px 4px 5px;
+    background:color-mix(in srgb, var(--star-color) 20%, transparent);
+    filter:drop-shadow(0 0 7px color-mix(in srgb, var(--star-color) 85%, transparent));
   }
-  .priority-star.active:hover{transform:scale(1.28);}
+  .priority-star.active:hover{transform:scale(1.22);}
+  .priority-label{
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:0.05em;
+    color:var(--star-color);
+    white-space:nowrap;
+  }
   .note-badge{
     flex-shrink:0;
     display:inline-flex;
@@ -1681,7 +1691,10 @@
     var attrs = active
       ? 'fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"'
       : 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"';
-    return '<svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
+    return '<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
+  }
+  function priorityBadgeHTML(active){
+    return starIcon(active) + (active ? '<span class="priority-label">HIGH PRIO</span>' : "");
   }
 
   var STATUS_BG_VAR = {"not-started":"--status-not","in-progress":"--status-prog","complete":"--status-done"};
@@ -1757,13 +1770,13 @@
     });
     main.appendChild(nameInput);
 
-    var priorityBtn = el("button","priority-star" + (task.priority ? " active" : ""), starIcon(!!task.priority));
+    var priorityBtn = el("button","priority-star" + (task.priority ? " active" : ""), priorityBadgeHTML(!!task.priority));
     priorityBtn.type = "button";
     priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
     priorityBtn.addEventListener("click", function(){
       task.priority = !task.priority;
       priorityBtn.classList.toggle("active", task.priority);
-      priorityBtn.innerHTML = starIcon(task.priority);
+      priorityBtn.innerHTML = priorityBadgeHTML(task.priority);
       priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
       save();
     });
@@ -1896,13 +1909,13 @@
     });
     main.appendChild(nameInput);
 
-    var meetingPriorityBtn = el("button","priority-star" + (meeting.priority ? " active" : ""), starIcon(!!meeting.priority));
+    var meetingPriorityBtn = el("button","priority-star" + (meeting.priority ? " active" : ""), priorityBadgeHTML(!!meeting.priority));
     meetingPriorityBtn.type = "button";
     meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
     meetingPriorityBtn.addEventListener("click", function(){
       meeting.priority = !meeting.priority;
       meetingPriorityBtn.classList.toggle("active", meeting.priority);
-      meetingPriorityBtn.innerHTML = starIcon(meeting.priority);
+      meetingPriorityBtn.innerHTML = priorityBadgeHTML(meeting.priority);
       meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
       save();
     });
