@@ -1458,6 +1458,8 @@
   function todayMidnight(){
     var d = new Date();
     d.setHours(0,0,0,0);
+    if(d.getDay() === 6) d = addDays(d, 2);
+    if(d.getDay() === 0) d = addDays(d, 1);
     return d;
   }
 
@@ -1504,6 +1506,16 @@
   function addDays(d, n){
     var nd = new Date(d);
     nd.setDate(nd.getDate()+n);
+    return nd;
+  }
+
+  // Steps one day in the given direction (1 or -1), skipping Sat/Sun.
+  // Friday + 1 lands on Monday; Monday - 1 lands on Friday.
+  function addWeekday(d, direction){
+    var nd = addDays(d, direction);
+    while(nd.getDay() === 0 || nd.getDay() === 6){
+      nd = addDays(nd, direction);
+    }
     return nd;
   }
 
@@ -1795,9 +1807,9 @@
       var carryBtn = el("button","item-carry" + (task.carriedTo ? " carried" : ""),
         svgIcon("carry") + (carryLabel ? "<span>" + carryLabel + "</span>" : ""));
       carryBtn.type = "button";
-      carryBtn.title = task.carriedTo ? "Carried forward — click to carry again" : "Carry to next day";
+      carryBtn.title = task.carriedTo ? "Carried forward — click to carry again" : "Carry to next weekday";
       carryBtn.addEventListener("click", function(){
-        var nextDate = addDays(viewedDate, 1);
+        var nextDate = addWeekday(viewedDate, 1);
         var nextDay = ensureDay(nextDate);
         nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", priority: !!task.priority, templateId: null });
         task.carriedTo = dkey(nextDate);
@@ -2236,8 +2248,8 @@
   });
 
   // ---------- date navigation ----------
-  document.getElementById("prev-day").addEventListener("click", function(){ viewedDate = addDays(viewedDate,-1); renderToday(); });
-  document.getElementById("next-day").addEventListener("click", function(){ viewedDate = addDays(viewedDate,1); renderToday(); });
+  document.getElementById("prev-day").addEventListener("click", function(){ viewedDate = addWeekday(viewedDate,-1); renderToday(); });
+  document.getElementById("next-day").addEventListener("click", function(){ viewedDate = addWeekday(viewedDate,1); renderToday(); });
   document.getElementById("btn-jump-today").addEventListener("click", function(){ viewedDate = todayMidnight(); renderToday(); });
   document.getElementById("btn-ooo").addEventListener("click", function(){
     var day = ensureDay(viewedDate);
