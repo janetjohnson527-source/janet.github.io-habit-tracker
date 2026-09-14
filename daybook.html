@@ -321,9 +321,9 @@
     overflow:hidden;
   }
   .panel + .panel{margin-top:20px;}
-  .panel-todo{border:1.5px solid var(--todo-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(255,79,163,0.16);}
-  .panel-meetings{border:1.5px solid var(--meetings-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(77,141,255,0.16);}
-  .panel-ideas{border:1.5px solid var(--ideas-accent); box-shadow:var(--shadow-card), 0 8px 28px rgba(255,213,0,0.16);}
+  .panel-todo{border:1.5px solid var(--todo-accent); box-shadow:var(--shadow-card), 0 8px 28px color-mix(in srgb, var(--todo-accent) 16%, transparent);}
+  .panel-meetings{border:1.5px solid var(--meetings-accent); box-shadow:var(--shadow-card), 0 8px 28px color-mix(in srgb, var(--meetings-accent) 16%, transparent);}
+  .panel-ideas{border:1.5px solid var(--ideas-accent); box-shadow:var(--shadow-card), 0 8px 28px color-mix(in srgb, var(--ideas-accent) 16%, transparent);}
 
   .panel-head{
     display:flex;
@@ -332,9 +332,9 @@
     padding:14px 18px;
     border-bottom:1px solid var(--line-soft);
   }
-  .panel-todo .panel-head{background:rgba(255,79,163,0.09);}
-  .panel-meetings .panel-head{background:rgba(77,141,255,0.09);}
-  .panel-ideas .panel-head{background:rgba(255,213,0,0.09);}
+  .panel-todo .panel-head{background:color-mix(in srgb, var(--todo-accent) 9%, transparent);}
+  .panel-meetings .panel-head{background:color-mix(in srgb, var(--meetings-accent) 9%, transparent);}
+  .panel-ideas .panel-head{background:color-mix(in srgb, var(--ideas-accent) 9%, transparent);}
 
   .panel-title{
     font-size:12.5px;
@@ -360,18 +360,18 @@
 
   .panel-todo .panel-title{color:var(--todo-accent);}
   .panel-todo .add-trigger{color:var(--todo-accent);}
-  .panel-todo .add-trigger:hover{background:rgba(255,79,163,0.14);}
-  .panel-todo .item-row:hover{background:rgba(255,79,163,0.10);}
+  .panel-todo .add-trigger:hover{background:color-mix(in srgb, var(--todo-accent) 14%, transparent);}
+  .panel-todo .item-row:hover{background:color-mix(in srgb, var(--todo-accent) 10%, transparent);}
 
   .panel-meetings .panel-title{color:var(--meetings-accent);}
-  .panel-meetings .add-trigger{color:var(--accent-hover);}
-  .panel-meetings .add-trigger:hover{background:var(--accent-soft);}
-  .panel-meetings .item-row:hover{background:rgba(77,141,255,0.10);}
+  .panel-meetings .add-trigger{color:var(--meetings-accent);}
+  .panel-meetings .add-trigger:hover{background:color-mix(in srgb, var(--meetings-accent) 14%, transparent);}
+  .panel-meetings .item-row:hover{background:color-mix(in srgb, var(--meetings-accent) 10%, transparent);}
 
   .panel-ideas .panel-title{color:var(--ideas-accent);}
   .panel-ideas .add-trigger{color:var(--ideas-accent);}
-  .panel-ideas .add-trigger:hover{background:rgba(255,213,0,0.14);}
-  .panel-ideas .idea-item:hover{background:rgba(255,213,0,0.10);}
+  .panel-ideas .add-trigger:hover{background:color-mix(in srgb, var(--ideas-accent) 14%, transparent);}
+  .panel-ideas .idea-item:hover{background:color-mix(in srgb, var(--ideas-accent) 10%, transparent);}
 
   .panel-body{padding:6px 8px 12px;}
 
@@ -634,9 +634,9 @@
     white-space:nowrap;
   }
   .item-carry:hover{background:var(--line-soft); color:var(--ink-soft);}
-  .panel-todo .item-carry:hover{background:rgba(255,79,163,0.14); color:var(--todo-accent);}
-  .item-carry.carried{color:var(--todo-accent); background:rgba(255,79,163,0.12);}
-  .item-carry.carried:hover{background:rgba(255,79,163,0.2);}
+  .panel-todo .item-carry:hover{background:color-mix(in srgb, var(--todo-accent) 14%, transparent); color:var(--todo-accent);}
+  .item-carry.carried{color:var(--todo-accent); background:color-mix(in srgb, var(--todo-accent) 12%, transparent);}
+  .item-carry.carried:hover{background:color-mix(in srgb, var(--todo-accent) 20%, transparent);}
 
   .item-note{
     margin:2px 10px 6px 32px;
@@ -1340,7 +1340,7 @@
       "status-not":"#8B0000", "status-not-bg":"#240404", "status-not-ink":"#EDE3DA",
       "status-prog":"#6B7A3B", "status-prog-bg":"#1E2408", "status-prog-ink":"#EDE3DA",
       "status-done":"#5C1A66", "status-done-bg":"#1A0A1E", "status-done-ink":"#EDE3DA",
-      "todo-accent":"#B0121F", "meetings-accent":"#5C1A66", "ideas-accent":"#6B7A3B", "star-color":"#FF3B3B",
+      "todo-accent":"#B0121F", "meetings-accent":"#C77DFF", "ideas-accent":"#6B7A3B", "star-color":"#FF3B3B",
       "blob1":"rgba(176,18,31,0.20)", "blob2":"rgba(92,26,102,0.16)", "blob3":"rgba(107,122,59,0.08)", "blob4":"rgba(176,18,31,0.10)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     }
