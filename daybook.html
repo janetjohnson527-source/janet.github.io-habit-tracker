@@ -947,6 +947,41 @@
     background:var(--accent); border-color:var(--accent); color:#fff;
   }
 
+  .freq-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:9px;
+  }
+  .freq-toggle{
+    padding:5px 10px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-faint);
+  }
+  .freq-toggle.on{
+    background:var(--accent); border-color:var(--accent); color:#fff;
+  }
+  .freq-start-wrap{
+    align-items:center;
+    gap:6px;
+    margin-left:4px;
+  }
+  .freq-start-label{font-size:11.5px; color:var(--ink-faint);}
+  .freq-start-input{
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:7px;
+    padding:5px 7px;
+    font-size:12px;
+    font-family:var(--font-mono);
+  }
+
   .modal-foot{
     display:flex; justify-content:space-between; align-items:center;
     padding:16px 22px; border-top:1px solid var(--line-soft);
@@ -1700,6 +1735,21 @@
     return new Date(parseInt(parts[0],10), parseInt(parts[1],10) - 1, parseInt(parts[2],10));
   }
 
+  // True if a recurring template should generate an occurrence on dateObj.
+  // Weekly templates just check the weekday. Biweekly templates additionally
+  // require dateObj's week to be an even number of weeks from the template's
+  // anchor (startDate) — i.e. every other week, not every week.
+  function templateMatchesDate(t, dateObj, wd){
+    if(t.days.indexOf(wd) === -1) return false;
+    if(t.frequency === "biweekly" && t.startDate){
+      var anchorMonday = startOfWeek(parseDateKey(t.startDate));
+      var targetMonday = startOfWeek(dateObj);
+      var diffWeeks = Math.round((targetMonday - anchorMonday) / (7*24*60*60*1000));
+      if((((diffWeeks % 2) + 2) % 2) !== 0) return false;
+    }
+    return true;
+  }
+
   // Bring already-generated today/future days back in sync with the current
   // recurring templates. Past days are left alone (history stays accurate).
   // Runs whenever the Manage Recurring modal is closed, since that's the one
@@ -1711,20 +1761,21 @@
     Object.keys(state.days).forEach(function(key){
       if(key < todayKey) return;
       var day = state.days[key];
-      var wd = parseDateKey(key).getDay();
+      var dateObj = parseDateKey(key);
+      var wd = dateObj.getDay();
 
-      var validTaskIds = state.templates.tasks.filter(function(t){ return t.days.indexOf(wd) !== -1; }).map(function(t){ return t.id; });
+      var validTaskIds = state.templates.tasks.filter(function(t){ return templateMatchesDate(t, dateObj, wd); }).map(function(t){ return t.id; });
       day.tasks = day.tasks.filter(function(t){ return !t.templateId || validTaskIds.indexOf(t.templateId) !== -1; });
       state.templates.tasks.forEach(function(t){
-        if(t.days.indexOf(wd) === -1) return;
+        if(!templateMatchesDate(t, dateObj, wd)) return;
         var exists = day.tasks.some(function(dt){ return dt.templateId === t.id; });
         if(!exists) day.tasks.push({ id: uid(), name: t.name, status: "not-started", note: "", templateId: t.id });
       });
 
-      var validMeetingIds = state.templates.meetings.filter(function(m){ return m.days.indexOf(wd) !== -1; }).map(function(m){ return m.id; });
+      var validMeetingIds = state.templates.meetings.filter(function(m){ return templateMatchesDate(m, dateObj, wd); }).map(function(m){ return m.id; });
       day.meetings = day.meetings.filter(function(m){ return !m.templateId || validMeetingIds.indexOf(m.templateId) !== -1; });
       state.templates.meetings.forEach(function(m){
-        if(m.days.indexOf(wd) === -1) return;
+        if(!templateMatchesDate(m, dateObj, wd)) return;
         var exists = day.meetings.some(function(dm){ return dm.templateId === m.id; });
         if(!exists) day.meetings.push({ id: uid(), name: m.name, time: m.time || "", endTime: m.endTime || "", note: "", templateId: m.id });
       });
@@ -1738,12 +1789,12 @@
     if(!state.days[key]){
       var wd = dateObj.getDay();
       var tasks = state.templates.tasks
-        .filter(function(t){ return t.days.indexOf(wd) !== -1; })
+        .filter(function(t){ return templateMatchesDate(t, dateObj, wd); })
         .map(function(t){
           return { id: uid(), name: t.name, status: "not-started", note: "", templateId: t.id };
         });
       var meetings = state.templates.meetings
-        .filter(function(m){ return m.days.indexOf(wd) !== -1; })
+        .filter(function(m){ return templateMatchesDate(m, dateObj, wd); })
         .map(function(m){
           return { id: uid(), name: m.name, time: m.time || "", endTime: m.endTime || "", note: "", templateId: m.id };
         });
@@ -1807,8 +1858,22 @@
       : 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"';
     return '<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '" ' + attrs + '/></svg>';
   }
-  function priorityBadgeHTML(active){
-    return starIcon(active) + (active ? '<span class="priority-label">HIGH PRIO</span>' : "");
+  var RANK_LABEL = {1:"1ST PRIORITY", 2:"2ND PRIORITY", 3:"3RD PRIORITY"};
+  function normPriority(p){
+    if(p === true) return 1;
+    if(typeof p === "number" && p >= 0 && p <= 3) return Math.floor(p);
+    return 0;
+  }
+  function priorityBadgeHTML(rank){
+    rank = normPriority(rank);
+    return starIcon(rank > 0) + (rank > 0 ? '<span class="priority-label">' + RANK_LABEL[rank] + '</span>' : "");
+  }
+  // Cycles a task's priority 0 -> 1 -> 2 -> 3 -> 0. Multiple tasks can share
+  // the same rank — this is just a tag, not a unique ranking.
+  function setItemPriority(dayKey, item, newRank){
+    item.priority = newRank;
+    save();
+    renderToday();
   }
 
   var STATUS_BG_VAR = {"not-started":"--status-not","in-progress":"--status-prog","complete":"--status-done"};
@@ -1884,15 +1949,13 @@
     });
     main.appendChild(nameInput);
 
-    var priorityBtn = el("button","priority-star" + (task.priority ? " active" : ""), priorityBadgeHTML(!!task.priority));
+    var taskRank = normPriority(task.priority);
+    var priorityBtn = el("button","priority-star" + (taskRank > 0 ? " active" : ""), priorityBadgeHTML(taskRank));
     priorityBtn.type = "button";
-    priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
+    priorityBtn.title = taskRank > 0 ? "Click to change priority" : "Mark as 1st priority";
     priorityBtn.addEventListener("click", function(){
-      task.priority = !task.priority;
-      priorityBtn.classList.toggle("active", task.priority);
-      priorityBtn.innerHTML = priorityBadgeHTML(task.priority);
-      priorityBtn.title = task.priority ? "High priority — click to unstar" : "Mark as high priority";
-      save();
+      var next = (normPriority(task.priority) + 1) % 4;
+      setItemPriority(dayKey, task, next);
     });
     main.appendChild(priorityBtn);
     row.appendChild(main);
@@ -1913,7 +1976,7 @@
       carryBtn.addEventListener("click", function(){
         var nextDate = addWeekday(viewedDate, 1);
         var nextDay = ensureDay(nextDate);
-        nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", priority: !!task.priority, templateId: null });
+        nextDay.tasks.push({ id: uid(), name: task.name, status: "not-started", note: task.note || "", priority: normPriority(task.priority), templateId: null });
         task.carriedTo = dkey(nextDate);
         save();
         renderToday();
@@ -2022,18 +2085,6 @@
       save();
     });
     main.appendChild(nameInput);
-
-    var meetingPriorityBtn = el("button","priority-star" + (meeting.priority ? " active" : ""), priorityBadgeHTML(!!meeting.priority));
-    meetingPriorityBtn.type = "button";
-    meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
-    meetingPriorityBtn.addEventListener("click", function(){
-      meeting.priority = !meeting.priority;
-      meetingPriorityBtn.classList.toggle("active", meeting.priority);
-      meetingPriorityBtn.innerHTML = priorityBadgeHTML(meeting.priority);
-      meetingPriorityBtn.title = meeting.priority ? "High priority — click to unstar" : "Mark as high priority";
-      save();
-    });
-    main.appendChild(meetingPriorityBtn);
     row.appendChild(main);
     requestAnimationFrame(function(){ sizeNameInput(nameInput); });
 
@@ -2682,15 +2733,49 @@
     });
     row.appendChild(toggles);
 
+    var freqRow = el("div","freq-row");
+    var weeklyBtn = el("button","freq-toggle" + (item.frequency !== "biweekly" ? " on" : ""), "Weekly");
+    weeklyBtn.type = "button";
+    var biweeklyBtn = el("button","freq-toggle" + (item.frequency === "biweekly" ? " on" : ""), "Every 2 weeks");
+    biweeklyBtn.type = "button";
+    var startDateWrap = el("span","freq-start-wrap");
+    var startDateLabel = el("span","freq-start-label", "starting");
+    var startDateInput = document.createElement("input");
+    startDateInput.type = "date";
+    startDateInput.className = "freq-start-input";
+    startDateInput.value = item.startDate || dkey(todayMidnight());
+    startDateInput.addEventListener("change", function(){ item.startDate = startDateInput.value; });
+    startDateWrap.appendChild(startDateLabel);
+    startDateWrap.appendChild(startDateInput);
+    startDateWrap.style.display = item.frequency === "biweekly" ? "inline-flex" : "none";
+
+    function setFrequency(freq){
+      item.frequency = freq;
+      weeklyBtn.classList.toggle("on", freq !== "biweekly");
+      biweeklyBtn.classList.toggle("on", freq === "biweekly");
+      startDateWrap.style.display = freq === "biweekly" ? "inline-flex" : "none";
+      if(freq === "biweekly" && !item.startDate){
+        item.startDate = dkey(todayMidnight());
+        startDateInput.value = item.startDate;
+      }
+    }
+    weeklyBtn.addEventListener("click", function(){ setFrequency("weekly"); });
+    biweeklyBtn.addEventListener("click", function(){ setFrequency("biweekly"); });
+
+    freqRow.appendChild(weeklyBtn);
+    freqRow.appendChild(biweeklyBtn);
+    freqRow.appendChild(startDateWrap);
+    row.appendChild(freqRow);
+
     return row;
   }
 
   document.getElementById("add-template-task").addEventListener("click", function(){
-    state.templates.tasks.push({ id: uid(), name: "New recurring task", days: [1,2,3,4,5] });
+    state.templates.tasks.push({ id: uid(), name: "New recurring task", days: [1,2,3,4,5], frequency: "weekly" });
     renderTemplateGroup("tasks", document.getElementById("template-tasks"), false);
   });
   document.getElementById("add-template-meeting").addEventListener("click", function(){
-    state.templates.meetings.push({ id: uid(), name: "New recurring meeting", time: "09:00", endTime: "09:30", days: [1,2,3,4,5] });
+    state.templates.meetings.push({ id: uid(), name: "New recurring meeting", time: "09:00", endTime: "09:30", days: [1,2,3,4,5], frequency: "weekly" });
     renderTemplateGroup("meetings", document.getElementById("template-meetings"), true);
   });
 
