@@ -34,10 +34,10 @@
     --meetings-accent:#4D8DFF;
     --ideas-accent:#FFD500;
     --star-color:#FFC72C;
-    --blob1:rgba(77,141,255,0.20);
-    --blob2:rgba(255,165,61,0.16);
-    --blob3:rgba(177,92,255,0.18);
-    --blob4:rgba(34,224,107,0.12);
+    --blob1:rgba(77,141,255,0.29);
+    --blob2:rgba(255,165,61,0.232);
+    --blob3:rgba(177,92,255,0.261);
+    --blob4:rgba(34,224,107,0.174);
     --radius-sm:6px;
     --radius:10px;
     --radius-lg:16px;
@@ -51,10 +51,10 @@
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(760px circle at 8% -8%, var(--blob1), transparent 58%),
-      radial-gradient(620px circle at 96% 4%, var(--blob2), transparent 55%),
-      radial-gradient(680px circle at 30% 105%, var(--blob3), transparent 55%),
-      radial-gradient(560px circle at 92% 100%, var(--blob4), transparent 55%),
+      radial-gradient(920px circle at 6% -10%, var(--blob1), transparent 65%),
+      radial-gradient(760px circle at 98% 2%, var(--blob2), transparent 62%),
+      radial-gradient(820px circle at 28% 108%, var(--blob3), transparent 62%),
+      radial-gradient(680px circle at 94% 102%, var(--blob4), transparent 62%),
       var(--paper);
     background-attachment:fixed;
     color:var(--ink);
@@ -444,6 +444,7 @@
     transform:scaleX(0);
     transform-origin:left center;
   }
+  .chip-fill.reverse{transform-origin:right center;}
   .chip-fill.grow{
     transition:transform .38s cubic-bezier(.45,1.2,.55,1);
     transform:scaleX(1);
@@ -1281,7 +1282,7 @@
       "status-prog":"#FFD500", "status-prog-bg":"#332B04", "status-prog-ink":"#3A2E00",
       "status-done":"#22E06B", "status-done-bg":"#06331A", "status-done-ink":"#04331A",
       "todo-accent":"#FF4FA3", "meetings-accent":"#4D8DFF", "ideas-accent":"#FFD500", "star-color":"#FFC72C",
-      "blob1":"rgba(77,141,255,0.20)", "blob2":"rgba(255,165,61,0.16)", "blob3":"rgba(177,92,255,0.18)", "blob4":"rgba(34,224,107,0.12)",
+      "blob1":"rgba(77,141,255,0.29)", "blob2":"rgba(255,165,61,0.232)", "blob3":"rgba(177,92,255,0.261)", "blob4":"rgba(34,224,107,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     princess: {
@@ -1293,7 +1294,7 @@
       "status-prog":"#FFD54F", "status-prog-bg":"#3A2E06", "status-prog-ink":"#3A2405",
       "status-done":"#7CE6B0", "status-done-bg":"#0C3322", "status-done-ink":"#0A3320",
       "todo-accent":"#FF7BC4", "meetings-accent":"#FFD54F", "ideas-accent":"#D9A6FF", "star-color":"#FFE066",
-      "blob1":"rgba(255,123,196,0.22)", "blob2":"rgba(255,213,79,0.14)", "blob3":"rgba(217,166,255,0.20)", "blob4":"rgba(255,180,220,0.14)",
+      "blob1":"rgba(255,123,196,0.319)", "blob2":"rgba(255,213,79,0.203)", "blob3":"rgba(217,166,255,0.29)", "blob4":"rgba(255,180,220,0.203)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     spooky: {
@@ -1305,7 +1306,7 @@
       "status-prog":"#B6FF3B", "status-prog-bg":"#243306", "status-prog-ink":"#233005",
       "status-done":"#8B5CF6", "status-done-bg":"#1E1233", "status-done-ink":"#F2EAD9",
       "todo-accent":"#FF6B1A", "meetings-accent":"#8B5CF6", "ideas-accent":"#B6FF3B", "star-color":"#FFD23F",
-      "blob1":"rgba(255,107,26,0.18)", "blob2":"rgba(139,92,246,0.20)", "blob3":"rgba(182,255,59,0.10)", "blob4":"rgba(255,59,59,0.12)",
+      "blob1":"rgba(255,107,26,0.261)", "blob2":"rgba(139,92,246,0.29)", "blob3":"rgba(182,255,59,0.145)", "blob4":"rgba(255,59,59,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     ocean: {
@@ -1317,7 +1318,7 @@
       "status-prog":"#FFD166", "status-prog-bg":"#332905", "status-prog-ink":"#332405",
       "status-done":"#3FE0A5", "status-done-bg":"#053325", "status-done-ink":"#053325",
       "todo-accent":"#FF7A5C", "meetings-accent":"#22C3E6", "ideas-accent":"#3FE0A5", "star-color":"#FFD166",
-      "blob1":"rgba(34,195,230,0.22)", "blob2":"rgba(63,224,165,0.16)", "blob3":"rgba(255,209,102,0.12)", "blob4":"rgba(255,122,92,0.10)",
+      "blob1":"rgba(34,195,230,0.319)", "blob2":"rgba(63,224,165,0.232)", "blob3":"rgba(255,209,102,0.174)", "blob4":"rgba(255,122,92,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     sunset: {
@@ -1329,7 +1330,7 @@
       "status-prog":"#FFB84D", "status-prog-bg":"#3A2705", "status-prog-ink":"#3A2205",
       "status-done":"#FF8FCB", "status-done-bg":"#3A0E2A", "status-done-ink":"#3A0E2A",
       "todo-accent":"#FF6F61", "meetings-accent":"#9B5DE5", "ideas-accent":"#FFB84D", "star-color":"#FFB84D",
-      "blob1":"rgba(255,111,97,0.20)", "blob2":"rgba(155,93,229,0.18)", "blob3":"rgba(255,184,77,0.14)", "blob4":"rgba(255,143,203,0.12)",
+      "blob1":"rgba(255,111,97,0.29)", "blob2":"rgba(155,93,229,0.261)", "blob3":"rgba(255,184,77,0.203)", "blob4":"rgba(255,143,203,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     galaxy: {
@@ -1341,7 +1342,7 @@
       "status-prog":"#FFD86B", "status-prog-bg":"#3A2E06", "status-prog-ink":"#3A2405",
       "status-done":"#5CE1E6", "status-done-bg":"#04353A", "status-done-ink":"#04353A",
       "todo-accent":"#FF6B9D", "meetings-accent":"#8B7FFF", "ideas-accent":"#5CE1E6", "star-color":"#FFFFFF",
-      "blob1":"rgba(139,127,255,0.22)", "blob2":"rgba(92,225,230,0.14)", "blob3":"rgba(255,107,157,0.14)", "blob4":"rgba(255,216,107,0.08)",
+      "blob1":"rgba(139,127,255,0.319)", "blob2":"rgba(92,225,230,0.203)", "blob3":"rgba(255,107,157,0.203)", "blob4":"rgba(255,216,107,0.116)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     forest: {
@@ -1353,7 +1354,7 @@
       "status-prog":"#FFCB4D", "status-prog-bg":"#3A2C07", "status-prog-ink":"#3A2405",
       "status-done":"#2EE6B8", "status-done-bg":"#083A2E", "status-done-ink":"#04331F",
       "todo-accent":"#FF7A52", "meetings-accent":"#A3E066", "ideas-accent":"#FFCB4D", "star-color":"#FFCB4D",
-      "blob1":"rgba(163,224,102,0.22)", "blob2":"rgba(255,203,77,0.16)", "blob3":"rgba(255,122,82,0.12)", "blob4":"rgba(46,230,184,0.12)",
+      "blob1":"rgba(163,224,102,0.319)", "blob2":"rgba(255,203,77,0.232)", "blob3":"rgba(255,122,82,0.174)", "blob4":"rgba(46,230,184,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     cyberpunk: {
@@ -1365,7 +1366,7 @@
       "status-prog":"#F5FF3B", "status-prog-bg":"#33300A", "status-prog-ink":"#2E2C05",
       "status-done":"#3BFFDB", "status-done-bg":"#053330", "status-done-ink":"#053330",
       "todo-accent":"#FF2E9A", "meetings-accent":"#3BE6FF", "ideas-accent":"#F5FF3B", "star-color":"#F5FF3B",
-      "blob1":"rgba(255,46,154,0.20)", "blob2":"rgba(59,230,255,0.18)", "blob3":"rgba(245,255,59,0.10)", "blob4":"rgba(139,92,246,0.14)",
+      "blob1":"rgba(255,46,154,0.29)", "blob2":"rgba(59,230,255,0.261)", "blob3":"rgba(245,255,59,0.145)", "blob4":"rgba(139,92,246,0.203)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     cottagecore: {
@@ -1377,7 +1378,7 @@
       "status-prog":"#FFCB5C", "status-prog-bg":"#332905", "status-prog-ink":"#2E2405",
       "status-done":"#A8E082", "status-done-bg":"#1E2A17", "status-done-ink":"#17240F",
       "todo-accent":"#FF9EB8", "meetings-accent":"#A8E082", "ideas-accent":"#FFCB5C", "star-color":"#FFCB5C",
-      "blob1":"rgba(255,158,184,0.22)", "blob2":"rgba(168,224,130,0.18)", "blob3":"rgba(255,203,92,0.14)", "blob4":"rgba(255,138,107,0.12)",
+      "blob1":"rgba(255,158,184,0.319)", "blob2":"rgba(168,224,130,0.261)", "blob3":"rgba(255,203,92,0.203)", "blob4":"rgba(255,138,107,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     retro_arcade: {
@@ -1389,7 +1390,7 @@
       "status-prog":"#FFE22F", "status-prog-bg":"#332C05", "status-prog-ink":"#2E2805",
       "status-done":"#2FFFD0", "status-done-bg":"#05332C", "status-done-ink":"#05332C",
       "todo-accent":"#FF2FD0", "meetings-accent":"#2FE0FF", "ideas-accent":"#FFE22F", "star-color":"#FFE22F",
-      "blob1":"rgba(255,47,208,0.20)", "blob2":"rgba(47,224,255,0.18)", "blob3":"rgba(255,226,47,0.12)", "blob4":"rgba(47,255,208,0.10)",
+      "blob1":"rgba(255,47,208,0.29)", "blob2":"rgba(47,224,255,0.261)", "blob3":"rgba(255,226,47,0.174)", "blob4":"rgba(47,255,208,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     horror: {
@@ -1401,7 +1402,7 @@
       "status-prog":"#B8E62E", "status-prog-bg":"#232B05", "status-prog-ink":"#232B05",
       "status-done":"#C13BFF", "status-done-bg":"#240A33", "status-done-ink":"#F5EDE5",
       "todo-accent":"#FF5C1A", "meetings-accent":"#D68AFF", "ideas-accent":"#B8E62E", "star-color":"#FF1443",
-      "blob1":"rgba(255,20,67,0.26)", "blob2":"rgba(193,59,255,0.22)", "blob3":"rgba(184,230,46,0.14)", "blob4":"rgba(255,20,67,0.16)",
+      "blob1":"rgba(255,20,67,0.377)", "blob2":"rgba(193,59,255,0.319)", "blob3":"rgba(184,230,46,0.203)", "blob4":"rgba(255,20,67,0.232)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     vaporwave: {
@@ -1413,7 +1414,7 @@
       "status-prog":"#FFE45E", "status-prog-bg":"#3A3005", "status-prog-ink":"#332A04",
       "status-done":"#5EEAD4", "status-done-bg":"#05332C", "status-done-ink":"#05332C",
       "todo-accent":"#FF6EC7", "meetings-accent":"#7DD3FC", "ideas-accent":"#C084FC", "star-color":"#FFE45E",
-      "blob1":"rgba(255,110,199,0.24)", "blob2":"rgba(125,211,252,0.2)", "blob3":"rgba(192,132,252,0.18)", "blob4":"rgba(94,234,212,0.12)",
+      "blob1":"rgba(255,110,199,0.348)", "blob2":"rgba(125,211,252,0.29)", "blob3":"rgba(192,132,252,0.261)", "blob4":"rgba(94,234,212,0.174)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     bioluminescent: {
@@ -1425,7 +1426,7 @@
       "status-prog":"#4FD1FF", "status-prog-bg":"#052733", "status-prog-ink":"#052733",
       "status-done":"#22E6C7", "status-done-bg":"#062E28", "status-done-ink":"#062E28",
       "todo-accent":"#FF4FA8", "meetings-accent":"#4FD1FF", "ideas-accent":"#22E6C7", "star-color":"#4FD1FF",
-      "blob1":"rgba(34,230,199,0.22)", "blob2":"rgba(79,209,255,0.2)", "blob3":"rgba(255,79,168,0.14)", "blob4":"rgba(34,230,199,0.1)",
+      "blob1":"rgba(34,230,199,0.319)", "blob2":"rgba(79,209,255,0.29)", "blob3":"rgba(255,79,168,0.203)", "blob4":"rgba(34,230,199,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     candyshop: {
@@ -1437,7 +1438,7 @@
       "status-prog":"#FFE45E", "status-prog-bg":"#332C04", "status-prog-ink":"#332404",
       "status-done":"#5EEAAE", "status-done-bg":"#04331F", "status-done-ink":"#04331F",
       "todo-accent":"#FF5FA2", "meetings-accent":"#5EEAAE", "ideas-accent":"#FFE45E", "star-color":"#FFE45E",
-      "blob1":"rgba(255,95,162,0.22)", "blob2":"rgba(94,234,174,0.18)", "blob3":"rgba(255,228,94,0.16)", "blob4":"rgba(255,95,162,0.1)",
+      "blob1":"rgba(255,95,162,0.319)", "blob2":"rgba(94,234,174,0.261)", "blob3":"rgba(255,228,94,0.232)", "blob4":"rgba(255,95,162,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     noir: {
@@ -1449,7 +1450,7 @@
       "status-prog":"#D4A24C", "status-prog-bg":"#332B15", "status-prog-ink":"#2E2508",
       "status-done":"#F2F2F2", "status-done-bg":"#2A2A2A", "status-done-ink":"#1A1A1A",
       "todo-accent":"#E4162A", "meetings-accent":"#D4A24C", "ideas-accent":"#F2F2F2", "star-color":"#E4162A",
-      "blob1":"rgba(228,22,42,0.18)", "blob2":"rgba(212,162,76,0.1)", "blob3":"rgba(242,242,242,0.06)", "blob4":"rgba(228,22,42,0.08)",
+      "blob1":"rgba(228,22,42,0.261)", "blob2":"rgba(212,162,76,0.145)", "blob3":"rgba(242,242,242,0.087)", "blob4":"rgba(228,22,42,0.116)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     desert: {
@@ -1461,7 +1462,7 @@
       "status-prog":"#F2C14E", "status-prog-bg":"#3A2E08", "status-prog-ink":"#332905",
       "status-done":"#3BC9C9", "status-done-bg":"#0A3333", "status-done-ink":"#0A3333",
       "todo-accent":"#E8703A", "meetings-accent":"#3BC9C9", "ideas-accent":"#F2C14E", "star-color":"#F2C14E",
-      "blob1":"rgba(232,112,58,0.22)", "blob2":"rgba(59,201,201,0.18)", "blob3":"rgba(242,193,78,0.16)", "blob4":"rgba(232,112,58,0.1)",
+      "blob1":"rgba(232,112,58,0.319)", "blob2":"rgba(59,201,201,0.261)", "blob3":"rgba(242,193,78,0.232)", "blob4":"rgba(232,112,58,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     },
     matrix: {
@@ -1473,7 +1474,7 @@
       "status-prog":"#FFE45E", "status-prog-bg":"#332C04", "status-prog-ink":"#332404",
       "status-done":"#39FF14", "status-done-bg":"#0A2E0A", "status-done-ink":"#0A2E0A",
       "todo-accent":"#39FF14", "meetings-accent":"#5FDE5F", "ideas-accent":"#FFE45E", "star-color":"#39FF14",
-      "blob1":"rgba(57,255,20,0.22)", "blob2":"rgba(95,222,95,0.14)", "blob3":"rgba(255,228,94,0.08)", "blob4":"rgba(57,255,20,0.1)",
+      "blob1":"rgba(57,255,20,0.319)", "blob2":"rgba(95,222,95,0.203)", "blob3":"rgba(255,228,94,0.116)", "blob4":"rgba(57,255,20,0.145)",
       "font-display":"'Baloo 2', 'Nunito', sans-serif", "font-body":"'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif"
     }
   };
@@ -1855,6 +1856,10 @@
     var i = STATUS_ORDER.indexOf(s);
     return STATUS_ORDER[(i+1) % STATUS_ORDER.length];
   }
+  function prevStatus(s){
+    var i = STATUS_ORDER.indexOf(s);
+    return STATUS_ORDER[(i - 1 + STATUS_ORDER.length) % STATUS_ORDER.length];
+  }
 
   function faceIcon(status){
     var inner = "";
@@ -1862,17 +1867,23 @@
       inner =
         '<path d="M2.6 6.4 Q4.4 5 6.2 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>' +
         '<path d="M9.8 6.4 Q11.6 5 13.4 6.4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="4" cy="9.3" r="1.1" fill="currentColor" opacity="0.28"/>' +
+        '<circle cx="12" cy="9.3" r="1.1" fill="currentColor" opacity="0.28"/>' +
         '<path d="M6.4 10.6 Q8 11.5 9.6 10.6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>' +
         '<path d="M11.6 1.8 L14.2 1.8 L11.6 4 L14.2 4" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
     } else if(status === "in-progress"){
       inner =
         '<circle cx="4.6" cy="6.6" r="1.4" fill="currentColor"/>' +
         '<circle cx="11.4" cy="6.6" r="1.4" fill="currentColor"/>' +
+        '<circle cx="3.4" cy="8.9" r="1.1" fill="currentColor" opacity="0.3"/>' +
+        '<circle cx="12.6" cy="8.9" r="1.1" fill="currentColor" opacity="0.3"/>' +
         '<path d="M4 10 Q8 13 12 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
     } else {
       inner =
         '<path d="M2.4 6.2 Q4.5 4.1 6.6 6.2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
         '<path d="M9.4 6.2 Q11.5 4.1 13.6 6.2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+        '<circle cx="2.8" cy="9.6" r="1.2" fill="currentColor" opacity="0.35"/>' +
+        '<circle cx="13.2" cy="9.6" r="1.2" fill="currentColor" opacity="0.35"/>' +
         '<path d="M2.6 9 Q8 15.2 13.4 9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>';
     }
     return '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">' + inner + '</svg>';
@@ -1933,18 +1944,20 @@
 
     var chip = el("button","status-chip " + task.status, chipContentHTML(task.status));
     chip.type = "button";
-    chip.addEventListener("click", function(){
+    chip.title = "Click to advance \u2022 Shift-click to go back";
+    chip.addEventListener("click", function(e){
       if(chip.classList.contains("filling")) return;
-      var newStatus = nextStatus(task.status);
+      var goBack = e.shiftKey;
+      var newStatus = goBack ? prevStatus(task.status) : nextStatus(task.status);
 
       var fill = document.createElement("span");
-      fill.className = "chip-fill";
+      fill.className = "chip-fill" + (goBack ? " reverse" : "");
       fill.style.background = statusColor(newStatus);
       chip.insertBefore(fill, chip.firstChild);
 
       var content = chip.querySelector(".chip-content");
       content.style.color = statusInk(newStatus);
-      content.innerHTML = chipInnerHTML(newStatus, true);
+      content.innerHTML = chipInnerHTML(newStatus, !goBack);
 
       chip.classList.add("filling");
       void fill.offsetWidth;
@@ -1952,7 +1965,7 @@
 
       task.status = newStatus;
       nameInput.classList.toggle("complete-strike", newStatus === "complete");
-      if(newStatus === "complete") spawnConfetti(chip);
+      if(newStatus === "complete" && !goBack) spawnConfetti(chip);
 
       setTimeout(function(){
         save();
