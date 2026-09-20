@@ -489,6 +489,7 @@
       state.timer = setTimeout(function() {
         state.dragging = true;
         btn.classList.add('dragging');
+        btn.style.pointerEvents = 'none';
         try { btn.setPointerCapture(state.pointerId); } catch (err) {}
       }, 420);
 
@@ -520,6 +521,7 @@
           document.querySelectorAll('.habit-btn.drop-target').forEach(function(b){ b.classList.remove('drop-target'); });
           btn.classList.remove('dragging');
           btn.style.transform = '';
+          btn.style.pointerEvents = '';
           if (targetBtn && targetBtn !== btn && targetBtn.dataset.habitId) {
             var fromIdx = habits.findIndex(function(h){ return h.id === habitId; });
             var toIdx = habits.findIndex(function(h){ return h.id === targetBtn.dataset.habitId; });
