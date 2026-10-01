@@ -5,9 +5,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap">
 <style>
 :root{
---bg:#fff1f6;--panel:#ffffff;--soft:#ffe3ee;--ink:#5b4560;--ink2:#9a739a;--line:#ffd3e4;
---accent:#f0669b;--accent-ink:#ffffff;--gold:#ffd84d;--warn:#d9761a;--bad:#d95b73;
---shadow:0 12px 30px rgba(240,102,155,.16);--bub:#fffbe0;--bubline:#ffe28a;--bubink:#6d5a1a;
+--bg:#f8eee3;--panel:#fffdf8;--soft:#f6e7d6;--ink:#6a4c3f;--ink2:#a38064;--line:#ecd7bd;
+--accent:#f0669b;--accent-ink:#ffffff;--gold:#ffd84d;--warn:#c97a1e;--bad:#d95b73;
+--shadow:0 12px 30px rgba(186,132,92,.16);--bub:#fffbe0;--bubline:#ffe28a;--bubink:#6d5a1a;
 color-scheme:light;
 }
 :root[data-t="dark"]{--bg:#1c1326;--panel:#2a1c37;--soft:#38264a;--ink:#f7e8f4;--ink2:#bd9fc7;--line:#4c3563;--accent:#ff86b4;--accent-ink:#2a0f1e;--gold:#ffd84d;--warn:#ffb15c;--bad:#ff8aa0;--shadow:0 12px 30px rgba(0,0,0,.45);--bub:#3a2f22;--bubline:#7a6230;--bubink:#f6e3a1;color-scheme:dark;}
@@ -152,9 +152,10 @@ button{font-family:inherit;color:inherit}
 .main,.side{display:contents}
 .penny{order:0}.sum{order:1}.b2{order:2}.b3{order:3}.b4{order:4}.b5{order:5}.b6{order:6}.b7{order:7}
 @media(min-width:1100px){
-body{padding-block:16px 28px}
-.wrap{max-width:1420px}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:0 28px;align-items:start}
+body{padding-block:20px 36px;font-size:16px}
+.wrap{max-width:1520px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 384px;gap:0 32px;align-items:start}
+.grid{gap:16px}
 .main,.side{display:block}
 .sh{margin:16px 0 8px}
 .main .art svg{max-height:96px}
