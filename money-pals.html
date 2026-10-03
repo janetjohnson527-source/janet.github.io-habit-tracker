@@ -82,6 +82,7 @@ button{font-family:inherit;color:inherit}
 .art{display:block}.art svg{width:100%;height:auto;max-height:128px;display:block}
 .info{display:block}
 .nm{display:block;font-size:12px;color:var(--ink2);font-weight:700;letter-spacing:.02em}
+.acct{font-size:10px;background:var(--soft);color:var(--ink2);border-radius:8px;padding:1px 7px;font-weight:700;margin-left:5px;white-space:nowrap}
 .amt{display:block;font-size:20px;font-weight:500;margin-top:1px}
 .amt small{font-family:'Nunito',sans-serif;font-size:12px;color:var(--ink2);font-weight:600}
 .bar{display:block;height:9px;border-radius:9px;background:var(--soft);margin:7px 8px 0;overflow:hidden}
@@ -432,6 +433,7 @@ return d;
 function merge(d,p){for(var k in d){if(p[k]!==undefined)d[k]=(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))?Object.assign({},d[k],p[k]):p[k]}return d}
 var S=load();
 S.cards.forEach(function(c){if(c.billAmt===undefined)c.billAmt=0;if(!c.paid)c.paid={}});
+S.jars.forEach(function(j){if(j.acct===undefined)j.acct=''});
 function load(){
 var d=defaults(),r=null,hadBills=true;
 try{r=localStorage.getItem('moneyPals.v2')}catch(e){}
@@ -581,7 +583,7 @@ function jarMood(j){var p=pct(j.bal,j.cozy);return p>=1?'wow':p>=.6?'happy':p>=.
 /* ---------- render ---------- */
 function palHTML(k,o){
 var wm=WMAP[k];
-return '<button class="pal'+(o.hungry?' hungry':'')+(wm?' w-'+wm.level:'')+'" data-k="'+k+'" style="--c:'+dk(o.c||'var(--accent)')+';--pb:'+(o.b||'var(--line)')+'" aria-label="'+esc(o.name)+', '+o.aria+(wm?'. '+(wm.level==='urgent'?'Uh oh: ':'Warning: ')+esc(wm.title):'')+'. Tap to edit"'+(wm?' title="'+esc(wm.title)+'"':'')+'><span class="edit">edit</span>'+(wm?'<span class="wbadge" aria-hidden="true">!</span>':'')+'<span class="say" aria-hidden="true"></span><span class="art">'+o.art+'</span><span class="info"><span class="nm">'+esc(o.name)+'</span><span class="amt tnum">'+o.amt+'</span>'+(o.bar!=null?'<span class="bar"><i style="width:'+Math.round(o.bar*100)+'%"></i></span>':'')+'<span class="sub'+(o.warn?' warn':'')+'">'+o.sub+'</span></span></button>';
+return '<button class="pal'+(o.hungry?' hungry':'')+(wm?' w-'+wm.level:'')+'" data-k="'+k+'" style="--c:'+dk(o.c||'var(--accent)')+';--pb:'+(o.b||'var(--line)')+'" aria-label="'+esc(o.name)+', '+o.aria+(wm?'. '+(wm.level==='urgent'?'Uh oh: ':'Warning: ')+esc(wm.title):'')+'. Tap to edit"'+(wm?' title="'+esc(wm.title)+'"':'')+'><span class="edit">edit</span>'+(wm?'<span class="wbadge" aria-hidden="true">!</span>':'')+'<span class="say" aria-hidden="true"></span><span class="art">'+o.art+'</span><span class="info"><span class="nm">'+esc(o.name)+(o.badge||'')+'</span><span class="amt tnum">'+o.amt+'</span>'+(o.bar!=null?'<span class="bar"><i style="width:'+Math.round(o.bar*100)+'%"></i></span>':'')+'<span class="sub'+(o.warn?' warn':'')+'">'+o.sub+'</span></span></button>';
 }
 function totals(){
 var cash=S.jars.reduce(function(a,j){return a+j.bal},0)+S.hysa.bal;
@@ -619,7 +621,7 @@ $('#rowJars').innerHTML=S.jars.map(function(j,i){
 var p=pct(j.bal,j.cozy),mood=jarMood(j),sub=p>=1?'full!':Math.round(p*100)+'% full',warn=false;
 if(i===1&&bjr){p=bjr.p;mood=bjr.mood;sub=bjr.sub;warn=bjr.short}
 if(i===2){var dpd=Math.max(1,daysUntil(S.pay.next));sub+=' &middot; ≈'+fmt(j.bal/dpd)+'/day til payday'}
-return palHTML('jar'+i,{name:j.name,art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('');
+return palHTML('jar'+i,{name:j.name,badge:j.acct?' <span class="acct">…'+esc(j.acct)+'</span>':'',art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('');
 function hung(p){return p>=1?'wow':p>=.6?'happy':p>=.25?'ok':'sad'}
 function hpSub(){var p=pct(S.hysa.mtd,S.hysa.goal),left=S.hysa.goal-S.hysa.mtd;return p>=1?'brimming with honey! 🍯':'making honey… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
 function rpSub(){var p=pct(S.roth.ytd,S.roth.goal),left=S.roth.goal-S.roth.ytd;return p>=1?'fully grown! 🌱':'growing… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
@@ -655,7 +657,7 @@ function ruleLabel(k){var m=/^jar(\d+)_bal$/.exec(k);return m&&S.jars[+m[1]]?S.j
 function jarBalRule(i){return function(x){return S.jars[i]&&S.jars[i].bal>=x.target}}
 function ensureJarRules(){S.jars.forEach(function(j,i){var k='jar'+i+'_bal';if(!RULES[k])RULES[k]={l:'',t:'money',f:jarBalRule(i)}})}
 function addPal(kind){
-if(kind==='jar'){S.jars.push({name:'New jar',bal:0,cozy:0});save();render();edit('jar'+(S.jars.length-1))}
+if(kind==='jar'){S.jars.push({name:'New jar',bal:0,cozy:0,acct:''});save();render();edit('jar'+(S.jars.length-1))}
 else{S.cards.push({name:'New card',bal:0,limit:0,due:1,billAmt:0,paid:{}});save();render();edit('card'+(S.cards.length-1))}
 }
 function describe(st){var r=RULES[st.rule];if(!r)return st.name;var l=ruleLabel(st.rule);return r.t==='money'?l+' '+fmt(st.target):r.t==='pct'?l+' '+st.target+'%':r.t==='days'?l+' '+st.target+' days':l}
@@ -1083,7 +1085,7 @@ function specFor(k){
 var m,i;
 if(k==='pay')return {t:'Your paycheck',l:'Your take-home pay and when the next one lands.',f:[['pay.amount','Take-home per paycheck','money'],['pay.freq','How often','select',FREQ],['pay.next','Next payday','date'],['pay.auto','Payday autopilot','check','','When on, each payday is logged automatically: the paycheck goes to the Bills jar and your HYSA gets its auto cut. No taps needed.'],['pay.hysaAuto','HYSA auto cut per paycheck','money','','Taken from each paycheck before the rest lands in Bills.']]};
 if(k==='car')return {t:'Car payment',l:'Track the loan as it shrinks.',f:[['car.name','Nickname','text'],['car.pay','Monthly payment','money'],['car.left','Loan balance left','money'],['car.orig','Original loan amount','money'],['car.due','Due day of month','day']]};
-if((m=/^jar(\d+)$/.exec(k))){i=+m[1];return {t:S.jars[i].name,l:'One of your Chase accounts.',f:[['jars.'+i+'.name','Account nickname','text'],['jars.'+i+'.bal','Current balance','money'],['jars.'+i+'.cozy','Full at','money','',(i===1&&allBills().length?'Your Bills jar follows this month\'s unpaid bills instead, from the Bills tab.':'The balance where this jar counts as full.')]]}}
+if((m=/^jar(\d+)$/.exec(k))){i=+m[1];return {t:S.jars[i].name,l:'One of your Chase accounts.',f:[['jars.'+i+'.name','Account nickname','text'],['jars.'+i+'.acct','Account ending (optional)','text'],['jars.'+i+'.bal','Current balance','money'],['jars.'+i+'.cozy','Full at','money','',(i===1&&allBills().length?'Your Bills jar follows this month\'s unpaid bills instead, from the Bills tab.':'The balance where this jar counts as full.')]]}}
 if(k==='hysa')return {t:'HYSA',l:'Your high-yield savings. It gets hungry when you have not fed it this month.',f:[['hysa.bal','Current balance','money'],['hysa.apy','APY','pct'],['hysa.goal','Monthly feeding goal','money','','How much you want to add each month.'],['hysa.mtd','Fed so far this month','money']]};
 if(k==='k401')return {t:'401k',l:'Long-term growing. It gets hungrier the further behind your yearly goal.',f:[['k401.bal','Current balance','money'],['k401.ytd','Contributed this year','money'],['k401.goal','Yearly contribution goal','money','','Set this to your own target, including any employer match you like to count.']]};
 if(k==='roth')return {t:'Roth IRA',l:'It grows as you feed it this year.',f:[['roth.bal','Current balance','money'],['roth.ytd','Contributed this year','money'],['roth.goal','Yearly contribution goal','money','','Set this to your own limit. Check the current IRS rules for your situation.']]};
