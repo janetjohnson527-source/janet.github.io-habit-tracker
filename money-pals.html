@@ -430,7 +430,7 @@ d.pay={amount:0,freq:'biweekly',next:iso(addDays(t,7)),auto:false,hysaAuto:0,k40
 d.jars.forEach(function(j,i){j.bal=0;j.cozy=[3000,1500,400][i]});
 d.hysa.bal=0;d.hysa.mtd=0;d.roth.bal=0;d.roth.ytd=0;d.k401.bal=0;d.k401.ytd=0;
 d.cards.forEach(function(c){c.bal=0;c.limit=1000;c.billAmt=0;c.paid={}});
-d.car.pay=0;d.car.left=0;d.car.orig=0;
+d.car.pay=0;d.car.left=0;d.car.orig=0;d.car.paid={};
 return d;
 }
 function merge(d,p){for(var k in d){if(p[k]!==undefined)d[k]=(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))?Object.assign({},d[k],p[k]):p[k]}return d}
@@ -438,6 +438,7 @@ var S=load();
 S.cards.forEach(function(c){if(c.billAmt===undefined)c.billAmt=0;if(!c.paid)c.paid={}});
 S.jars.forEach(function(j){if(j.acct===undefined)j.acct=''});
 if(S.pay.k401Auto===undefined)S.pay.k401Auto=0;
+if(!S.car.paid)S.car.paid={};
 function load(){
 var d=defaults(),r=null,hadBills=true;
 try{r=localStorage.getItem('moneyPals.v2')}catch(e){}
@@ -675,7 +676,7 @@ S.stickers.forEach(function(st){var on=unlocked(st);if(on&&!S.earned[st.id]){S.e
 S.earnedInit=true;save();
 fresh.forEach(function(id,i){setTimeout(function(){var el=document.querySelector('.stk[data-id="'+id+'"]');if(!el)return;el.classList.add('pop');var r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,'mix',22)},i*300)});
 }
-var EMO=['⭐','🍯','🐝','🏆','👑','🌱','🚗','💸','💰','🎉','🥳','🦄','🌈','🍀','💎','🔥','🎀','🐷','🐰','🧁','🫙','☁️','🌸','✨'];
+var EMO=['⭐','🍯','🐝','🏆','👑','🌱','🚗','💸','💰','🎉','🥳','🦄','🌈','🍀','💎','🔥','🎀','🐷','🐰','🧁','🫙','☁️','🌸','✨','💡','🚿','🛒','💊','🎮','📚','✂️','🍔','☕','💅','🐱','🌿','🔑','📦','🏥','🎁','✈️','🧸','⛽'];
 function editSticker(id){
 var isNew=!id,st=isNew?{id:'s'+Date.now().toString(36),name:'',icon:'⭐',rule:'manual',target:100,on:false}:S.stickers.filter(function(x){return x.id===id})[0];
 if(!st)return;
@@ -735,7 +736,11 @@ if(!(c.billAmt>0))return null;
 return {id:'cardbill'+i,icon:'💳',name:c.name,amount:c.billAmt,due:c.due,paid:c.paid||{},_card:i};
 }).filter(Boolean);
 }
-function allBills(){return S.bills.concat(cardBills())}
+function carBill(){
+if(!(S.car.pay>0))return null;
+return {id:'carbill',icon:'🚗',name:S.car.name,amount:S.car.pay,due:S.car.due,paid:S.car.paid||{},_car:true};
+}
+function allBills(){var b=S.bills.concat(cardBills());var cb=carBill();if(cb)b.push(cb);return b}
 function billStats(mk){var tot=0,paid=0,np=0,n=0;allBills().forEach(function(b){n++;tot+=b.amount;if(b.paid&&b.paid[mk]){paid+=b.amount;np++}});return {tot:tot,paid:paid,left:tot-paid,n:n,np:np}}
 function billDate(b,mk){var y=+mk.slice(0,4),m=+mk.slice(5,7)-1;return new Date(y,m,Math.min(b.due,new Date(y,m+1,0).getDate()))}
 function billStatus(b,mk){
@@ -783,6 +788,7 @@ if(st.n>0&&st.left<=0){var s=$('.bsum');if(s){var q=s.getBoundingClientRect();bu
 function togglePaid(id){
 var cm=/^cardbill(\d+)$/.exec(id||'');
 if(cm){var c=S.cards[+cm[1]];if(!c)return;c.paid=c.paid||{};var mkw=viewMonth,was=!!c.paid[mkw];if(was)delete c.paid[mkw];else c.paid[mkw]=true;save();render();if(!was)celebrateBill(id);return}
+if(id==='carbill'){S.car.paid=S.car.paid||{};var was=!!S.car.paid[viewMonth];if(was)delete S.car.paid[viewMonth];else S.car.paid[viewMonth]=true;save();render();if(!was)celebrateBill(id);return}
 var b=S.bills.filter(function(x){return x.id===id})[0];if(!b)return;
 b.paid=b.paid||{};var was=!!b.paid[viewMonth];
 if(was)delete b.paid[viewMonth];else b.paid[viewMonth]=true;
@@ -792,6 +798,7 @@ if(!was)celebrateBill(id);
 var BEMO=['🏠','⚡','💧','📶','📱','🚗','🛡️','📺','🎵','🏋️','🐶','💳','🎓','🧾','☁️','🔥','💡','🚿','🛒','💊','🎮','📚','✂️','🍔','☕','💅','🐱','🌿','🔑','📦','💸','🏥','🎁','✈️','🧸','⛽'];
 function editBill(id){
 var cm=/^cardbill(\d+)$/.exec(id||'');if(cm){edit('card'+cm[1]);return}
+if(id==='carbill'){edit('car');return}
 var isNew=!id,b=isNew?{id:'b'+Date.now().toString(36),icon:'🧾',name:'',amount:0,due:1,paid:{}}:S.bills.filter(function(x){return x.id===id})[0];
 if(!b)return;
 var body='<label class="fld" for="bl_icon"><span>Badge</span><input id="bl_icon" type="text" maxlength="8" value="'+esc(b.icon)+'"></label><div class="emo">'+BEMO.map(function(e){return '<button type="button" data-e="'+e+'" aria-label="Use '+e+'">'+e+'</button>'}).join('')+'</div>'+
@@ -845,7 +852,6 @@ var mk=monthKey(new Date(t.getFullYear(),t.getMonth()+k,1)),date=billDate(b,mk);
 if(b.paid&&b.paid[mk])return;
 if(date<=end&&(date>=t||k===0)){items.push({name:b.name,amt:b.amount,date:date,late:date<t});total+=b.amount}
 })});
-if(S.car.pay>0){var cd=nextDue(S.car.due),cdate=addDays(t,cd);if(cdate<=end){items.push({name:S.car.name,amt:S.car.pay,date:cdate,late:false});total+=S.car.pay}}
 items.sort(function(a,b){return a.date-b.date});
 return {items:items,total:total};
 }
@@ -891,7 +897,7 @@ if(hr<=0)T.push({id:'hysa-win-'+nowMk,kind:'win',icon:'🍯',title:'HYSA is fed 
 else if(nM>0)T.push({id:'hysa-pace-'+nowMk+'-'+Math.round(hr),kind:'idea',icon:'🍯',title:'HYSA: about '+fmt(Math.ceil(hr/nM))+' per paycheck',body:'You have '+pl(nM,'paycheck')+' left this month and '+fmt(hr)+' to reach the monthly goal.',math:'('+fmt(S.hysa.goal)+' − '+fmt(S.hysa.mtd)+') ÷ '+pl(nM,'paycheck'),act:['Edit goal','edit:hysa']});
 }
 /* runway */
-var ess=allBills().reduce(function(a,b){return a+b.amount},0)+S.car.pay,cash=S.jars[0].bal+S.hysa.bal;
+var ess=allBills().reduce(function(a,b){return a+b.amount},0),cash=S.jars[0].bal+S.hysa.bal;
 if(ess>0&&cash>0){var mo=cash/ess,math2=fmt(cash)+' ÷ '+fmt(ess)+' a month';
 if(mo>=6)T.push({id:'run-win-'+Math.floor(mo),kind:'win',icon:'🛟',title:'About '+mo.toFixed(1)+' months of bills saved',body:jbName(0)+' plus your HYSA could cover your monthly bills and car payment for a good while.',math:math2});
 else if(mo>=3)T.push({id:'run-ok-'+Math.floor(mo*2),kind:'idea',icon:'🛟',title:'About '+mo.toFixed(1)+' months of bills saved',body:'A common goal is 3 to 6 months. Six months would be about '+fmt(ess*6-cash)+' more.',math:math2});
@@ -901,7 +907,7 @@ S.jars.forEach(function(j,i){if(j.cozy>0&&j.bal<j.cozy*.15)T.push({id:'jar-low-'
 var yfrac=(t-new Date(yr,0,1))/(new Date(yr+1,0,1)-new Date(yr,0,1));
 [['roth','Roth IRA','🌱',S.roth],['k401','401k','🌈',S.k401]].forEach(function(x){if(x[3].goal>0&&yfrac>.25){var fp=x[3].ytd/x[3].goal;if(fp<yfrac-.25)T.push({id:'behind-'+x[0]+'-'+Math.round(fp*20),kind:'warn',icon:'🐌',title:x[1]+' is behind pace',body:'You are '+Math.round(yfrac*100)+'% through '+yr+' but only '+Math.round(fp*100)+'% of the way to your goal.',pals:[x[0]],act:['Edit goal','edit:'+x[0]]})}});
 if(S.hysa.goal>0&&t.getDate()>=20&&pct(S.hysa.mtd,S.hysa.goal)<.25)T.push({id:'hysa-hungry-'+nowMk,kind:'warn',icon:'🍯',title:'HYSA is hungry this month',body:'Only '+fmt(S.hysa.mtd)+' of the '+fmt(S.hysa.goal)+' monthly goal so far, and the month is almost over.',pals:['hysa'],act:['Edit goal','edit:hysa']});
-var perMonth={weekly:52/12,biweekly:26/12,semi:2,monthly:1}[S.pay.freq]||1,inc=S.pay.amount*perMonth,fixed=allBills().reduce(function(a,b){return a+b.amount},0)+S.car.pay;
+var perMonth={weekly:52/12,biweekly:26/12,semi:2,monthly:1}[S.pay.freq]||1,inc=S.pay.amount*perMonth,fixed=allBills().reduce(function(a,b){return a+b.amount},0);
 if(inc>0&&fixed/inc>.8)T.push({id:'fixed-'+Math.round(fixed/inc*20),kind:'warn',icon:'🧮',title:'Bills and car payment take '+Math.round(fixed/inc*100)+'% of your pay',body:'Your bills and car payment add up to about '+fmt(fixed)+' a month, against about '+fmt(inc)+' coming in.',math:fmt(fixed)+' ÷ '+fmt(inc),pals:['pay'],act:['Open Bills','tab:bills']});
 var cdue=nextDue(S.car.due);if(S.car.pay>0&&cdue<=3)T.push({id:'car-due-'+cdue+'-'+nowMk,kind:'heads',icon:'🚗',title:'Car payment is due '+inTxt(cdue),body:fmt(S.car.pay)+' is coming up.',pals:['car'],act:['Edit car','edit:car']});
 /* interest */
