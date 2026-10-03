@@ -410,7 +410,7 @@ return [['🏠','Rent',1400,1],['🛡\uFE0F','Car insurance',120,5],['📺','Str
 function defaults(){
 var t=today(),cm=iso(t).slice(0,7);
 return {v:2,example:true,name:'Janet',theme:(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light',year:t.getFullYear(),fx:{rain:false,burst:true,float:true,gaze:true},
-pay:{amount:2450,freq:'biweekly',next:iso(addDays(t,6)),auto:false,hysaAuto:0},
+pay:{amount:2450,freq:'biweekly',next:iso(addDays(t,6)),auto:false,hysaAuto:0,k401Auto:0},
 jars:[{name:'Savings',bal:1820,cozy:3000},{name:'Bills',bal:940,cozy:1500},{name:'Fun and Essentials',bal:215,cozy:400}],
 hysa:{bal:8400,apy:4.3,goal:500,mtd:200,month:cm},
 roth:{bal:12650,ytd:2250,goal:7500},
@@ -423,7 +423,7 @@ earned:{},earnedInit:false,nospend:{},payTemplates:[],wish:[],snap:{},mode:'clas
 function blank(keep){
 var d=defaults(),t=today();
 d.example=false;d.name=keep.name;d.theme=keep.theme;d.mode=keep.mode||'classic';d.light=keep.light;d.fx=keep.fx;d.stickers=keep.stickers;d.tab=keep.tab;d.bills=[];d.tipsHidden={};d.nospend={};d.wish=[];d.snap={};
-d.pay={amount:0,freq:'biweekly',next:iso(addDays(t,7)),auto:false,hysaAuto:0};
+d.pay={amount:0,freq:'biweekly',next:iso(addDays(t,7)),auto:false,hysaAuto:0,k401Auto:0};
 d.jars.forEach(function(j,i){j.bal=0;j.cozy=[3000,1500,400][i]});
 d.hysa.bal=0;d.hysa.mtd=0;d.roth.bal=0;d.roth.ytd=0;d.k401.bal=0;d.k401.ytd=0;
 d.cards.forEach(function(c){c.bal=0;c.limit=1000;c.billAmt=0;c.paid={}});
@@ -434,6 +434,7 @@ function merge(d,p){for(var k in d){if(p[k]!==undefined)d[k]=(d[k]&&typeof d[k]=
 var S=load();
 S.cards.forEach(function(c){if(c.billAmt===undefined)c.billAmt=0;if(!c.paid)c.paid={}});
 S.jars.forEach(function(j){if(j.acct===undefined)j.acct=''});
+if(S.pay.k401Auto===undefined)S.pay.k401Auto=0;
 function load(){
 var d=defaults(),r=null,hadBills=true;
 try{r=localStorage.getItem('moneyPals.v2')}catch(e){}
@@ -608,7 +609,7 @@ $('#viewPals').hidden=S.tab!=='pals';$('#viewBills').hidden=S.tab!=='bills';$('#
 $('#tabPals').setAttribute('aria-selected',String(S.tab==='pals'));$('#tabBills').setAttribute('aria-selected',String(S.tab==='bills'));$('#tabWish').setAttribute('aria-selected',String(S.tab==='wish'));$('#tabWrap').setAttribute('aria-selected',String(S.tab==='wrap'));
 $('#feed').style.display=S.pay.auto?'none':'';
 var an=$('#autoNote');
-if(autoNote){an.hidden=false;an.innerHTML='🤖 <span><b>Autopilot</b> fed '+pl(autoNote.n,'paycheck')+': '+fmt(autoNote.b)+' → '+esc(S.jars[1]?S.jars[1].name:'Bills')+', '+fmt(autoNote.h)+' → HYSA.</span>';}
+if(autoNote){an.hidden=false;an.innerHTML='🤖 <span><b>Autopilot</b> fed '+pl(autoNote.n,'paycheck')+': '+fmt(autoNote.b)+' → '+esc(S.jars[1]?S.jars[1].name:'Bills')+', '+fmt(autoNote.h)+' → HYSA'+(autoNote.k>0?', '+fmt(autoNote.k)+' → 401k':'')+'.</span>';}
 else an.hidden=true;
 renderBills();renderTips();
 var pd=daysUntil(S.pay.next),fl={weekly:'weekly',biweekly:'every 2 wks',semi:'twice a month',monthly:'monthly'}[S.pay.freq];
@@ -623,15 +624,15 @@ if(i===1&&bjr){p=bjr.p;mood=bjr.mood;sub=bjr.sub;warn=bjr.short}
 if(i===2){var dpd=Math.max(1,daysUntil(S.pay.next));sub+=' &middot; ≈'+fmt(j.bal/dpd)+'/day til payday'}
 return palHTML('jar'+i,{name:j.name,badge:j.acct?' <span class="acct">…'+esc(j.acct)+'</span>':'',art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('');
 function hung(p){return p>=1?'wow':p>=.6?'happy':p>=.25?'ok':'sad'}
-function hpSub(){var p=pct(S.hysa.mtd,S.hysa.goal),left=S.hysa.goal-S.hysa.mtd;return p>=1?'brimming with honey! 🍯':'making honey… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
+function hpSub(){var p=pct(S.hysa.mtd,S.hysa.goal),left=S.hysa.goal-S.hysa.mtd;var s=p>=1?'brimming with honey! 🍯':'making honey… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go';if(S.pay.auto&&S.pay.hysaAuto>0)s+=' &middot; 🤖 +'+fmt(S.pay.hysaAuto)+'/paycheck';return s}
 function rpSub(){var p=pct(S.roth.ytd,S.roth.goal),left=S.roth.goal-S.roth.ytd;return p>=1?'fully grown! 🌱':'growing… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
-function kpSub(){var p=pct(S.k401.ytd,S.k401.goal),left=S.k401.goal-S.k401.ytd;return p>=1?'overflowing with gold! ✨':'filling with gold… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
+function kpSub(){var p=pct(S.k401.ytd,S.k401.goal),left=S.k401.goal-S.k401.ytd;var s=p>=1?'overflowing with gold! ✨':'filling with gold… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go';if(S.pay.auto&&S.pay.k401Auto>0)s+=' &middot; 🤖 +'+fmt(S.pay.k401Auto)+'/paycheck';return s}
 var hp=pct(S.hysa.mtd,S.hysa.goal),rp=pct(S.roth.ytd,S.roth.goal),kp=pct(S.k401.ytd,S.k401.goal),yr=new Date().getFullYear();
 $('#rowGrow').innerHTML=
 palHTML('hysa',{name:'HYSA',art:honey(hp,'happy'),amt:fmt(S.hysa.bal),bar:hp,c:'#ffc247',b:'#ffe0a0',hungry:hp<.25,warn:hp<.25,sub:hpSub(),aria:fmt(S.hysa.bal)})+
 palHTML('roth',{name:'Roth IRA',art:sprout(rp,'happy'),amt:fmt(S.roth.bal),bar:rp,c:'#8fd9a0',b:'#c9efd0',hungry:rp<.25,warn:rp<.25,sub:rpSub(),aria:fmt(S.roth.bal)})+
 palHTML('k401',{name:'401k',art:potgold(kp,'happy'),amt:fmt(S.k401.bal),bar:kp,c:'#8fb0f0',b:'#c8dcff',hungry:kp<.25,warn:kp<.25,sub:kpSub(),aria:fmt(S.k401.bal)});
-$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% spent &middot; due '+inTxt(d),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('');
+$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% spent &middot; due '+inTxt(d)+(c.billAmt>0?' &middot; 💳 auto-bill '+fmt(c.billAmt):''),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('');
 renderStickers();renderTemplates();renderWish();renderWrapped();
 setTimeout(function(){gaze()},60);
 }
@@ -1083,7 +1084,7 @@ return '<label class="fld" for="'+id+'"><span>'+f[1]+'</span>'+inp+(f[4]?'<small
 }
 function specFor(k){
 var m,i;
-if(k==='pay')return {t:'Your paycheck',l:'Your take-home pay and when the next one lands.',f:[['pay.amount','Take-home per paycheck','money'],['pay.freq','How often','select',FREQ],['pay.next','Next payday','date'],['pay.auto','Payday autopilot','check','','When on, each payday is logged automatically: the paycheck goes to the Bills jar and your HYSA gets its auto cut. No taps needed.'],['pay.hysaAuto','HYSA auto cut per paycheck','money','','Taken from each paycheck before the rest lands in Bills.']]};
+if(k==='pay')return {t:'Your paycheck',l:'Your take-home pay and when the next one lands.',f:[['pay.amount','Take-home per paycheck','money'],['pay.freq','How often','select',FREQ],['pay.next','Next payday','date'],['pay.auto','Payday autopilot','check','','When on, each payday is logged automatically: the paycheck goes to the Bills jar, your HYSA gets its auto cut, and your 401k gets its auto amount. No taps needed.'],['pay.hysaAuto','HYSA auto cut per paycheck','money','','Taken from each paycheck before the rest lands in Bills.'],['pay.k401Auto','401k auto per paycheck','money','','Added to your 401k each payday by autopilot (already out of your take-home).']]};
 if(k==='car')return {t:'Car payment',l:'Track the loan as it shrinks.',f:[['car.name','Nickname','text'],['car.pay','Monthly payment','money'],['car.left','Loan balance left','money'],['car.orig','Original loan amount','money'],['car.due','Due day of month','day']]};
 if((m=/^jar(\d+)$/.exec(k))){i=+m[1];return {t:S.jars[i].name,l:'One of your Chase accounts.',f:[['jars.'+i+'.name','Account nickname','text'],['jars.'+i+'.acct','Account ending (optional)','text'],['jars.'+i+'.bal','Current balance','money'],['jars.'+i+'.cozy','Full at','money','',(i===1&&allBills().length?'Your Bills jar follows this month\'s unpaid bills instead, from the Bills tab.':'The balance where this jar counts as full.')]]}}
 if(k==='hysa')return {t:'HYSA',l:'Your high-yield savings. It gets hungry when you have not fed it this month.',f:[['hysa.bal','Current balance','money'],['hysa.apy','APY','pct'],['hysa.goal','Monthly feeding goal','money','','How much you want to add each month.'],['hysa.mtd','Fed so far this month','money']]};
@@ -1257,16 +1258,18 @@ if(!S.pay.auto)return;
 var amt=Math.max(0,+S.pay.amount||0);
 if(amt<=0)return; /* paycheck not set up yet; do not advance blindly */
 var ha=Math.min(Math.max(0,+S.pay.hysaAuto||0),amt);
-var t=iso(today()),n=0,totB=0,totH=0,guard=0;
+var ka=Math.max(0,+S.pay.k401Auto||0);
+var t=iso(today()),n=0,totB=0,totH=0,totK=0,guard=0;
 while(S.pay.next<=t&&guard<8){
 guard++;
 var b=amt-ha;
 if(S.jars[1])S.jars[1].bal+=b;
 S.hysa.bal+=ha;S.hysa.mtd+=ha;
+S.k401.bal+=ka;S.k401.ytd+=ka;
 S.pay.next=advance(S.pay.next,S.pay.freq);
-n++;totB+=b;totH+=ha;
+n++;totB+=b;totH+=ha;totK+=ka;
 }
-if(n>0){save();autoNote={n:n,b:totB,h:totH};}
+if(n>0){save();autoNote={n:n,b:totB,h:totH,k:totK};}
 }
 /* feed paycheck */
 function feedDest(){return S.jars.map(function(j,i){return ['jars.'+i+'.bal',j.name]}).concat([['hysa.bal','HYSA'],['roth.bal','Roth IRA'],['k401.bal','401k']])}
