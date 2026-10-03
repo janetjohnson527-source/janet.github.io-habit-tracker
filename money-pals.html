@@ -571,7 +571,20 @@ extra='<g fill="#fff" opacity=".9" stroke="#e6dcef" stroke-width="1"><circle cx=
 return V(back+body+glass+bump+lights+plate+extra+wheel(34)+wheel(88)+face(61,58,13,.9,'happy'),.6);
 }
 }
-function car(){return carV('A')}
+function truck(){
+var body='#ffe066',stroke='#e5a900',dark='#f5c93d';
+var bed='<rect x="10" y="48" width="46" height="30" rx="5" fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5"/>';
+var nanner='<path d="M24 48 C25 36 33 29 43 31 C35 33 29 39 28 48 Z" fill="#ffe066" stroke="#e5a900" stroke-width="2" stroke-linejoin="round"/>';
+var rail='<rect x="8" y="43" width="50" height="8" rx="4" fill="'+dark+'" stroke="'+stroke+'" stroke-width="1.6"/>';
+var cab='<path d="M56 78 L56 44 Q56 40 60 40 L70 40 L78 26 Q80 22 84 22 L94 22 Q98 22 100 26 L106 44 Q110 46 110 52 L110 72 Q110 78 104 78 Z" fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5" stroke-linejoin="round"/>';
+var glass='<path d="M73 38 L79 28 Q80 26 83 26 L92 26 Q94 26 95 28 L99 38 Z" fill="#d9f0ff" stroke="'+stroke+'" stroke-width="2" stroke-linejoin="round"/><path d="M80 34 L83 29" stroke="#fff" stroke-width="2" stroke-linecap="round"/>';
+var lights='<rect x="7" y="54" width="5" height="9" rx="2.4" fill="#ff8fa8" stroke="#e9668a" stroke-width="1.4"/><circle cx="106" cy="60" r="4" fill="#fff6b8" stroke="'+stroke+'" stroke-width="1.6"/><path d="M110 57 l7 -2 M110 62 l7 2" stroke="#ffe27a" stroke-width="2" stroke-linecap="round"/>';
+var bump='<rect x="102" y="70" width="9" height="8" rx="3" fill="'+dark+'" stroke="'+stroke+'" stroke-width="1.6"/>';
+var smile='<path d="M75 68 Q82 73 89 68" fill="none" stroke="#5b4560" stroke-width="2.2" stroke-linecap="round"/>';
+var inner='<g transform="translate(60 55) scale(0.88) translate(-60 -55)">'+wheel(34)+wheel(88)+bed+nanner+rail+cab+glass+lights+bump+face(82,56,9,.9,'happy')+smile+'</g>';
+return V(inner,.6);
+}
+function car(){return truck()}
 function pot(f,st,r){return '<path d="M30 62 L90 62 L84 100 Q83 106 77 106 L43 106 Q37 106 36 100Z" fill="'+f+'" stroke="'+st+'" stroke-width="2.5" stroke-linejoin="round"/><rect x="24" y="52" width="72" height="13" rx="6" fill="'+r+'" stroke="'+st+'" stroke-width="2.5"/>'}
 function bee(dx,dy){return '<g transform="translate('+dx+' '+dy+')"><g class="fc" style="animation-duration:2.6s"><ellipse cx="88" cy="24" rx="8" ry="6" fill="#ffd84d" stroke="#5b4560" stroke-width="1.4"/><path d="M85 18.5 v11 M90 18.8 v10.4" stroke="#5b4560" stroke-width="1.8"/><ellipse cx="84" cy="16" rx="4" ry="3" fill="#dff1ff" stroke="#8fb8e8" stroke-width="1"/><ellipse cx="91" cy="16" rx="4" ry="3" fill="#dff1ff" stroke="#8fb8e8" stroke-width="1"/><circle cx="82" cy="23" r="1.1" fill="#3d2b45"/></g></g>'}
 function honey(p,mood){return V('<path d="M44 52 L38 22" stroke="#c9915a" stroke-width="4" stroke-linecap="round"/><ellipse cx="37" cy="19" rx="6" ry="4" fill="#e0a86a" stroke="#c9915a" stroke-width="2"/>'+pot('#ffd25a','#e5a020','#ffbf3d')+'<path d="M28 60 Q27 74 32 74 Q37 74 36 62 M52 62 Q52 71 56 71 Q60 71 60 62 M80 62 Q79 76 84 76 Q89 76 88 62" fill="#ffb733" stroke="#e5a020" stroke-width="2" stroke-linejoin="round"/>'+face(60,86,11,.2,mood)+'<ellipse cx="60" cy="62" rx="14" ry="3" fill="#fff" opacity=".35"/>'+bee(0,0)+(p>=.6?bee(-58,12):''),.2)}
