@@ -620,18 +620,20 @@ palHTML('pay',{name:'Paycheck',art:bill(),amt:fmt(S.pay.amount)+' <small>'+fl+'<
 palHTML('car',{name:S.car.name,art:car(),amt:fmt(S.car.pay)+' <small>/ month</small>',bar:cp,c:'#ffc76b',b:'#ffe0a8',sub:Math.round(cp*100)+'% paid off &middot; due '+inTxt(cd),warn:cd<=3&&S.car.pay>0,aria:fmt(S.car.pay)+' a month'});
 var bjr=billsJar();
 $('#rowJars').innerHTML=S.jars.map(function(j,i){
-var p=pct(j.bal,j.cozy),mood=jarMood(j),sub=Math.round(p*100)+'% cozy',warn=false;
+var p=pct(j.bal,j.cozy),mood=jarMood(j),sub=p>=1?'full!':Math.round(p*100)+'% full',warn=false;
 if(i===1&&bjr){p=bjr.p;mood=bjr.mood;sub=bjr.sub;warn=bjr.short}
 if(i===2){var dpd=Math.max(1,daysUntil(S.pay.next));sub+=' &middot; ≈'+fmt(j.bal/dpd)+'/day til payday'}
 return palHTML('jar'+i,{name:j.name,art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('');
 function hung(p){return p>=1?'wow':p>=.6?'happy':p>=.25?'ok':'sad'}
-function fed(p,left,when){return p>=1?'stuffed! fully fed '+when:Math.round(p*100)+'% fed '+when+' &middot; '+fmt(left)+' to go'}
+function hpSub(){var p=pct(S.hysa.mtd,S.hysa.goal),left=S.hysa.goal-S.hysa.mtd;return p>=1?'brimming with honey! 🍯':'making honey… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
+function rpSub(){var p=pct(S.roth.ytd,S.roth.goal),left=S.roth.goal-S.roth.ytd;return p>=1?'fully grown! 🌱':'growing… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
+function kpSub(){var p=pct(S.k401.ytd,S.k401.goal),left=S.k401.goal-S.k401.ytd;return p>=1?'overflowing with gold! ✨':'filling with gold… '+Math.round(p*100)+'% &middot; '+fmt(left)+' to go'}
 var hp=pct(S.hysa.mtd,S.hysa.goal),rp=pct(S.roth.ytd,S.roth.goal),kp=pct(S.k401.ytd,S.k401.goal),yr=new Date().getFullYear();
 $('#rowGrow').innerHTML=
-palHTML('hysa',{name:'HYSA',art:honey(hp,'happy'),amt:fmt(S.hysa.bal),bar:hp,c:'#ffc247',b:'#ffe0a0',hungry:hp<.25,warn:hp<.25,sub:fed(hp,S.hysa.goal-S.hysa.mtd,'this month'),aria:fmt(S.hysa.bal)})+
-palHTML('roth',{name:'Roth IRA',art:sprout(rp,'happy'),amt:fmt(S.roth.bal),bar:rp,c:'#8fd9a0',b:'#c9efd0',hungry:rp<.25,warn:rp<.25,sub:fed(rp,S.roth.goal-S.roth.ytd,'in '+yr),aria:fmt(S.roth.bal)})+
-palHTML('k401',{name:'401k',art:potgold(kp,'happy'),amt:fmt(S.k401.bal),bar:kp,c:'#8fb0f0',b:'#c8dcff',hungry:kp<.25,warn:kp<.25,sub:fed(kp,S.k401.goal-S.k401.ytd,'in '+yr),aria:fmt(S.k401.bal)});
-$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% used &middot; due '+inTxt(d),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('');
+palHTML('hysa',{name:'HYSA',art:honey(hp,'happy'),amt:fmt(S.hysa.bal),bar:hp,c:'#ffc247',b:'#ffe0a0',hungry:hp<.25,warn:hp<.25,sub:hpSub(),aria:fmt(S.hysa.bal)})+
+palHTML('roth',{name:'Roth IRA',art:sprout(rp,'happy'),amt:fmt(S.roth.bal),bar:rp,c:'#8fd9a0',b:'#c9efd0',hungry:rp<.25,warn:rp<.25,sub:rpSub(),aria:fmt(S.roth.bal)})+
+palHTML('k401',{name:'401k',art:potgold(kp,'happy'),amt:fmt(S.k401.bal),bar:kp,c:'#8fb0f0',b:'#c8dcff',hungry:kp<.25,warn:kp<.25,sub:kpSub(),aria:fmt(S.k401.bal)});
+$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% spent &middot; due '+inTxt(d),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('');
 renderStickers();renderTemplates();renderWish();renderWrapped();
 setTimeout(function(){gaze()},60);
 }
