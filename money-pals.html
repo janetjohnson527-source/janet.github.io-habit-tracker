@@ -414,7 +414,7 @@ roth:{bal:12650,ytd:2250,goal:7500},
 k401:{bal:21300,ytd:5100,goal:12000},
 cards:[{name:'Capital One',bal:640,limit:2300,due:28},{name:'Wayfair',bal:1120,limit:2000,due:3},{name:'Citibank',bal:95,limit:1000,due:9}],
 car:{name:'My car',pay:385,left:11200,orig:18000,due:15},
-stickers:[{id:'s1',name:'HYSA $1k',icon:'🍯',rule:'hysa_bal',target:1000},{id:'s2',name:'HYSA $5k',icon:'🐝',rule:'hysa_bal',target:5000},{id:'s3',name:'HYSA $10k',icon:'🏆',rule:'hysa_bal',target:10000},{id:'s4',name:'Card cuddler',icon:'🐰',rule:'cards_util',target:30},{id:'s5',name:'Cozy jars',icon:'🫙',rule:'jars_cozy',target:0},{id:'s6',name:'Well fed',icon:'🥳',rule:'fed_all',target:0},{id:'s7',name:'Roth half fed',icon:'🌱',rule:'roth_fed',target:50},{id:'s8',name:'Car halfway',icon:'🚗',rule:'car_paid',target:50},{id:'s9',name:'Bills boss',icon:'💸',rule:'bills_all',target:0}],
+stickers:[{id:'s1',name:'HYSA $1k',icon:'🍯',rule:'hysa_bal',target:1000},{id:'s2',name:'HYSA $5k',icon:'🐝',rule:'hysa_bal',target:5000},{id:'s3',name:'HYSA $10k',icon:'🏆',rule:'hysa_bal',target:10000},{id:'s4',name:'Card cuddler',icon:'🐰',rule:'cards_util',target:30},{id:'s5',name:'Full jars',icon:'🫙',rule:'jars_cozy',target:0},{id:'s6',name:'Well fed',icon:'🥳',rule:'fed_all',target:0},{id:'s7',name:'Roth half fed',icon:'🌱',rule:'roth_fed',target:50},{id:'s8',name:'Car halfway',icon:'🚗',rule:'car_paid',target:50},{id:'s9',name:'Bills boss',icon:'💸',rule:'bills_all',target:0}],
 earned:{},earnedInit:false,nospend:{},payTemplates:[],wish:[],snap:{},mode:'classic',tab:'pals',tipsHidden:{},bills:sampleBills()};
 }
 function blank(keep){
@@ -608,7 +608,7 @@ var h=new Date().getHours();
 $('#hello').textContent=(h<12?'Good morning, ':h<18?'Hi there, ':'Good evening, ')+S.name+'!';
 $('#dateline').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 var t=totals();
-$('#sum').innerHTML='<div><b class="tnum">'+fmt(t.cash)+'</b><span>Cozy cash</span></div><div><b class="tnum">'+fmt(t.grow)+'</b><span>Growing</span></div><div><b class="tnum">'+fmt(t.owed)+'</b><span>Owed</span></div><div><b class="tnum">'+fmt(t.net)+'</b><span>Net worth</span></div>';
+$('#sum').innerHTML='<div><b class="tnum">'+fmt(t.cash)+'</b><span>Cash</span></div><div><b class="tnum">'+fmt(t.grow)+'</b><span>Growing</span></div><div><b class="tnum">'+fmt(t.owed)+'</b><span>Owed</span></div><div><b class="tnum">'+fmt(t.net)+'</b><span>Net worth</span></div>';
 $('#exBanner').hidden=!S.example;
 $('#viewPals').hidden=S.tab!=='pals';$('#viewBills').hidden=S.tab!=='bills';$('#viewTips').hidden=S.tab!=='tips';$('#viewWish').hidden=S.tab!=='wish';$('#viewWrap').hidden=S.tab!=='wrap';$('#tabTips').setAttribute('aria-selected',String(S.tab==='tips'));
 $('#tabPals').setAttribute('aria-selected',String(S.tab==='pals'));$('#tabBills').setAttribute('aria-selected',String(S.tab==='bills'));$('#tabWish').setAttribute('aria-selected',String(S.tab==='wish'));$('#tabWrap').setAttribute('aria-selected',String(S.tab==='wrap'));
@@ -646,7 +646,7 @@ roth_bal:{l:'Roth IRA balance reaches',t:'money',f:function(x){return S.roth.bal
 k401_bal:{l:'401k balance reaches',t:'money',f:function(x){return S.k401.bal>=x.target}},
 net_worth:{l:'Net worth reaches',t:'money',f:function(x){return totals().net>=x.target}},
 cards_util:{l:'All cards at or under this % used',t:'pct',f:function(x){return S.cards.every(function(c){return c.limit>0&&c.bal/c.limit*100<=x.target})}},
-jars_cozy:{l:'All three jars at their cozy level',t:'none',f:function(){return S.jars.every(function(j){return j.cozy>0&&j.bal>=j.cozy})}},
+jars_cozy:{l:'All jars full',t:'none',f:function(){return S.jars.every(function(j){return j.cozy>0&&j.bal>=j.cozy})}},
 fed_all:{l:'HYSA, Roth IRA and 401k all fully fed',t:'none',f:function(){return pct(S.hysa.mtd,S.hysa.goal)>=1&&pct(S.roth.ytd,S.roth.goal)>=1&&pct(S.k401.ytd,S.k401.goal)>=1}},
 hysa_fed:{l:'Honey pot fed at least this % of its goal',t:'pct',f:function(x){return S.hysa.goal>0&&pct(S.hysa.mtd,S.hysa.goal)*100>=x.target}},
 roth_fed:{l:'Roth sprout fed at least this % of its goal',t:'pct',f:function(x){return S.roth.goal>0&&pct(S.roth.ytd,S.roth.goal)*100>=x.target}},
@@ -901,7 +901,7 @@ else if(S.car.orig>0&&S.car.left<=0)T.push({id:'car-win',kind:'win',icon:'🚗',
 /* wins */
 var bs=billStats(nowMk);
 if(bs.n>0&&bs.left<=0)T.push({id:'bills-win-'+nowMk,kind:'win',icon:'💸',title:'Every bill is paid this month',body:'All '+pl(bs.n,'bill')+' are checked off. That is a whole month of on-time bills.'});
-if(S.jars[0].cozy>0&&S.jars[0].bal>=S.jars[0].cozy)T.push({id:'jar0-win-'+Math.floor(S.jars[0].bal/500),kind:'win',icon:'🫙',title:S.jars[0].name+' is at its cozy level',body:'You set '+fmt(S.jars[0].cozy)+' as comfy, and you are there.'});
+if(S.jars[0].cozy>0&&S.jars[0].bal>=S.jars[0].cozy)T.push({id:'jar0-win-'+Math.floor(S.jars[0].bal/500),kind:'win',icon:'🫙',title:S.jars[0].name+' is full!',body:'You set '+fmt(S.jars[0].cozy)+' as full, and you made it!'});
 var order={urgent:0,warn:1,heads:2,idea:3,win:4};
 return T.sort(function(a,b){return order[a.kind]-order[b.kind]});
 }
@@ -1074,7 +1074,7 @@ function specFor(k){
 var m,i;
 if(k==='pay')return {t:'Your paycheck',l:'Your take-home pay and when the next one lands.',f:[['pay.amount','Take-home per paycheck','money'],['pay.freq','How often','select',FREQ],['pay.next','Next payday','date']]};
 if(k==='car')return {t:'Car payment',l:'Track the loan as it shrinks.',f:[['car.name','Nickname','text'],['car.pay','Monthly payment','money'],['car.left','Loan balance left','money'],['car.orig','Original loan amount','money'],['car.due','Due day of month','day']]};
-if((m=/^jar(\d+)$/.exec(k))){i=+m[1];return {t:S.jars[i].name,l:'One of your Chase accounts.',f:[['jars.'+i+'.name','Account nickname','text'],['jars.'+i+'.bal','Current balance','money'],['jars.'+i+'.cozy','Cozy level','money','',(i===1&&S.bills.length?'Your Bills jar follows this month\'s unpaid bills instead, from the Bills tab.':'The balance where this jar feels totally comfy. The jar fills as you get there.')]]}}
+if((m=/^jar(\d+)$/.exec(k))){i=+m[1];return {t:S.jars[i].name,l:'One of your Chase accounts.',f:[['jars.'+i+'.name','Account nickname','text'],['jars.'+i+'.bal','Current balance','money'],['jars.'+i+'.cozy','Full at','money','',(i===1&&S.bills.length?'Your Bills jar follows this month\'s unpaid bills instead, from the Bills tab.':'The balance where this jar counts as full.')]]}}
 if(k==='hysa')return {t:'HYSA',l:'Your high-yield savings. It gets hungry when you have not fed it this month.',f:[['hysa.bal','Current balance','money'],['hysa.apy','APY','pct'],['hysa.goal','Monthly feeding goal','money','','How much you want to add each month.'],['hysa.mtd','Fed so far this month','money']]};
 if(k==='k401')return {t:'401k',l:'Long-term growing. It gets hungrier the further behind your yearly goal.',f:[['k401.bal','Current balance','money'],['k401.ytd','Contributed this year','money'],['k401.goal','Yearly contribution goal','money','','Set this to your own target, including any employer match you like to count.']]};
 if(k==='roth')return {t:'Roth IRA',l:'It grows as you feed it this year.',f:[['roth.bal','Current balance','money'],['roth.ytd','Contributed this year','money'],['roth.goal','Yearly contribution goal','money','','Set this to your own limit. Check the current IRS rules for your situation.']]};
