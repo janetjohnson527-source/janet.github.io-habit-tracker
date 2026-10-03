@@ -54,6 +54,7 @@ button{font-family:inherit;color:inherit}
 .sh h2{margin:0;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:600}
 .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:99px;padding:9px 18px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 16px rgba(240,102,155,.35);transition:transform .12s,box-shadow .2s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(240,102,155,.45)}
+.btn.sm{padding:6px 14px;font-size:12.5px}
 .btn:active{transform:translateY(1px);box-shadow:0 2px 8px rgba(240,102,155,.3)}
 .btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(2px);box-shadow:none}
 .btn.ghost{background:var(--panel);color:var(--ink);border:2px solid var(--line);box-shadow:none}
@@ -359,9 +360,9 @@ body{padding-block:20px 36px;font-size:16px}
 <div id="viewPals">
 <div class="layout">
 <div class="main">
-<section class="blk b3"><div class="sh"><h2>Chase jars</h2></div><div class="grid g3" id="rowJars"></div></section>
+<section class="blk b3"><div class="sh"><h2>Chase jars</h2><button type="button" class="btn sm" data-add="jar">+ New jar</button></div><div class="grid g3" id="rowJars"></div></section>
 <section class="blk b4"><div class="sh"><h2>Hungry growing things</h2></div><div class="grid g3" id="rowGrow"></div></section>
-<section class="blk b5"><div class="sh"><h2>Credit cards</h2></div><div class="grid g3" id="rowCards"></div></section>
+<section class="blk b5"><div class="sh"><h2>Credit cards</h2><button type="button" class="btn sm" data-add="card">+ New card</button></div><div class="grid g3" id="rowCards"></div></section>
 </div>
 <aside class="side">
 <section class="penny" id="pennyRow" hidden>
@@ -636,7 +637,7 @@ $('#rowJars').innerHTML=S.jars.map(function(j,i){
 var p=pct(j.bal,j.cozy),mood=jarMood(j),sub=Math.round(p*100)+'% cozy',warn=false;
 if(i===1&&bjr){p=bjr.p;mood=bjr.mood;sub=bjr.sub;warn=bjr.short}
 if(i===2){var dpd=Math.max(1,daysUntil(S.pay.next));sub+=' &middot; ≈'+fmt(j.bal/dpd)+'/day til payday'}
-return palHTML('jar'+i,{name:j.name,art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('')+addTile('jar','New jar');
+return palHTML('jar'+i,{name:j.name,art:jar(i,p,mood),amt:fmt(j.bal),bar:p,c:JC[i%3][1],b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],sub:sub,warn:warn,aria:fmt(j.bal)})}).join('');
 function hung(p){return p>=1?'wow':p>=.6?'happy':p>=.25?'ok':'sad'}
 function fed(p,left,when){return p>=1?'stuffed! fully fed '+when:Math.round(p*100)+'% fed '+when+' &middot; '+fmt(left)+' to go'}
 var hp=pct(S.hysa.mtd,S.hysa.goal),rp=pct(S.roth.ytd,S.roth.goal),kp=pct(S.k401.ytd,S.k401.goal),yr=new Date().getFullYear();
@@ -644,7 +645,7 @@ $('#rowGrow').innerHTML=
 palHTML('hysa',{name:'HYSA',art:honey(hp,'happy'),amt:fmt(S.hysa.bal),bar:hp,c:'#ffc247',b:'#ffe0a0',hungry:hp<.25,warn:hp<.25,sub:fed(hp,S.hysa.goal-S.hysa.mtd,'this month'),aria:fmt(S.hysa.bal)})+
 palHTML('roth',{name:'Roth IRA',art:sprout(rp,'happy'),amt:fmt(S.roth.bal),bar:rp,c:'#8fd9a0',b:'#c9efd0',hungry:rp<.25,warn:rp<.25,sub:fed(rp,S.roth.goal-S.roth.ytd,'in '+yr),aria:fmt(S.roth.bal)})+
 palHTML('k401',{name:'401k',art:potgold(kp,'happy'),amt:fmt(S.k401.bal),bar:kp,c:'#8fb0f0',b:'#c8dcff',hungry:kp<.25,warn:kp<.25,sub:fed(kp,S.k401.goal-S.k401.ytd,'in '+yr),aria:fmt(S.k401.bal)});
-$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% used &middot; due '+inTxt(d),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('')+addTile('card','New card');
+$('#rowCards').innerHTML=S.cards.map(function(c,i){var u=pct(c.bal,c.limit),d=nextDue(c.due);return palHTML('card'+i,{name:c.name,art:card(i,cardMood(c)),amt:fmt(c.bal),bar:u,c:u>.6?'#ef6a80':u>.3?'#ffb15c':'#ff9d8a',sub:Math.round(u*100)+'% used &middot; due '+inTxt(d),b:['#bfe3ff','#e3d0ff','#ffd0e0'][i%3],warn:d<=3&&c.bal>0,aria:fmt(c.bal)+' owed'})}).join('');
 renderStickers();renderStreak();renderTemplates();renderWish();renderWrapped();
 setTimeout(function(){gaze()},60);
 }
@@ -670,7 +671,6 @@ manual:{l:'I decide (I mark it earned myself)',t:'none',f:function(x){return !!x
 function ruleLabel(k){var m=/^jar(\d+)_bal$/.exec(k);return m&&S.jars[+m[1]]?S.jars[+m[1]].name+' balance reaches':(RULES[k]||{}).l}
 function jarBalRule(i){return function(x){return S.jars[i]&&S.jars[i].bal>=x.target}}
 function ensureJarRules(){S.jars.forEach(function(j,i){var k='jar'+i+'_bal';if(!RULES[k])RULES[k]={l:'',t:'money',f:jarBalRule(i)}})}
-function addTile(kind,label){return '<button type="button" class="pal add" data-add="'+kind+'" aria-label="Add '+label.toLowerCase()+'"><span class="plus" aria-hidden="true">＋</span><span class="nm">'+label+'</span></button>'}
 function addPal(kind){
 if(kind==='jar'){S.jars.push({name:'New jar',bal:0,cozy:0});save();render();edit('jar'+(S.jars.length-1))}
 else{S.cards.push({name:'New card',bal:0,limit:0,due:1});save();render();edit('card'+(S.cards.length-1))}
