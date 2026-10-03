@@ -575,14 +575,15 @@ function wheel(x){var s='<circle cx="'+x+'" cy="82" r="10.5" fill="#6e5f78"/><ci
 function truck(){
 var body='#ffe066',stroke='#e5a900',dark='#f5c93d';
 var bed='<rect x="10" y="48" width="46" height="30" rx="5" fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5"/>';
-var nanner='<path d="M24 48 C25 36 33 29 43 31 C35 33 29 39 28 48 Z" fill="#ffe066" stroke="#e5a900" stroke-width="2" stroke-linejoin="round"/>';
+var nanner='<path d="M16 50 C26 40 40 40 50 49 C40 46 26 46 18 51 Z" fill="#ffd94d" stroke="#e0a92e" stroke-width="1.6" stroke-linejoin="round"/>'
++'<circle cx="16" cy="50.5" r="2" fill="#8a5a2b"/><circle cx="50" cy="49" r="2" fill="#8a5a2b"/>';
 var rail='<rect x="8" y="43" width="50" height="8" rx="4" fill="'+dark+'" stroke="'+stroke+'" stroke-width="1.6"/>';
 var cab='<path d="M56 78 L56 44 Q56 40 60 40 L70 40 L78 26 Q80 22 84 22 L94 22 Q98 22 100 26 L106 44 Q110 46 110 52 L110 72 Q110 78 104 78 Z" fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5" stroke-linejoin="round"/>';
 var glass='<path d="M73 38 L79 28 Q80 26 83 26 L92 26 Q94 26 95 28 L99 38 Z" fill="#d9f0ff" stroke="'+stroke+'" stroke-width="2" stroke-linejoin="round"/><path d="M80 34 L83 29" stroke="#fff" stroke-width="2" stroke-linecap="round"/>';
 var lights='<rect x="7" y="54" width="5" height="9" rx="2.4" fill="#ff8fa8" stroke="#e9668a" stroke-width="1.4"/><circle cx="106" cy="60" r="4" fill="#fff6b8" stroke="'+stroke+'" stroke-width="1.6"/><path d="M110 57 l7 -2 M110 62 l7 2" stroke="#ffe27a" stroke-width="2" stroke-linecap="round"/>';
 var bump='<rect x="102" y="70" width="9" height="8" rx="3" fill="'+dark+'" stroke="'+stroke+'" stroke-width="1.6"/>';
 var smile='<path d="M78 68 Q82 71.5 86 68" fill="none" stroke="#5b4560" stroke-width="2" stroke-linecap="round"/>';
-var inner=wheel(34)+wheel(88)+bed+nanner+rail+cab+glass+lights+bump+face(82,56,9,.9,'happy')+smile;
+var inner=wheel(34)+wheel(88)+bed+nanner+rail+cab+glass+lights+bump+face(82,56,9,.9,'happy',{mouth:'none'})+smile;
 return V(inner,.6);
 }
 function car(){return truck()}
