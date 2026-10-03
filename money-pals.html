@@ -786,14 +786,17 @@ var st=billStats(viewMonth);
 if(st.n>0&&st.left<=0){var s=$('.bsum');if(s){var q=s.getBoundingClientRect();burst(q.left+q.width/2,q.top+q.height/3,'mix',34)}}
 }
 function togglePaid(id){
+var cur=viewMonth===monthKey(today());
+function jarDeduct(amt,wasPaid){if(cur&&S.jars[1]&&amt>0)S.jars[1].bal+=wasPaid?amt:-amt}
 var cm=/^cardbill(\d+)$/.exec(id||'');
-if(cm){var c=S.cards[+cm[1]];if(!c)return;c.paid=c.paid||{};var mkw=viewMonth,was=!!c.paid[mkw];if(was)delete c.paid[mkw];else c.paid[mkw]=true;save();render();if(!was)celebrateBill(id);return}
-if(id==='carbill'){S.car.paid=S.car.paid||{};var was=!!S.car.paid[viewMonth];if(was)delete S.car.paid[viewMonth];else S.car.paid[viewMonth]=true;save();render();if(!was)celebrateBill(id);return}
+if(cm){var c=S.cards[+cm[1]];if(!c)return;c.paid=c.paid||{};var mkw=viewMonth,was=!!c.paid[mkw];if(was)delete c.paid[mkw];else c.paid[mkw]=true;jarDeduct(c.billAmt,was);save();render();if(!was)celebrateBill(id);return}
+if(id==='carbill'){S.car.paid=S.car.paid||{};var was2=!!S.car.paid[viewMonth];if(was2)delete S.car.paid[viewMonth];else S.car.paid[viewMonth]=true;jarDeduct(S.car.pay,was2);save();render();if(!was2)celebrateBill(id);return}
 var b=S.bills.filter(function(x){return x.id===id})[0];if(!b)return;
-b.paid=b.paid||{};var was=!!b.paid[viewMonth];
-if(was)delete b.paid[viewMonth];else b.paid[viewMonth]=true;
+b.paid=b.paid||{};var was3=!!b.paid[viewMonth];
+if(was3)delete b.paid[viewMonth];else b.paid[viewMonth]=true;
+jarDeduct(b.amount,was3);
 save();render();
-if(!was)celebrateBill(id);
+if(!was3)celebrateBill(id);
 }
 var BEMO=['🏠','⚡','💧','📶','📱','🚗','🛡️','📺','🎵','🏋️','🐶','💳','🎓','🧾','☁️','🔥','💡','🚿','🛒','💊','🎮','📚','✂️','🍔','☕','💅','🐱','🌿','🔑','📦','💸','🏥','🎁','✈️','🧸','⛽'];
 function editBill(id){
