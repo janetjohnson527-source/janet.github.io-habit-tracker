@@ -571,6 +571,7 @@ extra='<g fill="#fff" opacity=".9" stroke="#e6dcef" stroke-width="1"><circle cx=
 return V(back+body+glass+bump+lights+plate+extra+wheel(34)+wheel(88)+face(61,58,13,.9,'happy'),.6);
 }
 }
+function wheel(x){var s='<circle cx="'+x+'" cy="82" r="10.5" fill="#6e5f78"/><circle cx="'+x+'" cy="82" r="5.6" fill="#e9e2ee" stroke="#a99bb3" stroke-width="1"/><circle cx="'+x+'" cy="82" r="1.8" fill="#8d7f98"/>';for(var a=0;a<5;a++){var r=a*72*Math.PI/180;s+='<path d="M'+x+' 82 L'+(x+Math.sin(r)*4.6).toFixed(1)+' '+(82-Math.cos(r)*4.6).toFixed(1)+'" stroke="#a99bb3" stroke-width="1.2" stroke-linecap="round"/>'}return s}
 function truck(){
 var body='#ffe066',stroke='#e5a900',dark='#f5c93d';
 var bed='<rect x="10" y="48" width="46" height="30" rx="5" fill="'+body+'" stroke="'+stroke+'" stroke-width="2.5"/>';
