@@ -308,6 +308,8 @@ body{padding-block:20px 36px;font-size:16px}
 @media(max-width:620px){.tip{grid-template-columns:1fr;gap:8px}.tico{width:40px;height:40px;font-size:22px}}
 /* warnings */
 .warnbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-radius:16px;padding:10px 14px;margin-top:10px;font-weight:700;font-size:14px}
+.howworks{font-size:12px;color:var(--ink2);background:var(--soft);border-radius:12px;padding:7px 14px;margin-top:10px;line-height:1.5}
+.howworks b{color:var(--ink)}
 .warnbar[hidden]{display:none!important}
 .warnbar .wico{font-size:20px;line-height:1}.warnbar .wtxt{flex:1;min-width:200px}
 .warnbar button{border:2px solid currentColor;background:transparent;color:inherit;border-radius:99px;padding:5px 14px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
@@ -344,6 +346,7 @@ body{padding-block:20px 36px;font-size:16px}
 <button class="chipbtn" id="openSettings">Settings</button>
 </div>
 </header>
+<div class="howworks" id="howWorks" hidden></div>
 <nav class="tabs" role="tablist" aria-label="Pages"><button role="tab" id="tabPals" aria-selected="true">Pals</button><button role="tab" id="tabBills" aria-selected="false">Bills</button><button role="tab" id="tabTips" aria-selected="false">Tips</button><button role="tab" id="tabWish" aria-selected="false">Wishlist</button><button role="tab" id="tabWrap" aria-selected="false">Wrapped</button></nav>
 <div class="ex" id="exBanner"><span>These are example numbers. Tap any pal to swap in yours.</span><button class="chipbtn" id="clearEx">Start fresh</button></div>
 <div class="warnbar" id="warnBar" hidden></div>
@@ -596,7 +599,7 @@ document.documentElement.dataset.t=S.theme;
 document.documentElement.dataset.m=S.mode||'classic';
 ensureSnap();
 TIPS=makeTips();WMAP=buildWmap(TIPS);
-renderWarnBar();
+renderWarnBar();renderHowWorks();
 document.body.classList.toggle('nofloat',!S.fx.float);
 $('#darkBtn').innerHTML=S.theme==='dark'?'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="#ffd84d" stroke="#e5a900" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="#e5a900" stroke-width="1.8" stroke-linecap="round"/></svg>Light':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" fill="#b9a6f5" stroke="#8c74e0" stroke-width="1.6" stroke-linejoin="round"/></svg>Dark';
 var h=new Date().getHours();
@@ -938,6 +941,21 @@ var urgent=w.some(function(x){return x.kind==='urgent'});
 bar.className='warnbar lv-'+(urgent?'urgent':'warn');bar.hidden=false;
 var titles=w.slice(0,2).map(function(x){return x.title}).join(' · ')+(w.length>2?' · +'+(w.length-2)+' more':'');
 bar.innerHTML='<span class="wico" aria-hidden="true">'+(urgent?'🚨':'⚠️')+'</span><span class="wtxt">'+esc((urgent?'Uh oh: ':'Keep an eye on: ')+titles)+'</span><button type="button" id="seeTips">See tips</button>';
+}
+function renderHowWorks(){
+var el=$('#howWorks');if(!el)return;
+var bits=[];
+if(S.pay.auto){
+var ap='🤖 <b>Autopilot on:</b> payday → '+esc(S.jars[1]?S.jars[1].name:'Bills');
+if(S.pay.hysaAuto>0)ap+=', '+fmt(S.pay.hysaAuto)+' → HYSA';
+if(S.pay.k401Auto>0)ap+=', '+fmt(S.pay.k401Auto)+' → 401k';
+bits.push(ap);
+}else bits.push('🤖 Autopilot off — payday is manual');
+var nb=S.cards.filter(function(c){return c.billAmt>0}).length;
+if(nb>0)bits.push('💳 '+nb+' card'+(nb===1?'':'s')+' auto-list in Bills');
+bits.push('📊 Bill patterns checked monthly');
+el.innerHTML=bits.join(' &middot; ');
+el.hidden=false;
 }
 function renderTips(){
 var el=$('#viewTips'),all=TIPS,vis=all.filter(function(x){return !S.tipsHidden[x.id]}),hid=all.length-vis.length;
