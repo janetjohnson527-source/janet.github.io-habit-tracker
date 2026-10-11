@@ -133,6 +133,7 @@ function dk(str){
   });
 }
 var uid=0;
+function nid(p){return (p||'id')+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function coin(x,y,i){return '<g class="fc" style="animation-duration:'+(3+i%3*.7)+'s;animation-delay:-'+(i*.9)+'s"><circle cx="'+x+'" cy="'+y+'" r="6" fill="#ffd84d" stroke="#e5a900" stroke-width="1.2"/><text x="'+x+'" y="'+(y+3)+'" font-size="8" text-anchor="middle" fill="#a67500" font-weight="700">$</text></g>'}
 var JC=[['#bfe3ff','#7fbdf0'],['#e3d0ff','#b590f0'],['#ffd0e0','#ff9dbf']];
 function jar(i,p,mood){
@@ -354,7 +355,7 @@ document.getElementById('mBody').addEventListener('click',function(e){
     var amts=feedDest().map(function(d,i){return Math.max(0,parseFloat($('#fd'+i).value)||0)});
     if(!amts.some(function(a){return a>0})){$('#mErr').textContent='Split out at least $1 first.';return}
     var nm=$('#tpl_name').value.trim()||'Payday';
-    S.payTemplates.push({id:uid(),name:nm,alloc:amts});save();refreshTplBar();renderTemplates();return;
+    S.payTemplates.push({id:nid('t'),name:nm,alloc:amts});save();refreshTplBar();renderTemplates();return;
   }
 });
 $('#tmprow').addEventListener('click',function(e){
@@ -869,7 +870,7 @@ function openWishAdd(w){
       if(!n){$('#mErr').textContent='Give your wish a name!';return false}
       if(p<=0){$('#mErr').textContent='How much does it cost?';return false}
       if(isEdit){w.name=n;w.price=p;w.icon=$('#w_icon').value;w.note=$('#w_note').value.trim()}
-      else S.wish.push({id:uid(),name:n,price:p,icon:$('#w_icon').value,note:$('#w_note').value.trim()});
+      else S.wish.push({id:nid('w'),name:n,price:p,icon:$('#w_icon').value,note:$('#w_note').value.trim()});
       save();renderWish();
     }});
 }
