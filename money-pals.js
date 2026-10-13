@@ -1,4 +1,3 @@
-
 (function(){
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
@@ -786,7 +785,7 @@ function renderRoad(){
   if(body)body.innerHTML=roadHTML(r);
   if(sim)sim.innerHTML=r.totalM>0?('At <b class="tnum">'+fmt(r.pay)+'</b> a month, paid off around <b>'+monthYear(addMonths(today(),r.totalM))+'</b>.'+(ex>0?' Every extra dollar shrinks the road! 🛣️':'')):'Paid off! Time to point that payment at a savings pal. 🎉';
 }
-var WICONS=['🎧','👟','🎮','📚','🕯️','🧸','💄','👗','🎨','✈️','📱','💻','🎟️','🌱','🍵','🎁','📷','📸','🎥','🎸','🧳','💍','🏠','🌸','⭐','🐾','👜','👒'];
+var WICONS=['🎧','👟','🎮','📚','🕯️','🧸','💄','👗','🎨','✈️','📱','💻','🎟️','🌱','🍵','🎁','📷','📸','🎥','🎸','🧳','💍','🏠','🌸','⭐','🐾','👜','👒','🍳','🍱','🥘','🍲','☕','📺','🏍️','🚗','💇','🧥','👢','🧁','🍩','🎤','🪴','🛋️','🚲','⛺','🧘','💅'];
 function chapterData(){
   var st=function(id){var s=(S.stickers||[]).find(function(x){return x.id===id});return s||null};
   var stWon=function(id){var s=st(id);return s&&S['st_'+id]};
