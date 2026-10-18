@@ -1,3 +1,4 @@
+
 (function(){
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
@@ -785,7 +786,8 @@ function renderRoad(){
   if(body)body.innerHTML=roadHTML(r);
   if(sim)sim.innerHTML=r.totalM>0?('At <b class="tnum">'+fmt(r.pay)+'</b> a month, paid off around <b>'+monthYear(addMonths(today(),r.totalM))+'</b>.'+(ex>0?' Every extra dollar shrinks the road! 🛣️':'')):'Paid off! Time to point that payment at a savings pal. 🎉';
 }
-var WICONS=['🎧','👟','🎮','📚','🕯️','🧸','💄','👗','🎨','✈️','📱','💻','🎟️','🌱','🍵','🎁','📷','📸','🎥','🎸','🧳','💍','🏠','🌸','⭐','🐾','👜','👒','🍳','🍱','🥘','🍲','☕','📺','🏍️','🚗','💇','🧥','👢','🧁','🍩','🎤','🪴','🛋️','🚲','⛺','🧘','💅'];
+var WCATEGORIES={'Kitchen & Food':['🍳','🍱','🥘','🍲','☕','🍵','🧁','🍩'],'Style & Beauty':['💄','👗','👜','👒','💍','💇','🧥','👢','💅','👟'],'Tech & Media':['📱','💻','🎧','🎮','📷','📸','🎥','📺','🎤'],'Travel & Wheels':['✈️','🧳','🏍️','🚗','🚲','⛺'],'Home & Cozy':['🏠','🛋️','🪴','🕯️','🌱','🌸'],'Fun & Hobbies':['🎨','🎸','🎟️','📚','🧸','🐾','⭐','🎁','🧘']};
+var WICONS=[].concat.apply([],Object.keys(WCATEGORIES).map(function(c){return WCATEGORIES[c]}));
 function chapterData(){
   var st=function(id){var s=(S.stickers||[]).find(function(x){return x.id===id});return s||null};
   var stWon=function(id){var s=st(id);return s&&S['st_'+id]};
@@ -861,7 +863,7 @@ function openWishAdd(w){
   var isEdit=!!w;
   var body='<label class="fld" for="w_name"><span>What is it?</span><input id="w_name" type="text" maxlength="30" placeholder="e.g. Headphones" value="'+(w?esc(w.name):'')+'"></label>'+
     '<label class="fld" for="w_price"><span>Price</span><span class="numwrap"><span class="pre">$</span><input id="w_price" type="number" inputmode="decimal" step="any" min="0" value="'+(w?w.price:'')+'"></span></label>'+
-    '<label class="fld" for="w_icon"><span>Pick an icon</span><select id="w_icon">'+WICONS.map(function(e){return '<option'+(w&&w.icon===e?' selected':'')+'>'+e+'</option>'}).join('')+'</select></label>'+
+    '<label class="fld" for="w_icon"><span>Pick an icon</span><select id="w_icon">'+Object.keys(WCATEGORIES).map(function(c){return '<optgroup label="'+c+'">'+WCATEGORIES[c].map(function(e){return '<option'+(w&&w.icon===e?' selected':'')+'>'+e+'</option>'}).join('')+'</optgroup>'}).join('')+'</select></label>'+
     '<label class="fld" for="w_note"><span>Note (optional)</span><input id="w_note" type="text" maxlength="60" placeholder="e.g. for my birthday" value="'+(w?esc(w.note||''):'')+'"></label>';
   openModal({title:isEdit?'Edit wish':'Add a wish',lead:isEdit?'Tweak the dream.':'Dream a little dream.',body:body,saveLabel:isEdit?'Save changes':'Add to wishlist',
     onSave:function(){
