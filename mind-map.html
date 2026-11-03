@@ -486,7 +486,7 @@ html:not([data-theme="folders"]) .fo-only{display:none}
   try{if(sessionStorage.getItem('mindmap-unlocked')==='1'){document.getElementById('gate').style.display='none';return;}}catch(e){}
   function unlock(){
     var v=document.getElementById('gatepw').value;
-    if(v==='Laceydarth1'){try{sessionStorage.setItem('mindmap-unlocked','1')}catch(e){}document.getElementById('gate').style.display='none';}
+    if(v==='Laceydarth1!'){try{sessionStorage.setItem('mindmap-unlocked','1')}catch(e){}document.getElementById('gate').style.display='none';}
     else{document.getElementById('gateerr').style.display='block';document.getElementById('gatepw').select();}
   }
   document.getElementById('gatebtn').addEventListener('click',unlock);
