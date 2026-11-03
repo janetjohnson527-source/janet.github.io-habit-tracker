@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Janet's Mind Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#3b1f1f; --paper:#fbf6ea; --grid:#ebe2d0;
+  --blue:#2f6bea; --teal:#1fb59a; --pink:#f7a1c4; --red:#ef4d3c; --yellow:#ffb627; --lilac:#9b7cf0; --mint:#7fd8b8; --peach:#ffb38a;
+  --muted:#7a5a52;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:Poppins,system-ui,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1500px;margin:0 auto;padding:22px 32px 90px}
+
+/* title */
+.titlebox{position:relative;text-align:center;margin:6px 0 4px}
+.ttl{font-weight:900;font-size:52px;line-height:1;letter-spacing:-.01em;color:var(--yellow);-webkit-text-stroke:5px var(--ink);paint-order:stroke fill;text-shadow:5px 5px 0 var(--red);margin:0}
+.sub{font-weight:800;font-size:12px;margin-top:10px}
+.themepill{position:fixed;top:14px;right:16px;z-index:30;display:flex;gap:6px;align-items:center;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:4px 10px 4px 4px;box-shadow:2px 2px 0 var(--ink);font-size:11px;font-weight:800}
+.themepill i{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--yellow) 50%,var(--red) 50%);border:2px solid var(--ink)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 22px}
+.chip{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;font-weight:800;font-size:11px;letter-spacing:.03em;text-transform:uppercase;box-shadow:2px 2px 0 var(--ink);transition:transform .15s}
+.chip:hover{transform:translate(-1px,-1px)}
+.chip.on{background:var(--yellow)}
+
+/* folder cards */
+.map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px 22px}
+@media(max-width:1150px){.map{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:820px){.map{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.map{grid-template-columns:1fr}.ttl{font-size:36px}}
+.folder{position:relative;text-align:left;background:none;border:0;padding:16px 0 0;display:block;width:100%;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+.folder .tab{position:absolute;left:0;top:0;height:22px;width:46%;background:var(--d);border:2.5px solid var(--ink);border-bottom:0;border-radius:8px 14px 0 0}
+.folder .body{position:relative;background:var(--c);border:2.5px solid var(--ink);border-radius:0 12px 12px 12px;box-shadow:5px 5px 0 var(--ink);padding:14px 16px 14px;min-height:214px;display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.3,1.5,.5,1),box-shadow .2s}
+.folder:hover .body,.folder:focus-visible .body{transform:translate(-2px,-3px);box-shadow:7px 8px 0 var(--ink)}
+.folder:focus-visible{outline:none}
+.folder .head{display:flex;align-items:center;gap:8px}
+.folder .name{font-weight:900;font-size:18px;line-height:1.05}
+.folder .pill{margin-left:auto;font-size:10px;font-weight:800;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.folder .metric{display:flex;align-items:baseline;gap:8px;margin:10px 0 2px}
+.folder .num{font-weight:900;font-size:34px;line-height:1;color:#fff;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill}
+.folder .unit{font-weight:800;font-size:12px}
+.folder .bar{height:9px;background:#fff;border:2px solid var(--ink);border-radius:999px;overflow:hidden;margin:6px 0 8px}
+.folder .bar i{display:block;height:100%;background:var(--ink)}
+.folder ul{list-style:none;margin:0;padding:0;font-size:12.5px;line-height:1.4}
+.folder li{padding:5px 0;border-top:2px dashed rgba(59,31,31,.25);display:flex;gap:7px}
+.folder li:first-child{border-top:0}
+.folder li .bx{flex:none;width:13px;height:13px;margin-top:2px;border:2px solid var(--ink);border-radius:4px;background:#fff}
+.folder li .bx.done{background:var(--ink)}
+.folder .next{margin-top:auto;padding-top:10px}
+.folder .next span{display:inline-block;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-weight:800;font-size:11.5px}
+.folder.hide{display:none}
+.folder.ext .name::after{content:" ↗";font-size:14px}
+
+/* corner key */
+.key{position:fixed;right:12px;bottom:12px;z-index:30;display:flex;gap:8px}
+.key button{background:var(--pink);border:2px solid var(--ink);border-radius:999px;padding:4px 10px;font-weight:800;font-size:11px;box-shadow:2px 2px 0 var(--ink)}
+.key button:nth-child(2){background:var(--yellow)}
+
+/* sparkles */
+.spk{position:fixed;pointer-events:none;z-index:0}
+.spk path{stroke:var(--ink);stroke-width:1.6}
+.tw{animation:tw 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes tw{0%,100%{transform:scale(.7)}50%{transform:scale(1.15)}}
+
+/* drawer */
+.drawer{position:fixed;inset:0;z-index:40;overflow:auto;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;display:none}
+.drawer.open{display:block;animation:slide .3s ease-out}
+@keyframes slide{from{opacity:0;transform:translateY(16px)}}
+.dwrap{max-width:1300px;margin:0 auto;padding:22px 32px 80px}
+.back{background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:6px 14px;font-weight:800;font-size:12px;box-shadow:3px 3px 0 var(--ink)}
+.dtitle{display:flex;align-items:center;gap:14px;margin:16px 0 4px}
+.dtitle h1{margin:0;font-weight:900;font-size:40px;line-height:1;color:var(--c,var(--yellow));-webkit-text-stroke:5px var(--ink);paint-order:stroke fill;text-shadow:4px 4px 0 var(--ink)}
+.dsub{font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 18px;max-width:780px}
+.panel{background:#fff;border:2.5px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);padding:16px 18px;margin-bottom:20px}
+.panel h2{margin:0 0 10px;font-weight:900;font-size:19px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:start}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:2px dashed rgba(59,31,31,.2);font-size:14px}
+.row:first-of-type{border-top:0}
+.row .t{flex:1}
+.row .t small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+.row.done .t>span{text-decoration:line-through;opacity:.55}
+.ck{flex:none;width:24px;height:24px;border-radius:7px;border:2.5px solid var(--ink);background:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;padding:0}
+.ck.on{background:var(--hc,var(--ink));color:#fff}
+.x{flex:none;background:none;border:0;font-size:16px;opacity:.35;padding:2px 6px}
+.x:hover{opacity:1}
+.add{display:flex;gap:8px;margin-top:10px}
+.add input,.field{flex:1;font:inherit;font-size:13px;border:2.5px solid var(--ink);border-radius:999px;padding:7px 14px;background:var(--paper);color:var(--ink);min-width:0}
+textarea.field{border-radius:14px;min-height:110px;resize:vertical;width:100%}
+.btn{background:var(--yellow);border:2.5px solid var(--ink);border-radius:999px;padding:6px 14px;font-weight:800;font-size:12px;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
+.btn.pink{background:var(--pink)}.btn.teal{background:var(--teal);color:#fff}.btn.white{background:#fff}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tabs .chip.on{background:var(--c,var(--yellow))}
+.big{font-weight:900;font-size:40px;line-height:1;color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+.bigrow{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.bigrow span{font-weight:800;font-size:13px}
+.pbar{height:12px;background:var(--paper);border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;margin:6px 0 12px}
+.pbar i{display:block;height:100%;background:var(--c,var(--teal))}
+.note{font-size:12px;color:var(--muted);font-weight:600;margin-top:8px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px}
+.cal .hd{font-weight:800;text-align:center;padding:4px;font-size:11px}
+.cal .d{border:2px solid var(--ink);border-radius:10px;padding:6px;min-height:64px;background:#fff;font-weight:700}
+.cal .d small{display:block;font-weight:600;font-size:10.5px;line-height:1.3}
+.cal .d.today{box-shadow:inset 0 0 0 3px var(--ink)}
+.cal .d.empty{border:0;background:none}
+.cal .d.dim{opacity:.4}
+.dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px}.dots i{width:8px;height:8px;border-radius:50%}
+.ev{display:inline-block;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-top:3px}
+.bars{display:flex;gap:8px;align-items:flex-end;height:170px;margin-top:10px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;text-align:center;font-size:11px;font-weight:700;height:100%}
+.bars i{display:block;background:var(--c,var(--teal));border:2px solid var(--ink);border-radius:8px 8px 0 0;margin-bottom:4px;min-height:2px}
+.vcard{background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:12px;font-size:13px}
+.vcard b{display:block;font-size:14px;margin-bottom:4px}
+.item{background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:12px;box-shadow:3px 3px 0 var(--ink)}
+.item b{font-size:14px}.item .spec{font-size:12.5px;color:var(--muted);font-weight:600;margin:4px 0 8px;line-height:1.4}
+.slot{display:grid;place-items:center;border:2.5px dashed var(--ink);border-radius:10px;min-height:90px;background:var(--paper);font-size:12px;font-weight:700;cursor:pointer;overflow:hidden;position:relative}
+.slot img{width:100%;height:140px;object-fit:cover;display:block}
+.status{display:flex;gap:6px;margin-top:8px}
+.status button{flex:1;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 0;font-size:11px;font-weight:800}
+.status button.on{background:var(--c,var(--yellow))}
+.ring{width:240px;height:240px;display:block;margin:0 auto}
+.phase{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:3px 11px;font-weight:800;font-size:12px;margin:3px}
+.callout{border:2.5px solid var(--ink);border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-top:10px}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(59,31,31,.35);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal .panel{width:min(560px,100%);margin:0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:8px 16px;font-weight:700;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.helper{position:fixed;left:16px;bottom:16px;z-index:50;width:min(340px,calc(100vw - 32px));background:#fff;border:2.5px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);font-size:13px;animation:hpop .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes hpop{from{opacity:0;transform:translateY(10px) scale(.96)}}
+.helper .hh{display:flex;align-items:center;gap:8px;padding:8px 10px 6px 12px;font-weight:900;font-size:12px;letter-spacing:.04em}
+.helper .hh .star{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);display:grid;place-items:center;font-size:10px}
+.helper .hh button{margin-left:auto;background:none;border:0;font-weight:900;font-size:14px;padding:0 4px}
+.helper .tip{display:flex;gap:8px;align-items:flex-start;padding:7px 12px;border-top:2px dashed rgba(59,31,31,.2);line-height:1.4}
+.helper .tip .ic{flex:none;width:22px;text-align:center}
+.helper .tip a,.helper .tip .go{background:none;border:0;padding:0;font-weight:800;text-decoration:underline;color:var(--ink);cursor:pointer;font-size:12.5px}
+.helper.mini{width:auto;border-radius:999px}
+.helper.mini .tip{display:none}
+.helper.mini .hh{padding:5px 8px 5px 6px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="themepill" title="Theme"><i></i>Folders</div>
+
+<svg class="spk" aria-hidden="true" style="left:3%;top:40px" width="30" height="30" viewBox="-15 -15 30 30"><path class="tw" fill="#fff" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
+<svg class="spk" aria-hidden="true" style="right:6%;top:90px" width="26" height="26" viewBox="-15 -15 30 30"><path class="tw" style="animation-delay:-1s" fill="#f7a1c4" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
+<svg class="spk" aria-hidden="true" style="left:22%;top:110px" width="20" height="20" viewBox="-15 -15 30 30"><path class="tw" style="animation-delay:-.5s" fill="#ffb627" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
+
+<div class="wrap">
+  <div class="titlebox">
+    <h1 class="ttl">JANET'S MIND MAP</h1>
+    <div class="sub" id="today"></div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <main class="map" id="map"></main>
+</div>
+
+<div class="key"><button type="button" id="dumpBtn">✎ Brain dump</button><button type="button" id="nextBtn">✦ Where next?</button></div>
+
+<div class="drawer" id="drawer" role="dialog" aria-modal="true"><div class="dwrap" id="dwrap"></div></div>
+<div class="modal" id="modal"><div class="panel" id="mpanel"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="filepick" accept="image/*" hidden>
+
+<script>
+/* ============ helpers ============ */
+var $=function(s,r){return (r||document).querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function pad(n){return (n<10?'0':'')+n}
+function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function parse(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function daysBetween(a,b){return Math.round((parse(ymd(b))-parse(ymd(a)))/864e5)}
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function nice(d){return DOW[d.getDay()]+' '+MON[d.getMonth()]+' '+d.getDate()}
+function uid(){return Math.random().toString(36).slice(2,9)}
+var TODAY=new Date(); TODAY.setHours(0,0,0,0);
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},1600)}
+
+/* ============ data (saved in this browser) ============ */
+var KEY='janet-mind-map-v1';
+function L(arr){return arr.map(function(t){return typeof t==='string'?{id:uid(),t:t,done:false}:Object.assign({id:uid(),done:false},t)})}
+function defaults(){return {
+  habits:[
+    {id:'water',name:'Daily water goal',color:'#2f9be8'},{id:'vit',name:'Vitamins',color:'#f2b705'},{id:'stretch',name:'Stretching',color:'#2fbf71'},
+    {id:'shower',name:'Showering',color:'#4aa8e0'},{id:'nospend',name:'No spending money',color:'#e8a020'},{id:'nopick',name:'No picking at skin',color:'#c9a0e8'},
+    {id:'floss',name:'Flossing',color:'#ff8fb3'},{id:'mouth',name:'Mouthwash',color:'#2fc8c8'},{id:'teeth',name:'Brushing teeth twice',color:'#ff8a3d'},
+    {id:'clean',name:'Cleaning something',color:'#7ed957'},{id:'draw',name:'Drawing',color:'#9b7ede'},{id:'zoloft',name:'Zoloft',color:'#ff6b9d'},
+    {id:'bank',name:'Checking bank balance via Money Pals',color:'#2b6cb0'},
+    {id:'strength',name:'Strength training',color:'#ff6b6b',weekly:3},{id:'walk',name:'Walking pad',color:'#2fbf71',weekly:3}
+  ],
+  hlog:{},
+  period:{starts:['2026-10-31'],cycle:28,bleed:4},
+  nails:{last:'2026-10-22',interval:17},
+  calendarUrl:'https://jannyjermcalendar.netlify.app',
+  moneyUrl:'https://janetjohnson527-source.github.io/janet.github.io-habit-tracker/money-pals.html',
+  events:[
+    {id:uid(),date:'2026-11-08',title:'Teeth Marks Recording',when:'noon · Bank St.'},
+    {id:uid(),date:'2026-11-09',title:'Bass Drum of Death',when:'Rumba'},
+    {id:uid(),date:'2026-11-14',title:"Fall Cookout at Alli & Cody's",when:''},
+    {id:uid(),date:'2026-11-18',title:'Flight to Greenville',when:'6:42 PM'},
+    {id:uid(),date:'2026-11-22',title:'Back in Columbus',when:'2:00 PM'}
+  ],
+  lists:{
+    art:[{name:'Initiatives',items:L([
+      {t:'Rebrand Motel Gemini',note:'New pfp (little Lot bunny) done · name after backfill · then update email, website, Redbubble, TeePublic'},
+      {t:'Bat Person',note:'Backfill content/ideas · keep separate from coloring books'},
+      {t:'SpongeBob tarot card series',note:'In progress'},
+      {t:'Fashion doll / wrinkly ladies concept',note:'Needs backfill to establish it'},
+      {t:'Coloring book',note:'Motel Gemini side only · small side income'}])}],
+    tobuy:[{name:'General',items:L(['Measuring cups',{t:'Privacy curtains',note:'Window size TBD'}])},{name:'Kroger',items:L(['Chicken tenders','Honey mustard','Dishwasher cleaning pods'])},{name:'Amazon',items:L([])}],
+    todo:[{name:'To Do',items:L(['Take a new Slack / LinkedIn picture','Fix cowboy boots','Purge closet','Re-organize shoes','Fix kitchen island',{t:'Buy a rug',note:'Only when Wayfair CC is paid down more'}])},{name:'Apartment',items:L([{t:'Privacy curtains',note:'Buy + install'}])}],
+    tattoo:[{name:'Tattoo ideas',items:L([])}],
+    recipes:[{name:'Recipe ideas',items:L([{t:'Elevated work-lunch sandwich',note:'Toasted ciabatta, apricot/pear preserves, prosciutto, brie, arugula, Castelvetrano olives, honey drizzle · toaster + oven only'}])}],
+    hobbies:[{name:'Hobbies to try',items:L([{t:'Sewing',note:'Overlaps fashion / closet only'}])}],
+    topics:[{name:'Topics to research',items:L([])}],
+    movies:[{name:'Movies to watch',items:L([])}]
+  },
+  vision:[
+    {t:'Ride',b:'Pink chopper. Motorcycle permit + endorsement.'},
+    {t:'Seen / shared',b:'More pictures of yourself + friends, on Instagram and everywhere else.'},
+    {t:'Art',b:'Great place with art, regular exposure + followers, maybe paid projects, inspired + consistent branding.'},
+    {t:'Fashion style',b:'Feminine, chic, very you. Breathing room to explore it. See the gap list.'},
+    {t:'Work + money',b:'Best work year yet — bills paid, no constant worry, decent salary. Product role door crept open.'},
+    {t:'Body / movement',b:'Start 3x/week, build to walking 3x + strength 3x + posture daily.'},
+    {t:'Learn',b:'Learn sewing + get into it. Overlaps fashion / closet only.'}
+  ],
+  fashion:[
+    ['Chunky knit sweater — black','Thick, oversized, chunky knit. Not breezy.'],
+    ['Plush oversized sweatshirt — black','Plush, oversized, high-quality / heavy, warm.'],
+    ['Plush oversized sweatshirt — grey','Plush, oversized, high-quality / heavy, warm.'],
+    ['Oversized button-down — white','Thick for winter — flannel / brushed cotton / heavy poplin.'],
+    ['Oversized button-down — black / dark grey','Oversized, thick for winter layering.'],
+    ['Blue oversized sweater','Oversized, blue — the practical blue translation.'],
+    ['Fitted long-sleeve base layers — black + white/grey','Fitted, for layering under sheer / lace / vests. Tentative.'],
+    ['Socks — white + black, crew + mid-calf','Solid only, never ankle. Bombas Small (US 7, 4–7.5). Especially white.'],
+    ['Bralettes — work-only, 2','Wireless, WFH only. Brand research still needed.'],
+    ['Thermal layers','For winter warmth under WFH tops + going-out layers.'],
+    ['Warm sweatpants — black + grey','Actually warm, to wear under thermals. Have 2 black pairs.'],
+    ['Wide-leg trousers — black','Wide-leg, black.'],
+    ['Leather jacket — black, updated','Black, oversized / moto.'],
+    ['Long coat — black, updated','Black, long.'],
+    ['Black pointed heeled boots','Pointed, heeled — not ankle, not cowboy. Needs an image.'],
+    ['Chunky sneakers — black or white','WFH-to-out shoe. Needs an image.'],
+    ['Big black tote','Black + silver detailing (or + white). Bag charm wanted.'],
+    ['Sunglasses — silver + black aviators','Aviators.'],
+    ['Chunky silver bracelets + rings','Hammered, natural looking.'],
+    ['Slip dress — grey / satin','Layering piece with skirt + tights + sweater. Needs a picture reference.']
+  ].map(function(a){return {id:uid(),t:a[0],spec:a[1],status:'need',img:''}})
+}}
+var D;
+try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){D=null}
+if(!D)D=defaults();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
+
+/* ============ computed ============ */
+function hDone(dateStr){return D.hlog[dateStr]||[]}
+function dailyHabits(){return D.habits.filter(function(h){return !h.weekly})}
+function weekStart(d){var x=new Date(d);var wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);return x}// Monday
+function weeklyCount(h,d){var s=weekStart(d),n=0;for(var i=0;i<7;i++){if(hDone(ymd(addDays(s,i))).indexOf(h.id)>-1)n++}return n}
+function todayStats(){var dh=dailyHabits(),done=hDone(ymd(TODAY));var n=dh.filter(function(h){return done.indexOf(h.id)>-1}).length;return {n:n,of:dh.length}}
+function period(){
+  var p=D.period,last=parse(p.starts[p.starts.length-1]);
+  var day=daysBetween(last,TODAY)+1;
+  var next=addDays(last,p.cycle);
+  return {day:day,last:last,next:next,phase:phaseFor(day)}
+}
+function phaseFor(day){var c=D.period.cycle,b=D.period.bleed,ov=Math.round(c/2);day=((day-1)%c+c)%c+1;
+  if(day<=b)return 'mens';if(day<ov-1)return 'foll';if(day<=ov)return 'ovu';return 'lut'}
+var PH={
+  mens:{n:'Menstrual',c:'#ff8fab',tip:'Rest first, low energy is normal. Leave space.',body:'Your body is shedding the lining it built up. That is the bleeding. It can come with cramps, tiredness, and feeling more emotional than usual. This is the rest part — low energy and wanting to skip plans is normal here.'},
+  foll:{n:'Follicular',c:'#ff9f43',tip:'Energy coming back — ease into more, one thing at a time.',body:'After bleeding stops, your body starts building the lining back up. Energy and mood usually lift. You might feel clearer, more social, and more like creating, planning, getting out.'},
+  ovu:{n:'Ovulation',c:'#ffd43b',tip:'Peak energy — good day for the big stuff.',body:'An egg is released around the middle of your cycle. Often the peak-energy point — your most outgoing, confident, or strong. It is the turning point before energy starts to taper.'},
+  lut:{n:'Luteal',c:'#a78bfa',tip:'Energy tapering — keep plans lighter, stock up.',body:'After ovulation your body winds down toward the next period. Energy often tapers; you might feel more irritable, tired, or emotional, and socializing can feel harder. Keep plans lighter and stock up before bleeding starts.'}
+};
+function nails(){var last=parse(D.nails.last),next=addDays(last,D.nails.interval);return {last:last,next:next,days:daysBetween(TODAY,next)}}
+function upcoming(){return D.events.filter(function(e){return parse(e.date)>=TODAY}).sort(function(a,b){return a.date<b.date?-1:1})}
+function listItems(key){var out=[];D.lists[key].forEach(function(s){out=out.concat(s.items)});return out}
+function fashionNeeds(){return D.fashion.filter(function(f){return f.status==='need'})}
+
+/* ============ buckets ============ */
+var BUCKETS=[
+  {k:'habits',name:'Habits',c:'#a8e6c4',d:'#1fb59a'},
+  {k:'period',name:'Period',c:'#d9c8ff',d:'#9b7cf0'},
+  {k:'upcoming',name:'Upcoming',c:'#ffd0a8',d:'#ff8a3d'},
+  {k:'nails',name:'Nail Tracker',c:'#ffc8dc',d:'#f7a1c4'},
+  {k:'art',name:'Art',c:'#ffb8b0',d:'#ef4d3c'},
+  {k:'tobuy',name:'To Buy',c:'#bfe0ff',d:'#2f6bea'},
+  {k:'todo',name:'To Do',c:'#ffe08a',d:'#ffb627'},
+  {k:'endeavors',name:'Endeavors',c:'#f7a1c4',d:'#ef4d3c'},
+  {k:'money',name:'Money Pals',c:'#c8f0e0',d:'#1fb59a',ext:true},
+  {k:'tattoo',name:'Tattoo Ideas',c:'#e4d8ff',d:'#9b7cf0'},
+  {k:'recipes',name:'Recipe Ideas',c:'#ffd8b8',d:'#ff8a3d'},
+  {k:'hobbies',name:'Hobbies to Try',c:'#d8f5b8',d:'#7ed957'},
+  {k:'topics',name:'Topics to Research',c:'#c8e8ff',d:'#2f6bea'},
+  {k:'movies',name:'Movies to Watch',c:'#ffd0e4',d:'#f7a1c4'}
+];
+function bucketOf(k){return BUCKETS.filter(function(b){return b.k===k})[0]}
+
+function summary(k){
+  var s={num:'',unit:'',pct:0,lines:[],next:'',pill:'',tags:[]};
+  if(k==='habits'){var t=todayStats(),wk=D.habits.filter(function(h){return h.weekly});
+    s.num=t.n+'/'+t.of;s.unit='today';s.pct=t.of?t.n/t.of*100:0;
+    var done=hDone(ymd(TODAY));s.lines=dailyHabits().slice(0,2).map(function(h){return {t:h.name,done:done.indexOf(h.id)>-1}});
+    wk.forEach(function(h){s.lines.push({t:h.name+' — '+weeklyCount(h,TODAY)+' of '+h.weekly+' this week',done:weeklyCount(h,TODAY)>=h.weekly})});
+    s.lines=s.lines.slice(0,3);
+    s.next=t.n===t.of?'all done today ✓':'check off today';s.pill=t.n>=Math.ceil(t.of*.7)?'Win':'Today';
+    s.tags=t.n>=Math.ceil(t.of*.7)?['wins','in-progress']:(t.n?['in-progress']:['untouched'])}
+  else if(k==='period'){var p=period();s.num='Day '+p.day;s.unit=PH[p.phase].n;s.pct=Math.min(100,p.day/D.period.cycle*100);
+    s.lines=[{t:'Next est. '+nice(p.next)},{t:PH[p.phase].tip}].slice(0,2);s.next={mens:'lighter week, by design',foll:'ease into more',ovu:'big-energy day',lut:'keep plans light'}[p.phase];s.pill='Cycle';s.tags=['in-progress']}
+  else if(k==='upcoming'){var u=upcoming();var d0=u.length?daysBetween(TODAY,parse(u[0].date)):null;
+    s.num=u.length?String(d0):'—';s.unit=u.length?(d0===1?'day to next':'days to next'):'nothing scheduled';s.pct=u.length?Math.max(5,100-d0*6):0;
+    s.lines=u.slice(0,3).map(function(e){return {t:nice(parse(e.date))+' — '+e.title}});s.next=u.length?u[0].title:'open shared calendar';
+    s.pill=u.length&&d0<=7?'Due soon':'Calendar';s.tags=u.length&&d0<=7?['due-soon']:[]}
+  else if(k==='nails'){var n=nails();s.num=MON[n.next.getMonth()]+' '+n.next.getDate();s.unit='next change';
+    s.pct=Math.min(100,Math.max(0,(D.nails.interval-n.days)/D.nails.interval*100));
+    s.lines=[{t:n.days<0?Math.abs(n.days)+' days overdue':n.days===0?'Due today':'In '+n.days+' days'},{t:'Every ~'+D.nails.interval+' days'},{t:'Last done '+nice(n.last)}];
+    s.next=n.days<=7?'plan it this week':'nothing yet';s.pill=n.days<=7?'Due soon':'Later';s.tags=n.days<=7?['due-soon']:[]}
+  else if(k==='endeavors'){var need=fashionNeeds().length;s.num=String(D.vision.length);s.unit='vision goals';s.pct=Math.round((D.fashion.length-need)/D.fashion.length*100);
+    s.lines=[{t:'Pink chopper + permit'},{t:'Learn sewing'},{t:need+' fashion needs → To Buy'}];s.next='sewing is the first step';s.pill='Vision';s.tags=['in-progress']}
+  else if(k==='money'){s.num='Open';s.unit='separate app';s.pct=100;s.lines=[{t:'Lives on its own page'},{t:'Tile + link only'}];s.next='open Money Pals ↗';s.pill='Link';s.tags=[]}
+  else{var it=listItems(k);if(k==='tobuy')it=it.concat(fashionNeeds());var dn=it.filter(function(x){return x.done}).length;
+    s.num=String(it.length-dn);s.unit=k==='tobuy'?'to get':'open';s.pct=it.length?dn/it.length*100:0;
+    s.lines=it.filter(function(x){return !x.done}).slice(0,3).map(function(x){return {t:x.t}});
+    if(!s.lines.length)s.lines=[{t:it.length?'All done ✓':'Nothing here yet — add one'}];
+    var nx={art:'backfill one piece',tobuy:'rug waits on Wayfair',todo:'pick one small one',tattoo:'drop one idea',recipes:'try it once this week',hobbies:'sewing first',topics:'add a topic',movies:'add a movie'};
+    s.next=nx[k]||'';s.pill=!it.length||!dn?'Untouched':(dn===it.length?'Win':'In progress');
+    s.tags=!dn?['untouched']:(dn===it.length?['wins']:['in-progress'])}
+  return s;
+}
+
+/* ============ home ============ */
+var FILTERS=[['all','All'],['due-soon','Due soon'],['in-progress','In progress'],['untouched','Untouched'],['wins','Wins']],filt='all';
+function renderHome(){
+  $('#today').textContent=nice(TODAY)+', '+TODAY.getFullYear()+'  ·  every little thing in its folder ♡';
+  $('#chips').innerHTML=FILTERS.map(function(f){return '<button class="chip'+(f[0]===filt?' on':'')+'" data-f="'+f[0]+'">'+f[1]+'</button>'}).join('');
+  $('#map').innerHTML=BUCKETS.map(function(b,i){var s=summary(b.k);var hide=filt!=='all'&&s.tags.indexOf(filt)<0;
+    return '<button class="folder'+(hide?' hide':'')+(b.ext?' ext':'')+'" data-k="'+b.k+'" style="--c:'+b.c+';--d:'+b.d+';animation-delay:'+(i*35)+'ms"><span class="tab"></span><span class="body">'+
+    '<span class="head"><span class="name">'+esc(b.name)+'</span><span class="pill">'+esc(s.pill)+'</span></span>'+
+    '<span class="metric"><span class="num">'+esc(s.num)+'</span><span class="unit">'+esc(s.unit)+'</span></span>'+
+    '<span class="bar"><i style="width:'+Math.round(s.pct)+'%"></i></span>'+
+    '<ul>'+s.lines.map(function(l){return '<li><span class="bx'+(l.done?' done':'')+'"></span><span>'+esc(l.t)+'</span></li>'}).join('')+'</ul>'+
+    '<span class="next"><span>Next: '+esc(s.next)+'</span></span></span></button>'}).join('');
+}
+$('#chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;filt=b.dataset.f;renderHome()});
+$('#map').addEventListener('click',function(e){var b=e.target.closest('.folder');if(!b)return;
+  if(b.dataset.k==='money'){window.open(D.moneyUrl,'_blank','noopener');return}openDrawer(b.dataset.k)});
+
+/* ============ drawers ============ */
+var cur=null,sub='today';
+function openDrawer(k,tab){cur=k;sub=tab||(k==='habits'?'today':'');renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
+function closeDrawer(){cur=null;if($('#helper'))$('#helper').remove();$('#drawer').classList.remove('open');document.body.style.overflow='';renderHome()}
+window.addEventListener('popstate',function(){if(cur)closeDrawer()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if(cur)history.back()}});
+function head(b,subtxt){return '<button class="back" data-act="back">← Back to map</button><div class="dtitle" style="--c:'+b.d+'"><h1>'+esc(b.name)+'</h1></div><p class="dsub">'+subtxt+'</p>'}
+function renderDrawer(){var b=bucketOf(cur),h='';var el=$('#dwrap');el.style.setProperty('--c',b.d);
+  if(cur==='habits')h=drawHabits(b);else if(cur==='period')h=drawPeriod(b);else if(cur==='upcoming')h=drawUpcoming(b);
+  else if(cur==='nails')h=drawNails(b);else if(cur==='endeavors')h=drawEndeavors(b);else h=drawList(b);
+  el.innerHTML=h;renderHelper();}
+
+/* --- generic list --- */
+var LISTSUB={art:'Each initiative is its own header — check one off when it’s done.',tobuy:'Store split is a guess — move things as you like. Fashion "Need" items from Endeavors show up here automatically.',
+  todo:'Small stuff, one at a time.',tattoo:'Drop an idea, add an image, move on.',recipes:'Things to cook.',hobbies:'Sewing first — overlaps fashion / closet only.',topics:'Things to look into.',movies:'Things to watch.'};
+function rowHTML(key,si,it,withImg){return '<div class="row'+(it.done?' done':'')+'"><button class="ck'+(it.done?' on':'')+'" data-act="tick" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="done">'+(it.done?'✓':'')+'</button>'+
+  '<div class="t"><span>'+esc(it.t)+'</span>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+(withImg?(it.img?'<img src="'+it.img+'" alt="" style="margin-top:6px;max-width:220px;border:2px solid var(--ink);border-radius:10px;display:block">':'<button class="btn white" style="margin-top:6px" data-act="img" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'">+ image</button>'):'')+'</div>'+
+  '<button class="x" data-act="del" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="remove">✕</button></div>'}
+function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
+  var h=head(b,LISTSUB[key]||'')+'<div class="cols">';
+  secs.forEach(function(s,si){h+='<div class="panel"><h2>'+esc(s.name)+'</h2>'+(s.items.length?s.items.map(function(it){return rowHTML(key,si,it,img)}).join(''):'<p class="note">Nothing yet.</p>')+
+    '<form class="add" data-act="add" data-key="'+key+'" data-si="'+si+'"><input placeholder="Add to '+esc(s.name)+'…" aria-label="new item"><button class="btn">Add</button></form></div>'});
+  if(key==='tobuy'){var fn=fashionNeeds();h+='<div class="panel"><h2>From the fashion gap list</h2>'+fn.map(function(f){return '<div class="row"><span class="ck" style="border-style:dashed"></span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.spec)+'</small></div></div>'}).join('')+
+    '<p class="note">Mark items "Have" in Endeavors → Fashion and they drop off here.</p><button class="btn pink" data-act="go" data-k="endeavors">Open fashion list →</button></div>'}
+  return h+'</div>'}
+
+/* --- habits --- */
+function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
+  var h=head(b,'Tap a circle to log it. Your log is saved in this browser.')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
+  var done=hDone(ymd(TODAY)),t=todayStats();
+  if(sub==='today'){h+='<div class="cols"><div class="panel"><h2>Today — '+nice(TODAY)+'</h2><div class="bigrow"><span class="big">'+t.n+'</span><span>of '+t.of+' daily done</span></div><div class="pbar"><i style="width:'+(t.of?t.n/t.of*100:0)+'%"></i></div>'+
+    dailyHabits().map(function(x){var on=done.indexOf(x.id)>-1;return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span></div></div>'}).join('')+'</div>'+
+    '<div class="panel"><h2>This week — 3x habits</h2>'+D.habits.filter(function(x){return x.weekly}).map(function(x){var c=weeklyCount(x,TODAY),on=done.indexOf(x.id)>-1;
+      return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span><small>'+c+' of '+x.weekly+' this week · '+Math.min(100,Math.round(c/x.weekly*100))+'%</small></div></div>'}).join('')+
+    '<p class="note">Weekly habits are judged against their 3x target, not 7 days.</p>'+
+    '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div>'}
+  else if(sub==='week'){var s=weekStart(TODAY);h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="cal">';
+    for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+ds.length+' of '+D.habits.length+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+x.color+'"></i>'}).join('')+'</div></div>'}
+    h+='</div><p class="note">Each dot is a habit you logged that day.</p></div>'}
+  else if(sub==='month'){h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d));
+      return {cls:d>TODAY?' dim':'',style:ds.length?'background:color-mix(in srgb,#1fb59a '+Math.round(ds.length/D.habits.length*90)+'%,#fff)':'',html:'<small>'+(ds.length?ds.length+' done':'')+'</small>'}})+'<p class="note">Darker green = more habits done that day.</p></div>'}
+  else{var vals=[];for(var m=0;m<12;m++){var tot=0,days=0,dim=new Date(TODAY.getFullYear(),m+1,0).getDate();for(var dd=1;dd<=dim;dd++){var dt=new Date(TODAY.getFullYear(),m,dd);if(dt>TODAY)break;days++;tot+=dailyHabits().filter(function(x){return hDone(ymd(dt)).indexOf(x.id)>-1}).length}
+      vals.push(days?Math.round(tot/(days*dailyHabits().length)*100):0)}
+    h+='<div class="panel"><h2>'+TODAY.getFullYear()+' — daily habits completed by month</h2><div class="bars">'+vals.map(function(v,i){return '<div><i style="height:'+v+'%"></i>'+MON[i]+'<br>'+v+'%</div>'}).join('')+'</div><p class="note">Fills in as you log. Months before you started tracking here show 0%.</p></div>'}
+  return h}
+function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate();
+  var h='<div class="cal">'+DOW.map(function(d){return '<div class="hd">'+d+'</div>'}).join('');
+  for(var i=0;i<first.getDay();i++)h+='<div class="d empty"></div>';
+  for(var d=1;d<=n;d++){var dt=new Date(y,m,d),c=cell(dt);h+='<div class="d'+(ymd(dt)===ymd(TODAY)?' today':'')+(c.cls||'')+'" style="'+(c.style||'')+'">'+d+(c.html||'')+'</div>'}
+  return h+'</div>'}
+
+/* --- period --- */
+function ringSVG(day){var c=D.period.cycle,cx=120,cy=120,R=100,r=64,segs=[['mens',1,D.period.bleed],['foll',D.period.bleed+1,Math.round(c/2)-2],['ovu',Math.round(c/2)-1,Math.round(c/2)],['lut',Math.round(c/2)+1,c]];
+  function pt(a,rad){return [cx+rad*Math.sin(a),cy-rad*Math.cos(a)]}
+  var h='<svg class="ring" viewBox="0 0 240 240">';segs.forEach(function(s){var a0=(s[1]-1)/c*2*Math.PI,a1=s[2]/c*2*Math.PI,lg=a1-a0>Math.PI?1:0,p0=pt(a0,R),p1=pt(a1,R),q1=pt(a1,r),q0=pt(a0,r);
+    h+='<path d="M'+p0+' A'+R+' '+R+' 0 '+lg+' 1 '+p1+' L'+q1+' A'+r+' '+r+' 0 '+lg+' 0 '+q0+'Z" fill="'+PH[s[0]].c+'" stroke="#3b1f1f" stroke-width="2.5"/>'});
+  var a=((day-.5)%c)/c*2*Math.PI,m=pt(a,(R+r)/2);h+='<circle cx="'+m[0]+'" cy="'+m[1]+'" r="11" fill="#3b1f1f" stroke="#fff" stroke-width="3"/><text x="120" y="122" text-anchor="middle" font-family="Poppins" font-weight="900" font-size="28" fill="#3b1f1f">Day '+day+'</text><text x="120" y="144" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="13" fill="#3b1f1f">'+PH[phaseFor(day)].n+'</text></svg>';return h}
+function drawPeriod(b){var p=period(),ph=PH[p.phase];
+  var h=head(b,'Estimates use a '+D.period.cycle+'-day cycle and '+D.period.bleed+' bleed days. Tap "Period started today" when it starts and everything recalculates.')+
+  '<div class="cols"><div class="panel">'+ringSVG(p.day)+'<p style="font-weight:900;font-size:18px;margin:10px 0 2px">'+ph.n+' — Day '+p.day+'</p><p style="margin:0;font-weight:700">Next period est.: '+nice(p.next)+' <span class="note">(predicted)</span></p>'+
+  '<div class="callout" style="background:'+ph.c+'"><b>What’s normal right now:</b> '+ph.tip+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn pink" data-act="pstart">Period started today</button><button class="btn white" data-act="pundo">Undo last start</button></div></div>'+
+  '<div class="panel"><h2>Tap a phase to see what it means</h2>'+['mens','foll','ovu','lut'].map(function(k){return '<button class="phase" style="background:'+PH[k].c+'" data-act="phase" data-ph="'+k+'">'+PH[k].n+'</button>'}).join('')+'<div id="phinfo" class="callout" style="background:'+ph.c+'"><b>'+ph.n+'</b><br>'+ph.body+'</div>'+
+  '<h2 style="margin-top:16px">Next 7 days</h2>'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(TODAY,i),pk=phaseFor(daysBetween(p.last,d)+1),ev=D.events.filter(function(e){return e.date===ymd(d)});if(ymd(d)===ymd(nails().next))ev=ev.concat([{title:'Nails due'}]);
+    return '<div class="row"><span class="phase" style="background:'+PH[pk].c+';margin:0;min-width:96px;text-align:center">'+PH[pk].n+'</span><div class="t"><span>'+nice(d)+'</span>'+(ev.length?'<small>'+ev.map(function(e){return esc(e.title)}).join(' · ')+'</small>':'')+'</div></div>'}).join('')+'</div></div>'+
+  '<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var day=daysBetween(p.last,d)+1,pk=phaseFor(day),ev=D.events.filter(function(e){return e.date===ymd(d)});
+      return {style:'background:'+PH[pk].c,html:'<small>Day '+(((day-1)%D.period.cycle+D.period.cycle)%D.period.cycle+1)+(ymd(d)===ymd(p.next)?' · next est.':'')+'</small>'+ev.map(function(e){return '<span class="ev">'+esc(e.title)+'</span>'}).join('')}})+'</div>';
+  return h}
+
+/* --- upcoming --- */
+function drawUpcoming(b){var u=upcoming();
+  var h=head(b,'Your shared calendar with Jeremy stays on its own site — this is a quick look plus a link.')+
+  '<div class="cols"><div class="panel"><h2>Coming up</h2>'+(u.length?u.map(function(e){var d=parse(e.date),n=daysBetween(TODAY,d);return '<div class="row"><span class="phase" style="background:var(--c);margin:0;min-width:70px;text-align:center">'+(n===0?'Today':n+'d')+'</span><div class="t"><span>'+esc(e.title)+'</span><small>'+nice(d)+(e.when?' · '+esc(e.when):'')+'</small></div><button class="x" data-act="delev" data-id="'+e.id+'">✕</button></div>'}).join(''):'<p class="note">Nothing coming up.</p>')+
+  '<form class="add" data-act="addev"><input type="date" style="flex:none;width:150px" aria-label="date"><input placeholder="What + where" aria-label="event"><button class="btn">Add</button></form></div>'+
+  '<div class="panel"><h2>Shared calendar</h2><p style="font-size:14px">The full calendar lives at its own site.</p><a class="btn teal" style="display:inline-block;text-decoration:none" href="'+esc(D.calendarUrl)+'" target="_blank" rel="noopener">Open shared calendar ↗</a></div></div>';
+  return h}
+
+/* --- nails --- */
+function drawNails(b){var n=nails();
+  var h=head(b,'Change roughly every '+D.nails.interval+' days. Tap "Did them today" and the next date updates.')+
+  '<div class="cols"><div class="panel"><h2>Next change</h2><div class="bigrow"><span class="big">'+MON[n.next.getMonth()]+' '+n.next.getDate()+'</span><span>'+(n.days<0?Math.abs(n.days)+' days overdue':n.days===0?'today!':'in '+n.days+' days')+'</span></div>'+
+  '<div class="pbar"><i style="width:'+Math.min(100,Math.max(0,(D.nails.interval-n.days)/D.nails.interval*100))+'%"></i></div><p style="font-weight:700;margin:0 0 12px">Last done: '+nice(n.last)+'</p>'+
+  '<button class="btn pink" data-act="nailsdone">Did them today</button></div>'+
+  '<div class="panel"><h2>Settings</h2><form class="add" data-act="nailset"><label style="font-size:13px;font-weight:700;align-self:center">Every</label><input type="number" min="5" max="60" value="'+D.nails.interval+'" style="flex:none;width:90px"><label style="font-size:13px;font-weight:700;align-self:center">days</label><button class="btn">Save</button></form>'+
+  '<form class="add" data-act="nailslast"><label style="font-size:13px;font-weight:700;align-self:center">Last done</label><input type="date" value="'+D.nails.last+'"><button class="btn">Save</button></form></div></div>';
+  return h}
+
+/* --- endeavors --- */
+function drawEndeavors(b){
+  var h=head(b,'Vision Board 2027 — thoughts to fold in gradually, not a rush list. Every fashion item carries a spec + an image slot. Items marked Need show up in To Buy.')+
+  '<div class="panel"><h2>Vision Board 2027</h2><div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">'+D.vision.map(function(v){return '<div class="vcard"><b>'+esc(v.t)+'</b>'+esc(v.b)+'</div>'}).join('')+'</div></div>'+
+  '<div class="panel"><h2>Fashion gap list — winter / WFH first</h2><div class="cols" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px">'+
+  D.fashion.map(function(f){return '<div class="item"><b>'+esc(f.t)+'</b><div class="spec">'+esc(f.spec)+'</div><div class="slot" data-act="fimg" data-id="'+f.id+'">'+(f.img?'<img src="'+f.img+'" alt="">':'+ add image reference')+'</div>'+
+    '<div class="status">'+[['need','Need'],['close','Close'],['have','Have']].map(function(s){return '<button class="'+(f.status===s[0]?'on':'')+'" data-act="fstat" data-id="'+f.id+'" data-s="'+s[0]+'">'+s[1]+'</button>'}).join('')+'</div></div>'}).join('')+
+  '</div><form class="add" data-act="addf" style="margin-top:16px"><input placeholder="Item (e.g. Satin cami — grey)" aria-label="item"><input placeholder="Spec: fit, fabric, color, details" aria-label="spec"><button class="btn">Add</button></form></div>';
+  return h}
+
+
+/* ============ helper ============ */
+var HKEY='janet-mind-map-helper-mini';
+function hasDone(id,d){return hDone(ymd(d||TODAY)).indexOf(id)>-1}
+function helperTips(ctx){
+  var T=[],n=nails(),u=upcoming(),p=period(),ph=PH[p.phase],t=todayStats();
+  var low=p.phase==='mens'||p.phase==='lut';
+  var moved=hasDone('strength')||hasDone('walk')||hasDone('stretch');
+  var fn=fashionNeeds().length;
+  function add(where,prio,ic,txt,go,url){if(where.indexOf(ctx)>-1||where.indexOf('*')>-1)T.push({prio:prio,ic:ic,txt:txt,go:go,url:url})}
+  // same-day collisions
+  var nd=ymd(n.next),evs=D.events.filter(function(e){return e.date===nd});
+  if(evs.length&&n.days>=0&&n.days<=10)add(['home','nails','upcoming','period'],9,'📅','Nails + '+evs[0].title+' both land on '+nice(n.next)+' — book nails early, keep that evening light.',ctx==='nails'?'upcoming':'nails');
+  if(n.days<=3)add(['home','nails','todo'],8,'💅',n.days<0?'Nails are '+(-n.days)+' days overdue.':n.days===0?'Nails are due today.':'Nails due in '+n.days+' days — '+nice(n.next)+'.',ctx==='nails'?null:'nails');
+  if(u.length){var d0=daysBetween(TODAY,parse(u[0].date));if(d0<=3)add(['home','todo','period','upcoming'],7,'🎟️',u[0].title+' is '+(d0===0?'today':d0===1?'tomorrow':'in '+d0+' days')+'.',ctx==='upcoming'?null:'upcoming')}
+  // cycle
+  var dnext=daysBetween(TODAY,p.next);
+  if(dnext>=0&&dnext<=4)add(['home','period','tobuy'],7,'🩸','Period est. in '+dnext+' days — stock up on supplies + comfort food now.',ctx==='tobuy'?null:'tobuy');
+  add(['home','period'],4,'🌙',ph.n+' phase — '+ph.tip,ctx==='period'?null:'period');
+  if(low)add(['todo','art','endeavors'],6,'🌙',ph.n+' phase, energy runs lower — pick one small thing, skip the big ones.','period');
+  else add(['todo','art','endeavors'],5,'⚡',ph.n+' phase, energy is up — good window for a bigger one (purge closet, backfill art).','period');
+  // movement -> art + work
+  if(moved)add(['art','habits','home'],5,'🏃','You moved today — that energy carries into art + work. Good time for a drawing session.',ctx==='art'?null:'art');
+  else add(['art','habits'],4,'🏃','A short walk or stretch first tends to unlock art + work energy.',ctx==='habits'?null:'habits');
+  // drawing habit <-> art
+  if(!hasDone('draw'))add(['art'],6,'✏️','Drawing is a daily habit too — tick it once you sit down.','habits');
+  if(ctx==='habits'&&!hasDone('draw'))add(['habits'],3,'✏️','Drawing links to Art — your rebrand needs backfill pieces.','art');
+  // bank habit <-> money pals
+  if(!hasDone('bank'))add(['habits','home'],4,'💸','Bank-balance check not done — it’s one click.',null,D.moneyUrl);
+  // habits left
+  if(t.n<t.of)add(['home'],3,'✅',(t.of-t.n)+' daily habits left today.','habits');
+  // art backfill -> rebrand + coloring book
+  add(['art'],7,'🎨','Backfilling pieces feeds two things at once: the Motel Gemini rebrand and the coloring book. Name change waits until after.');
+  add(['art'],2,'🦇','Keep Bat Person out of the coloring books.');
+  // fashion need -> to buy
+  if(fn)add(['endeavors'],6,'🛍️',fn+' Need items are already in To Buy — no re-typing.','tobuy');
+  if(fn)add(['tobuy'],5,'👗',fn+' items come from your fashion gap list. Mark them Have there and they drop off.','endeavors');
+  // sewing -> fashion only
+  add(['hobbies','endeavors'],4,'🧵','Sewing ties to fashion + your closet only — not art.',ctx==='endeavors'?null:'endeavors');
+  // overlaps between lists
+  var boots=listItems('todo').filter(function(x){return /cowboy/i.test(x.t)&&!x.done}).length;
+  if(boots)add(['todo','endeavors'],4,'🤠','Fixing cowboy boots counts toward the closet — they’re a Have once fixed.',ctx==='todo'?'endeavors':'todo');
+  var curt=listItems('tobuy').filter(function(x){return /curtain/i.test(x.t)&&!x.done}).length;
+  if(curt)add(['tobuy','todo'],3,'🪟','Privacy curtains: buy (To Buy) → install (To Do). Measure the window first.',ctx==='tobuy'?'todo':'tobuy');
+  add(['tobuy'],2,'🧾','Rug waits until the Wayfair card is paid down more.');
+  if(ctx==='tattoo')add(['tattoo'],3,'🖋️','Drop it, add one image, move on — no need to decide yet.');
+  if(ctx==='recipes')add(['recipes'],3,'🥪','The work-lunch sandwich is toaster + oven only — easy desk lunch this week.');
+  return T.sort(function(a,b){return b.prio-a.prio});
+}
+function tipHTML(x){var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a>':(x.go?' <button class="go" data-hgo="'+x.go+'">open →</button>':'');
+  return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+link+'</span></div>'}
+function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
+  var tips=helperTips(cur).slice(0,2);if(!tips.length)return;
+  var mini=false;try{mini=localStorage.getItem(HKEY)==='1'}catch(e){}
+  var el=document.createElement('aside');el.id='helper';el.className='helper'+(mini?' mini':'');el.setAttribute('aria-label','Helper');
+  el.innerHTML='<div class="hh"><span class="star">✦</span>'+(mini?'helper · '+tips.length:'HELPER')+'<button type="button" data-hmin aria-label="'+(mini?'expand':'minimize')+'">'+(mini?'+':'–')+'</button></div>'+tips.map(tipHTML).join('');
+  $('#drawer').appendChild(el);
+  el.addEventListener('click',function(e){var m=e.target.closest('[data-hmin]');if(m){try{localStorage.setItem(HKEY,mini?'0':'1')}catch(_){}renderHelper();return}
+    var g=e.target.closest('[data-hgo]');if(g){cur=g.dataset.hgo;sub=cur==='habits'?'today':'';renderDrawer();$('#drawer').scrollTop=0}});
+}
+/* ============ drawer events ============ */
+function findItem(key,si,id){return D.lists[key][si].items.filter(function(x){return x.id===id})[0]}
+var imgTarget=null;
+$('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-act]');if(!t||t.tagName==='FORM')return;var a=t.dataset.act;
+  if(a==='back'){history.back();return}
+  if(a==='sub'){sub=t.dataset.sub;renderDrawer();return}
+  if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
+  if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;save();renderDrawer();if(it.done)toast('Nice ✓');return}
+  if(a==='del'){var s=D.lists[t.dataset.key][+t.dataset.si];s.items=s.items.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
+  if(a==='img'){imgTarget={key:t.dataset.key,si:+t.dataset.si,id:t.dataset.id};$('#filepick').click();return}
+  if(a==='fimg'){imgTarget={f:t.dataset.id};$('#filepick').click();return}
+  if(a==='fstat'){D.fashion.forEach(function(f){if(f.id===t.dataset.id)f.status=t.dataset.s});save();renderDrawer();return}
+  if(a==='habit'){var k=ymd(TODAY),arr=D.hlog[k]||[],i=arr.indexOf(t.dataset.id);if(i>-1)arr.splice(i,1);else arr.push(t.dataset.id);D.hlog[k]=arr;save();renderDrawer();if(i<0)toast('Logged ✓');return}
+  if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);save();renderDrawer();toast('Cycle reset to Day 1');return}
+  if(a==='pundo'){if(D.period.starts.length>1){D.period.starts.pop();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
+  if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=ph.c;el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
+  if(a==='nailsdone'){D.nails.last=ymd(TODAY);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
+  if(a==='delev'){D.events=D.events.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
+});
+$('#dwrap').addEventListener('submit',function(e){e.preventDefault();var f=e.target,a=f.dataset.act,ins=f.querySelectorAll('input');
+  if(a==='add'){var v=ins[0].value.trim();if(!v)return;D.lists[f.dataset.key][+f.dataset.si].items.push({id:uid(),t:v,done:false})}
+  else if(a==='addhabit'){var v2=ins[0].value.trim();if(!v2)return;D.habits.splice(dailyHabits().length,0,{id:uid(),name:v2,color:['#2f9be8','#ff6b9d','#9b7ede','#2fbf71','#ff8a3d'][D.habits.length%5]})}
+  else if(a==='addev'){if(!ins[0].value||!ins[1].value.trim())return toast('Add a date and a name');D.events.push({id:uid(),date:ins[0].value,title:ins[1].value.trim(),when:''})}
+  else if(a==='nailset'){var n=parseInt(ins[0].value,10);if(n>0)D.nails.interval=n}
+  else if(a==='nailslast'){if(ins[0].value)D.nails.last=ins[0].value}
+  else if(a==='addf'){var v3=ins[0].value.trim();if(!v3)return;D.fashion.push({id:uid(),t:v3,spec:ins[1].value.trim()||'Spec to add',status:'need',img:''})}
+  save();renderDrawer();toast('Saved');
+});
+$('#filepick').addEventListener('change',function(){var file=this.files[0];this.value='';if(!file||!imgTarget)return;var rd=new FileReader();
+  rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,480/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    var url=c.toDataURL('image/jpeg',.78);if(imgTarget.f){D.fashion.forEach(function(f){if(f.id===imgTarget.f)f.img=url})}else{findItem(imgTarget.key,imgTarget.si,imgTarget.id).img=url}save();renderDrawer();toast('Image added')};im.src=rd.result};rd.readAsDataURL(file)});
+
+/* ============ brain dump + where next ============ */
+function openModal(h){$('#mpanel').innerHTML=h;$('#modal').classList.add('open');var i=$('#mpanel textarea,#mpanel input');if(i)i.focus()}
+function closeModal(){$('#modal').classList.remove('open')}
+$('#modal').addEventListener('click',function(e){if(e.target.id==='modal'||e.target.dataset.act==='close')closeModal()});
+var DUMPABLE=['todo','tobuy','art','tattoo','recipes','hobbies','topics','movies'];
+$('#dumpBtn').addEventListener('click',function(){openModal('<h2>Brain dump</h2><p class="note" style="margin-top:0">One thought per line. Pick where it goes — you can move it later.</p><form id="dumpf"><textarea class="field" placeholder="buy more socks&#10;research bralettes"></textarea><div class="add"><select class="field">'+
+  DUMPABLE.map(function(k){return '<option value="'+k+'">'+bucketOf(k).name+'</option>'}).join('')+'</select><button class="btn">Drop it in</button><button type="button" class="btn white" data-act="close">Cancel</button></div></form>');
+  $('#dumpf').addEventListener('submit',function(e){e.preventDefault();var lines=$('#dumpf textarea').value.split('\n').map(function(s){return s.trim()}).filter(Boolean),k=$('#dumpf select').value;if(!lines.length)return;
+    lines.forEach(function(l){D.lists[k][0].items.push({id:uid(),t:l,done:false})});save();renderHome();closeModal();toast(lines.length+' added to '+bucketOf(k).name)})});
+$('#nextBtn').addEventListener('click',function(){var tips=helperTips('home');
+  openModal('<h2>Where next?</h2><p class="note" style="margin-top:0">Most important first.</p>'+tips.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':'')+'</div>'}).join('')+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
+  $('#mpanel').querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})})});
+
+renderHome();
+</script>
+</body>
+</html>
