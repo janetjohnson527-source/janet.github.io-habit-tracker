@@ -472,6 +472,29 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 </style>
 </head>
 <body>
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:#fbf6ea;display:flex;align-items:center;justify-content:center;padding:20px">
+<div style="background:#fff;border:2.5px solid #3b1f1f;border-radius:16px;box-shadow:5px 5px 0 #3b1f1f;padding:28px;max-width:340px;width:100%;text-align:center;font-family:Poppins,system-ui,sans-serif;color:#3b1f1f">
+<h1 style="font-size:22px;margin:0 0 8px">Janet's Mind Map</h1>
+<p style="font-size:13px;margin:0 0 16px">Enter the password to open this page.</p>
+<input id="gatepw" type="password" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid #3b1f1f;border-radius:10px;font:inherit" placeholder="Password">
+<button id="gatebtn" type="button" style="margin-top:12px;width:100%;padding:10px;border:2px solid #3b1f1f;border-radius:999px;background:#ffb627;font-weight:800;cursor:pointer">Open</button>
+<p id="gateerr" style="display:none;color:#ef4d3c;font-size:13px;margin:12px 0 0">That password didn't match — try again.</p>
+<p style="font-size:11px;color:#7a5a52;margin:14px 0 0">Casual privacy only — this gate does not make the page truly private.</p>
+</div></div>
+<script>
+(function(){
+  try{if(sessionStorage.getItem('mindmap-unlocked')==='1'){document.getElementById('gate').style.display='none';return;}}catch(e){}
+  function unlock(){
+    var v=document.getElementById('gatepw').value;
+    if(v==='Laceydarth1'){try{sessionStorage.setItem('mindmap-unlocked','1')}catch(e){}document.getElementById('gate').style.display='none';}
+    else{document.getElementById('gateerr').style.display='block';document.getElementById('gatepw').select();}
+  }
+  document.getElementById('gatebtn').addEventListener('click',unlock);
+  document.getElementById('gatepw').addEventListener('keydown',function(e){if(e.key==='Enter')unlock();});
+  document.getElementById('gatepw').focus();
+})();
+</script>
+
 <button type="button" class="themepill" id="tpill" aria-haspopup="true" aria-label="Change theme"><i></i><span id="tname">Folders</span></button><div class="tmenu" id="tmenu" role="menu"></div>
 <div id="deco" aria-hidden="true"></div>
 
