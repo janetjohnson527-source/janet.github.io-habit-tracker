@@ -544,6 +544,7 @@ function defaults(){return {
     {id:'floss',name:'Flossing',color:'#ff8fb3'},{id:'mouth',name:'Mouthwash',color:'#2fc8c8'},{id:'teeth',name:'Brushing teeth twice',color:'#ff8a3d'},
     {id:'clean',name:'Cleaning something',color:'#7ed957'},{id:'draw',name:'Drawing',color:'#9b7ede'},{id:'zoloft',name:'Zoloft',color:'#ff6b9d'},
     {id:'bank',name:'Checking bank balance via Money Pals',color:'#2b6cb0'},
+    {id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'},
     {id:'strength',name:'Strength training',color:'#ff6b6b',weekly:3},{id:'walk',name:'Walking pad',color:'#2fbf71',weekly:3}
   ],
   hlog:{},
@@ -608,6 +609,7 @@ function defaults(){return {
 var D;
 try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){D=null}
 if(!D)D=defaults();
+if(D.habits && !D.habits.some(function(h){return h.id==='lymph'})){D.habits.splice(13,0,{id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
 
 /* ============ computed ============ */
