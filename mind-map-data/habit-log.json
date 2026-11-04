@@ -1,0 +1,11 @@
+{
+  "_how_to_edit": "Mark a habit done or undone for a date. Key = date YYYY-MM-DD. Inside: habit id (or exact habit name) set to true (done) or false (not done). Leave out habits you are not changing. See MUSE-HOW-TO.md.",
+  "log": {
+    "2026-11-03": {
+      "bank": true,
+      "collagen": true,
+      "clean": true,
+      "nopick": true
+    }
+  }
+}
