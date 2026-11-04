@@ -992,9 +992,9 @@ function drawOneHabit(x){var FM=['January','February','March','April','May','Jun
       '<p class="note">'+(wk?'Weekly habits are judged against their 3x target, not 7 days.':'% of the 7 days this week.')+'</p></div>'}
   else if(sub==='month'){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y,m+1,0).getDate(),n2=0;for(var dd=1;dd<=dim;dd++)if(hasOn(x.id,new Date(y,m,dd)))n2++;
     var den2=wk?weeksTarget(x,dim):dim,p2=Math.min(100,Math.round(n2/den2*100));
-    h+='<div class="panel"><h2>'+esc(x.name)+': '+n2+(n2===1?' day':' days')+' in '+FM[m]+'</h2><div class="bigrow"><span class="big">'+p2+'%</span><span>'+n2+' of '+den2+(wk?' (3x a week × '+(den2/3)+' weeks)':' days in '+FM[m])+' · <b>'+monthPct(x).sp+'%</b> so far ('+monthPct(x).sn+' of '+monthPct(x).sden+(wk?' target)':' days)')+'</span></div><div class="pbar"><i style="width:'+p2+'%;background:'+col+'"></i></div>'+
+    h+='<div class="panel"><h2>'+esc(x.name)+': '+n2+(n2===1?' day':' days')+' in '+FM[m]+'</h2><div class="bigrow"><span class="big">'+monthPct(x).sp+'%</span><span>'+monthPct(x).sn+' of '+monthPct(x).sden+(wk?' sessions':' days')+' so far</span></div><div class="pbar"><i style="width:'+monthPct(x).sp+'%;background:'+col+'"></i></div>'+
       monthGrid(TODAY,function(d){var on=hasOn(x.id,d);return {cls:d>TODAY&&!on?' dim':'',style:on?'background:'+col+';color:#fff':'',html:'<small>'+(on?'✓':'')+'</small>'}})+
-      '<p class="note">Only '+esc(x.name)+' days are filled in. '+(wk?'% is against the 3x-a-week target.':'% is out of every day in the month.')+'</p></div>'}
+      '<p class="note">Only '+esc(x.name)+' days are filled in. '+(wk?'% counts toward 3x a week.':'% is out of the days so far this month.')+'</p></div>'}
   else{var vals=[];for(var mm=0;mm<12;mm++){var yy=TODAY.getFullYear(),dm=new Date(yy,mm+1,0).getDate(),c=0,el=0;for(var d3=1;d3<=dm;d3++){var dt=new Date(yy,mm,d3);if(dt>TODAY)break;el++;if(hasOn(x.id,dt))c++}
       var den3=!el?0:(wk?Math.max(x.weekly,Math.round(el/7*x.weekly)):el);vals.push({c:c,p:den3?Math.min(100,Math.round(c/den3*100)):0,den:den3})}
     var tc=vals.reduce(function(a,v){return a+v.c},0);
@@ -1026,12 +1026,12 @@ function monthPct(x){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y
   return {n:n,den:den,p:Math.min(100,Math.round(n/den*100)),sn:sn,sden:sden,sp:Math.min(100,Math.round(sn/sden*100)),el:el}}
 function monthByHabit(){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],rows=D.habits.map(function(x){return {x:x,r:monthPct(x)}}),
   avg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.p},0)/rows.length):0,savg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.sp},0)/rows.length):0,el=TODAY.getDate();
-  return '<div class="panel"><h2>'+FM[TODAY.getMonth()]+' — % by habit</h2><div class="bigrow"><span class="big">'+avg+'%</span><span>of the month · <b>'+savg+'%</b> of the '+el+(el===1?' day':' days')+' so far · average across all '+rows.length+' habits</span></div>'+
+  return '<div class="panel"><h2>'+FM[TODAY.getMonth()]+' — % by habit</h2><div class="bigrow"><span class="big">'+savg+'%</span><span>average so far</span></div>'+
     rows.map(function(o){var x=o.x,r=o.r;return '<button class="row mrow" data-act="hsel" data-id="'+x.id+'" style="width:100%;text-align:left;background:none;border:0;border-bottom:1.5px dashed rgba(0,0,0,.15);padding:6px 0;cursor:pointer;display:block;color:inherit;font:inherit">'+
       '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+x.color+';margin-right:6px"></span>'+esc(x.name)+'</span>'+
-      '<span style="font-weight:800;white-space:nowrap">'+r.p+'% <small style="font-weight:600;opacity:.75">month ('+r.n+'/'+r.den+')</small> · '+r.sp+'% <small style="font-weight:600;opacity:.75">so far ('+r.sn+'/'+r.sden+(x.weekly?' target':' days')+')</small></span></div>'+
-      '<div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+r.p+'%;background:'+x.color+'"></i></div></button>'}).join('')+
-    '<p class="note">Month = out of all '+new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate()+' days. So far = out of the '+el+(el===1?' day':' days')+' that have passed. Weekly habits use their 3x-a-week target. The bar shows the month. Tap a habit to see its own calendar.</p></div>'}
+      '<span style="font-weight:800;white-space:nowrap">'+r.sp+'% <small style="font-weight:600;opacity:.75">· '+r.sn+' of '+r.sden+(x.weekly?' sessions':' days')+'</small></span></div>'+
+      '<div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+r.sp+'%;background:'+x.color+'"></i></div></button>'}).join('')+
+    '<p class="note">Out of the days so far this month. Strength + walking pad count toward 3x a week. Tap a habit to see its calendar.</p></div>'}
 function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate();
   var h='<div class="cal">'+DOW.map(function(d){return '<div class="hd">'+d+'</div>'}).join('');
   for(var i=0;i<first.getDay();i++)h+='<div class="d empty"></div>';
