@@ -6,7 +6,8 @@
       "collagen": true,
       "clean": true,
       "nopick": true,
-      "posture": true
+      "posture": true,
+      "mouth": true
     }
   }
 }
