@@ -1001,10 +1001,49 @@ function drawOneHabit(x){var FM=['January','February','March','April','May','Jun
     h+='<div class="panel"><h2>'+esc(x.name)+' — '+TODAY.getFullYear()+'</h2><div class="bigrow"><span class="big">'+tc+'</span><span>'+(wk?'sessions':'days')+' logged this year</span></div><div class="bars">'+vals.map(function(v,i){return '<div><i style="height:'+v.p+'%;background:'+col+'"></i>'+MON[i]+'<br>'+(v.den?v.p+'%':'—')+'<br><small>'+(v.den?v.c:'')+'</small></div>'}).join('')+'</div>'+
       '<p class="note">'+(wk?'% of the 3x-a-week target for each month.':'% of days in each month.')+' This month counts days so far.</p></div>'}
   return h}
+
+/* ===== month wrapped ===== */
+var wrapOff=1,FMN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function nailLog(d){var n=D.nails;n.history=n.history||[];if(n.history.indexOf(d)<0)n.history.push(d)}
+function wrapMonth(off){return new Date(TODAY.getFullYear(),TODAY.getMonth()-off,1)}
+function wrapData(off){var f=wrapMonth(off),y=f.getFullYear(),m=f.getMonth(),dim=new Date(y,m+1,0).getDate(),cur=off===0,days=cur?TODAY.getDate():dim,pre=ymd(f).slice(0,7);
+  var hs=D.habits.map(function(x){var n=0,run=0,best=0;for(var d=1;d<=days;d++){if(hDone(ymd(new Date(y,m,d))).indexOf(x.id)>-1){n++;run++;if(run>best)best=run}else run=0}
+      var den=x.weekly?Math.max(x.weekly,Math.round(days/7*x.weekly)):days;return {x:x,n:n,den:den,p:Math.min(100,Math.round(n/den*100)),streak:best}});
+  var total=hs.reduce(function(a,o){return a+o.n},0),bd=null,bdn=0;for(var d=1;d<=days;d++){var c=hDone(ymd(new Date(y,m,d))).length;if(c>bdn){bdn=c;bd=new Date(y,m,d)}}
+  var avg=hs.length?Math.round(hs.reduce(function(a,o){return a+o.p},0)/hs.length):0,st=hs.filter(function(o){return !o.x.weekly}).sort(function(a,b){return b.streak-a.streak})[0];
+  var fin=[];Object.keys(D.lists).forEach(function(k){D.lists[k].forEach(function(sct){sct.items.forEach(function(it){if(it.done&&it.doneOn&&it.doneOn.slice(0,7)===pre)fin.push({b:bucketOf(k).name,t:it.t})})})});
+  var ev=D.events.filter(function(e){return e.date.slice(0,7)===pre&&parse(e.date)<=TODAY}).sort(function(a,b){return a.date<b.date?-1:1});
+  var ps=D.period.starts.filter(function(x){return x.slice(0,7)===pre}),nl=(D.nails.history||[]).concat([D.nails.last]).filter(function(x,i,a){return x&&x.slice(0,7)===pre&&a.indexOf(x)===i});
+  return {y:y,m:m,name:FMN[m],cur:cur,days:days,hs:hs,total:total,bestDay:bd,bestDayN:bdn,avg:avg,streak:st,fin:fin,ev:ev,ps:ps,nl:nl,has:total>0||fin.length>0}}
+function wrapBanner(){var w=wrapData(1);return '<button class="panel wrapban" data-act="wrapoff" data-off="'+(w.has?1:0)+'" style="width:100%;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font:inherit;color:inherit;margin-bottom:14px">'+
+  '<span style="font-size:26px">✨</span><span style="flex:1"><b style="font-size:16px">'+(w.has?w.name+', wrapped':FMN[TODAY.getMonth()]+' so far')+'</b><br><small style="opacity:.75">'+(w.has?'Your month in review is ready':'Your first wrap arrives '+FMN[(TODAY.getMonth()+1)%12]+' 1 — peek at this month so far')+'</small></span><span style="font-weight:800">Open →</span></button>'}
+function drawWrap(){var w=wrapData(wrapOff),last=wrapData(1),prev=wrapData(wrapOff+1),h='';
+  h+='<div class="tabs"><button class="chip" data-act="sub" data-sub="month">← Month view</button><button class="chip'+(wrapOff===1?' on':'')+'" data-act="wrapoff" data-off="1">'+last.name+' wrapped</button><button class="chip'+(wrapOff===0?' on':'')+'" data-act="wrapoff" data-off="0">'+FMN[TODAY.getMonth()]+' so far</button></div>';
+  if(!w.has){return h+'<div class="panel"><h2>'+w.name+', wrapped</h2><p>Nothing was tracked here in '+w.name+' — you started logging in '+FMN[TODAY.getMonth()]+'.</p><p class="note">Your first full wrap arrives '+FMN[(TODAY.getMonth()+1)%12]+' 1. Until then, take a peek at this month so far.</p><button class="btn" data-act="wrapoff" data-off="0">See '+FMN[TODAY.getMonth()]+' so far →</button></div>'}
+  var top=w.hs.filter(function(o){return o.n>0}).sort(function(a,b){return b.p-a.p||b.n-a.n}).slice(0,3),low=w.hs.filter(function(o){return !o.x.weekly}).sort(function(a,b){return a.p-b.p}).slice(0,2);
+  var line=w.total+' check-off'+(w.total===1?'':'s')+(w.streak&&w.streak.streak>=3?' · '+w.streak.streak+'-day '+esc(w.streak.x.name.toLowerCase())+' streak 🔥':'');
+  var cmp=prev.has?(w.avg-prev.avg):null;
+  h+='<div class="panel wraphero" style="text-align:center;padding:26px 18px"><div style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.7">'+(w.cur?'so far this month':'month in review')+'</div>'+
+    '<h2 style="font-size:34px;margin:6px 0 4px">'+w.name+(w.cur?' so far':', wrapped')+'</h2><div style="font-size:16px;font-weight:700">'+line+'</div>'+
+    (cmp!==null?'<div class="note" style="margin-top:6px">'+(cmp>0?'Up '+cmp+' points from '+prev.name+' ✦':cmp<0?'Down '+(-cmp)+' points from '+prev.name+' — new month, fresh start':'Same as '+prev.name)+'</div>':'')+'</div>';
+  h+='<div class="cols">';
+  h+='<div class="panel"><h2>The highlights</h2><div class="bigrow"><span class="big">'+w.avg+'%</span><span>average across your habits'+(w.cur?' so far':'')+'</span></div>'+
+    (w.bestDay?'<div class="row"><div class="t"><span>Best day</span><small>'+nice(w.bestDay)+' — '+w.bestDayN+' habits</small></div></div>':'')+
+    (w.streak&&w.streak.streak>1?'<div class="row"><div class="t"><span>Longest streak</span><small>'+esc(w.streak.x.name)+' — '+w.streak.streak+' days in a row</small></div></div>':'')+
+    (top.length?'<div class="row"><div class="t"><span>Top habits</span><small>'+top.map(function(o){return esc(o.x.name)+' '+o.p+'%'}).join(' · ')+'</small></div></div>':'')+
+    (low.length?'<div class="row"><div class="t"><span>Next month’s focus</span><small>'+low.map(function(o){return esc(o.x.name)}).join(' · ')+'</small></div></div>':'')+'</div>';
+  h+='<div class="panel"><h2>Things you finished</h2>'+(w.fin.length?w.fin.map(function(f){return '<div class="row"><span class="ck on" style="pointer-events:none;--hc:#1fb59a">✓</span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.b)+'</small></div></div>'}).join(''):'<p class="note">Nothing checked off in your lists '+(w.cur?'yet this month':'this month')+'. Check-offs are dated starting now, so they’ll show up here.</p>')+'</div>';
+  var life=w.ev.map(function(e){return [e.date,esc(e.title)]}).concat(w.ps.map(function(x){return [x,'Period started']}),w.nl.map(function(x){return [x,'Fresh nails']}))
+    .sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}).map(function(r){return '<div class="row"><div class="t"><span>'+r[1]+'</span><small>'+nice(parse(r[0]))+'</small></div></div>'}).join('');
+  h+='<div class="panel"><h2>What happened</h2>'+(life||'<p class="note">No events, period starts or nail changes logged '+(w.cur?'yet':'this month')+'.</p>')+'</div></div>';
+  h+='<div class="panel"><h2>Every habit</h2>'+w.hs.map(function(o){var x=o.x;return '<div style="padding:5px 0;border-bottom:1.5px dashed rgba(0,0,0,.15)"><div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+x.color+';margin-right:6px"></span>'+esc(x.name)+'</span><span style="font-weight:800;white-space:nowrap">'+o.p+'% <small style="font-weight:600;opacity:.75">· '+o.n+' of '+o.den+(x.weekly?' sessions':' days')+'</small></span></div><div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+o.p+'%;background:'+x.color+'"></i></div></div>'}).join('')+'</div>';
+  return h}
 function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
   var h=head(b,'Tap a circle to log it. Voice updates from Muse show up here too ('+esc(repoStatus)+'). <button class="btn white" data-act="export" style="margin-left:6px">Back up my data</button>')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var done=hDone(ymd(TODAY)),t=todayStats();
+  if(sub==='wrap')return h+drawWrap();
   if(sub!=='today'){h+=picker();var one=hsel!=='all'&&habitById(hsel);if(one)return h+drawOneHabit(one)}
+  if(sub==='today'&&TODAY.getDate()<=7&&wrapData(1).has)h+=wrapBanner();
   if(sub==='today'){h+='<div class="cols"><div class="panel"><h2>Today — '+nice(TODAY)+'</h2><div class="bigrow"><span class="big">'+t.n+'</span><span>of '+t.of+' daily done</span></div><div class="pbar"><i style="width:'+(t.of?t.n/t.of*100:0)+'%"></i></div>'+
     dailyHabits().map(function(x){var on=done.indexOf(x.id)>-1;return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span></div></div>'}).join('')+'</div>'+
     '<div class="panel"><h2>This week — 3x habits</h2>'+D.habits.filter(function(x){return x.weekly}).map(function(x){var c=weeklyCount(x,TODAY),on=done.indexOf(x.id)>-1;
@@ -1014,7 +1053,7 @@ function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Mon
   else if(sub==='week'){var s=weekStart(TODAY);h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="cal">';
     for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+ds.length+' of '+D.habits.length+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+x.color+'"></i>'}).join('')+'</div></div>'}
     h+='</div><p class="note">Each dot is a habit you logged that day.</p></div>'}
-  else if(sub==='month'){h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d));
+  else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d));
       return {cls:d>TODAY?' dim':'',style:ds.length?'background:color-mix(in srgb,#1fb59a '+Math.round(ds.length/D.habits.length*90)+'%,#fff)':'',html:'<small>'+(ds.length?ds.length+' done<br>'+Math.round(ds.length/D.habits.length*100)+'%':'')+'</small>'}})+'<p class="note">Darker green = more habits done that day. % is out of all '+D.habits.length+' habits.</p></div>'+monthByHabit()}
   else{var vals=[];for(var m=0;m<12;m++){var tot=0,days=0,dim=new Date(TODAY.getFullYear(),m+1,0).getDate();for(var dd=1;dd<=dim;dd++){var dt=new Date(TODAY.getFullYear(),m,dd);if(dt>TODAY)break;days++;tot+=dailyHabits().filter(function(x){return hDone(ymd(dt)).indexOf(x.id)>-1}).length}
       vals.push(days?Math.round(tot/(days*dailyHabits().length)*100):0)}
@@ -1150,8 +1189,9 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='back'){history.back();return}
   if(a==='sub'){sub=t.dataset.sub;renderDrawer();return}
   if(a==='hsel'){hsel=t.dataset.id;renderDrawer();return}
+  if(a==='wrapoff'){wrapOff=+t.dataset.off;sub='wrap';hsel='all';renderDrawer();$('#drawer').scrollTop=0;return}
   if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
-  if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;save();renderDrawer();if(it.done)toast('Nice ✓');return}
+  if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;if(it.done)it.doneOn=ymd(TODAY);else delete it.doneOn;save();renderDrawer();if(it.done)toast('Nice ✓');return}
   if(a==='del'){var s=D.lists[t.dataset.key][+t.dataset.si];s.items=s.items.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
   if(a==='img'){imgTarget={key:t.dataset.key,si:+t.dataset.si,id:t.dataset.id};$('#filepick').click();return}
   if(a==='fimg'){imgTarget={f:t.dataset.id};$('#filepick').click();return}
@@ -1161,7 +1201,7 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);save();renderDrawer();toast('Cycle reset to Day 1');return}
   if(a==='pundo'){if(D.period.starts.length>1){D.period.starts.pop();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
   if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=ph.c;el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
-  if(a==='nailsdone'){D.nails.last=ymd(TODAY);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
+  if(a==='nailsdone'){D.nails.last=ymd(TODAY);nailLog(D.nails.last);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
   if(a==='delev'){D.events=D.events.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
 });
 $('#dwrap').addEventListener('submit',function(e){e.preventDefault();var f=e.target,a=f.dataset.act,ins=f.querySelectorAll('input');
@@ -1169,7 +1209,7 @@ $('#dwrap').addEventListener('submit',function(e){e.preventDefault();var f=e.tar
   else if(a==='addhabit'){var v2=ins[0].value.trim();if(!v2)return;D.habits.splice(dailyHabits().length,0,{id:uid(),name:v2,color:['#2f9be8','#ff6b9d','#9b7ede','#2fbf71','#ff8a3d'][D.habits.length%5]})}
   else if(a==='addev'){if(!ins[0].value||!ins[1].value.trim())return toast('Add a date and a name');D.events.push({id:uid(),date:ins[0].value,title:ins[1].value.trim(),when:''})}
   else if(a==='nailset'){var n=parseInt(ins[0].value,10);if(n>0)D.nails.interval=n}
-  else if(a==='nailslast'){if(ins[0].value)D.nails.last=ins[0].value}
+  else if(a==='nailslast'){if(ins[0].value){D.nails.last=ins[0].value;nailLog(D.nails.last)}}
   else if(a==='addf'){var v3=ins[0].value.trim();if(!v3)return;D.fashion.push({id:uid(),t:v3,spec:ins[1].value.trim()||'Spec to add',status:'need',img:''})}
   save();renderDrawer();toast('Saved');
 });
