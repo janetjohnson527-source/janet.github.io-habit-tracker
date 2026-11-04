@@ -637,7 +637,8 @@ function defaults(){return {
     ['Big black tote','Black + silver detailing (or + white). Bag charm wanted.'],
     ['Sunglasses — silver + black aviators','Aviators.'],
     ['Chunky silver bracelets + rings','Hammered, natural looking.'],
-    ['Slip dress — grey / satin','Layering piece with skirt + tights + sweater. Needs a picture reference.']
+    ['Slip dress — grey / satin','Layering piece with skirt + tights + sweater. Needs a picture reference.'],
+    ['Graphic baby tees','Baby tee fit — cropped, fitted, short-sleeve, graphic print. Color/graphic TBD — black/white/grey palette. Needs an image reference.']
   ].map(function(a){return {id:uid(),t:a[0],spec:a[1],status:'need',img:''}})
 }}
 var D;
@@ -646,6 +647,7 @@ if(!D)D=defaults();
 if(D.habits && !D.habits.some(function(h){return h.id==='lymph'})){D.habits.splice(13,0,{id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='collagen'})){D.habits.splice(14,0,{id:'collagen',name:'Collagen',color:'#ffb38a'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='posture'})){var si=D.habits.findIndex(function(h){return h.id==='strength'});D.habits.splice(si<0?D.habits.length:si,0,{id:'posture',name:'Posture exercises',color:'#e0aaff'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+if(D.fashion && !D.fashion.some(function(f){return f.t==='Graphic baby tees'})){D.fashion.push({id:uid(),t:'Graphic baby tees',spec:'Baby tee fit — cropped, fitted, short-sleeve, graphic print. Color/graphic TBD — black/white/grey palette. Needs an image reference.',status:'need',img:''});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
 
 /* ============ computed ============ */
