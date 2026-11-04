@@ -496,6 +496,9 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 .dart>div{position:absolute;left:0;top:0;width:640px;height:440px;transform-origin:0 0}
 .dart.fade{-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(transparent,#000 9%,#000 91%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-composite:intersect}
 .dart:not(.frame)>div>:first-child{background:transparent!important;box-shadow:none!important}
+.dart-measure *,.dart.iso *{animation-play-state:paused!important;transition:none!important}
+.dart.iso>div,.dart.iso>div *:not([data-dv]){filter:none!important;backdrop-filter:none!important;mix-blend-mode:normal!important;background:transparent!important;box-shadow:none!important}
+.dart.iso>div *{visibility:hidden!important}.dart.iso>div [data-dv],.dart.iso>div [data-dv] *{visibility:visible!important}
 .dart.frame{border:3px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink)}
 .dart-h{position:absolute;right:32px;z-index:0}
 .dart-t{align-self:center}
@@ -912,23 +915,23 @@ function head(b,subtxt){return '<button class="back" data-act="back">← Back to
 
 /* artwork crops from each home scene: [x,y,w,h] in scene units, mode fade|frame|clean */
 var DART={
- haunted:{h:[60,8,330,212,'fade'],t:[33,66,52,56,'clean']},
- pink:{h:[40,10,330,205,'fade'],t:[328,193,48,54,'fade']},
- folders:{h:[20,80,225,85,'clean'],t:[500,318,70,95,'clean']},
- chromatic:{h:[360,95,240,240,'frame'],t:[158,141,30,30,'clean']},
+ haunted:{h:[60,8,330,212,'fade'],t:[36,80,44,46,'iso']},
+ pink:{h:[40,10,330,205,'fade'],t:[322,172,64,94,'iso']},
+ folders:{h:[20,80,225,85,'clean'],t:[478,308,100,122,'iso']},
+ chromatic:{h:[360,95,240,240,'frame'],t:[150,135,50,45,'iso']},
  strange:{h:[430,0,175,145,'fade']},
- departure:{t:[553,333,74,74,'clean']},
+ departure:{t:[556,332,76,76,'iso']},
  psych:{h:[180,120,260,168,'fade']},
- pixel:{h:[400,288,200,75,'clean'],t:[406,290,38,34,'clean']},
- neo:{h:[95,285,235,110,'clean'],t:[536,136,92,92,'clean']},
- satellite:{h:[168,272,165,104,'clean'],t:[475,128,44,44,'clean']},
- patchwork:{h:[480,0,160,80,'frame'],t:[560,160,80,90,'frame']},
- blackcat:{h:[470,232,165,145,'clean'],t:[80,245,110,125,'clean']},
- checker:{h:[240,140,150,148,'frame'],t:[178,83,44,66,'clean']},
- rainbow:{h:[25,95,232,84,'fade'],t:[450,243,82,48,'clean']},
+ pixel:{h:[400,288,200,75,'clean'],t:[404,292,40,36,'iso']},
+ neo:{h:[95,285,235,110,'clean'],t:[527,140,113,135,'iso']},
+ satellite:{h:[168,272,165,104,'clean'],t:[470,120,60,60,'iso']},
+ patchwork:{h:[480,0,160,80,'frame'],t:[560,150,80,90,'iso']},
+ blackcat:{h:[470,232,165,145,'clean'],t:[75,240,112,122,'iso']},
+ checker:{h:[240,140,150,148,'frame'],t:[180,90,44,90,'iso']},
+ rainbow:{h:[25,95,232,84,'fade'],t:[454,244,72,44,'iso']},
  crayon:{h:[0,0,160,80,'frame'],t:[480,80,80,80,'frame']},
- sampler:{h:[5,305,232,72,'clean'],t:[440,248,70,42,'clean']},
- folk:{h:[28,182,180,215,'fade'],t:[516,16,46,46,'clean']}
+ sampler:{h:[5,305,232,72,'clean'],t:[442,244,72,42,'iso']},
+ folk:{h:[28,182,180,215,'fade'],t:[520,28,42,42,'iso']}
 };
 var dartCache={};
 function dartHTML(){if(dartCache[theme])return dartCache[theme];var src=$('#sceneInner');if(!src||!src.innerHTML)return '';
@@ -937,8 +940,17 @@ function dartHTML(){if(dartCache[theme])return dartCache[theme];var src=$('#scen
   Object.keys(refs).forEach(function(id){var e=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');h=h.replace(new RegExp('id="'+e+'"','g'),'id="'+id+'-dc"').replace(new RegExp('(url\\(\\s*(?:[\'"]|&quot;)?#)'+e+'(?![\\w:.-])','g'),'$1'+id+'-dc').replace(new RegExp('href="#'+e+'"','g'),'href="#'+id+'-dc"')});
   return dartCache[theme]=h}
 function dartBox(c,s,cls){return '<div class="dart '+cls+' '+(c[4]||'clean')+'" aria-hidden="true" style="width:'+Math.round(c[2]*s)+'px;height:'+Math.round(c[3]*s)+'px"><div style="transform:scale('+s.toFixed(3)+') translate('+(-c[0])+'px,'+(-c[1])+'px)">'+dartHTML()+'</div></div>'}
+
+function dartIso(c){var html=dartHTML();if(!html)return '';
+  var mw=document.createElement('div');mw.className='dart-measure';mw.style.cssText='position:fixed;left:-10000px;top:0;width:640px;height:440px;overflow:hidden;pointer-events:none';
+  mw.innerHTML=html;document.body.appendChild(mw);var R=mw.getBoundingClientRect(),els=mw.querySelectorAll('*'),u=null,n=0,m=3;
+  for(var i=0;i<els.length;i++){var r=els[i].getBoundingClientRect();if(!r.width||!r.height)continue;var x=r.left-R.left,y=r.top-R.top;
+    if(x>=c[0]-m&&y>=c[1]-m&&x+r.width<=c[0]+c[2]+m&&y+r.height<=c[1]+c[3]+m){els[i].setAttribute('data-dv','');n++;u=u?[Math.min(u[0],x),Math.min(u[1],y),Math.max(u[2],x+r.width),Math.max(u[3],y+r.height)]:[x,y,x+r.width,y+r.height]}}
+  var marked=mw.innerHTML;mw.remove();if(!n)return dartBox(c,48/c[3],'dart-t');
+  var P=5,cc=[u[0]-P,u[1]-P,u[2]-u[0]+2*P,u[3]-u[1]+2*P,'iso'],s=Math.min(52/cc[3],90/cc[2]);
+  return '<div class="dart dart-t iso" aria-hidden="true" style="width:'+Math.round(cc[2]*s)+'px;height:'+Math.round(cc[3]*s)+'px"><div style="transform:scale('+s.toFixed(3)+') translate('+(-cc[0]).toFixed(1)+'px,'+(-cc[1]).toFixed(1)+'px)">'+marked+'</div></div>'}
 function addDrawerArt(el){var a=DART[theme];if(!a||!SCENES[theme]||sceneLoaded!==theme)return;var html=dartHTML();if(!html)return;
-  if(a.t){var tt=el.querySelector('.dtitle');if(tt)tt.insertAdjacentHTML('beforeend',dartBox(a.t,48/a.t[3],'dart-t'))}
+  if(a.t){var tt=el.querySelector('.dtitle');if(tt)tt.insertAdjacentHTML('beforeend',a.t[4]==='iso'?dartIso(a.t):dartBox(a.t,48/a.t[3],'dart-t'))}
   if(a.h&&window.innerWidth>900){if(!$('#drawer').classList.contains('open')){setTimeout(function(){if(cur)renderDrawer()},0);return}var c=a.h,tt2=el.querySelector('.dtitle');if(!tt2)return;el.classList.add('has-art');
     var R=el.getBoundingClientRect(),cut=R.left+R.width*0.62,top=52,lim=200,kids=[].slice.call(el.children),past=false;
     for(var i=0;i<kids.length;i++){var k=kids[i];if(k===tt2){past=true;continue}if(!past||k.classList.contains('dsub'))continue;
