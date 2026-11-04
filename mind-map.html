@@ -951,7 +951,9 @@ function dartIso(c){var html=dartHTML();if(!html)return '';
   var marked=mw.innerHTML;mw.remove();if(!n)return dartBox(c,48/c[3],'dart-t');
   var P=5,cc=[u[0]-P,u[1]-P,u[2]-u[0]+2*P,u[3]-u[1]+2*P,'iso'],s=Math.min(52/cc[3],90/cc[2]);
   return '<div class="dart dart-t iso" aria-hidden="true" style="width:'+Math.round(cc[2]*s)+'px;height:'+Math.round(cc[3]*s)+'px"><div style="transform:scale('+s.toFixed(3)+') translate('+(-cc[0]).toFixed(1)+'px,'+(-cc[1]).toFixed(1)+'px)">'+marked+'</div></div>'}
-function addDrawerArt(el){var a=DART[theme];if(!a||!SCENES[theme]||sceneLoaded!==theme)return;var html=dartHTML();if(!html)return;
+var dartOff=false;
+function addDrawerArt(el){try{addDrawerArt0(el)}catch(e){dartOff=true;el.classList.remove('has-art');[].slice.call(el.querySelectorAll('.dart')).forEach(function(x){x.remove()})}}
+function addDrawerArt0(el){if(dartOff)return;var a=DART[theme];if(!a||!SCENES[theme]||sceneLoaded!==theme)return;var html=dartHTML();if(!html)return;
   if(a.t){var tt=el.querySelector('.dtitle');if(tt)tt.insertAdjacentHTML('beforeend',a.t[4]==='iso'?dartIso(a.t):dartBox(a.t,48/a.t[3],'dart-t'))}
   if(a.h&&window.innerWidth>900){if(!$('#drawer').classList.contains('open')){setTimeout(function(){if(cur)renderDrawer()},0);return}var c=a.h,tt2=el.querySelector('.dtitle');if(!tt2)return;el.classList.add('has-art');
     var R=el.getBoundingClientRect(),cut=R.left+R.width*0.62,top=52,lim=200,kids=[].slice.call(el.children),past=false;
@@ -1348,7 +1350,7 @@ function applyTheme(id){var t=THEMES.filter(function(x){return x.id===id})[0]||T
   if(t.id==='blackcat')ttl.textContent='Mind Map';
   if(t.id==='sampler')ttl.textContent='MIND MAP';
   try{localStorage.setItem(TKEY,t.id)}catch(e){}
-  renderHome();renderScene();if(cur)renderDrawer();
+  try{renderHome()}catch(e){}try{renderScene()}catch(e){}if(cur){try{renderDrawer()}catch(e){try{dartOff=true;renderDrawer()}catch(e2){}}}
   $('#tmenu').innerHTML=THEMES.map(function(x){return '<button type="button" role="menuitem" class="'+(x.id===t.id?'on':'')+'" data-t="'+x.id+'"><i style="background:'+x.sw+'"></i>'+x.name+'</button>'}).join('');
 }
 $('#tpill').addEventListener('click',function(e){e.stopPropagation();$('#tmenu').classList.toggle('open')});
