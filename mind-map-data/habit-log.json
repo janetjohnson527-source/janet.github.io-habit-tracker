@@ -9,6 +9,9 @@
       "posture": true,
       "mouth": true,
       "draw": true
+    },
+    "2026-11-04": {
+      "vit": true
     }
   }
 }
