@@ -168,10 +168,8 @@ html.scene-on #scene{display:flex}
 html.scene-on .wrap,html.scene-on .key{display:none}
 html.scene-on #deco{display:none}
 html.scene-on body.dopen #deco{display:block}
-body.dopen #scene{height:var(--bh,200px);bottom:auto;z-index:41;align-items:flex-start;box-shadow:0 6px 0 rgba(0,0,0,.18);border-bottom:3px solid var(--ink)}
+body.dopen #scene{display:none!important}
 body.dopen #sceneBar,body.dopen #sceneWeb,body.dopen #sceneKey{display:none!important}
-html.scene-on body.dopen .dwrap{padding-top:calc(var(--bh,200px) + 22px)}
-html.scene-on body.dopen .themepill{top:calc(var(--bh,200px) + 16px)}
 #sceneInner{position:relative;width:640px;height:440px;flex:none;transform-origin:center center}
 .sc-web{display:none}
 #sceneInner svg:has(#hhs-hg){display:none}
