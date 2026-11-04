@@ -814,6 +814,8 @@ function loadRepo(){if(!window.fetch)return;fetch(REPO_URL+'?t='+Date.now(),{cac
 function exportData(){var blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mind-map-backup-'+ymd(new Date())+'.json';document.body.appendChild(a);a.click();a.remove()}
 function dayCheck(){var ae=document.activeElement;if(ae&&/INPUT|TEXTAREA/.test(ae.tagName)&&ae.value)return;var n=new Date();n.setHours(0,0,0,0);if(n.getTime()!==TODAY.getTime())location.reload()}setInterval(dayCheck,300000);window.addEventListener('focus',dayCheck);
 loadRepo();window.addEventListener('focus',loadRepo);document.addEventListener('visibilitychange',function(){if(!document.hidden)loadRepo()});
+function dailyDone(ds){return dailyHabits().filter(function(h){return ds.indexOf(h.id)>-1}).length}
+function weeklyDone(ds){return D.habits.filter(function(h){return h.weekly&&ds.indexOf(h.id)>-1}).length}
 function dailyHabits(){return D.habits.filter(function(h){return !h.weekly})}
 function weekStart(d){var x=new Date(d);var wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);return x}// Monday
 function weeklyCount(h,d){var s=weekStart(d),n=0;for(var i=0;i<7;i++){if(hDone(ymd(addDays(s,i))).indexOf(h.id)>-1)n++}return n}
@@ -1051,10 +1053,10 @@ function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Mon
     '<p class="note">Weekly habits are judged against their 3x target, not 7 days.</p>'+
     '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div>'}
   else if(sub==='week'){var s=weekStart(TODAY);h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="cal">';
-    for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+ds.length+' of '+D.habits.length+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+x.color+'"></i>'}).join('')+'</div></div>'}
+    for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+dailyDone(ds)+' of '+dailyHabits().length+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+x.color+'"></i>'}).join('')+'</div></div>'}
     h+='</div><p class="note">Each dot is a habit you logged that day.</p></div>'}
-  else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d));
-      return {cls:d>TODAY?' dim':'',style:ds.length?'background:color-mix(in srgb,#1fb59a '+Math.round(ds.length/D.habits.length*90)+'%,#fff)':'',html:'<small>'+(ds.length?ds.length+' done<br>'+Math.round(ds.length/D.habits.length*100)+'%':'')+'</small>'}})+'<p class="note">Darker green = more habits done that day. % is out of all '+D.habits.length+' habits.</p></div>'+monthByHabit()}
+  else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d)),dn=dailyDone(ds),of=dailyHabits().length||1;
+      return {cls:d>TODAY?' dim':'',style:dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'',html:'<small>'+(dn?dn+' done<br>'+Math.round(dn/of*100)+'%':'')+'</small>'}})+'<p class="note">Darker green = more habits done that day. % is out of your '+dailyHabits().length+' daily habits (strength + walking pad are tracked weekly).</p></div>'+monthByHabit()}
   else{var vals=[];for(var m=0;m<12;m++){var tot=0,days=0,dim=new Date(TODAY.getFullYear(),m+1,0).getDate();for(var dd=1;dd<=dim;dd++){var dt=new Date(TODAY.getFullYear(),m,dd);if(dt>TODAY)break;days++;tot+=dailyHabits().filter(function(x){return hDone(ymd(dt)).indexOf(x.id)>-1}).length}
       vals.push(days?Math.round(tot/(days*dailyHabits().length)*100):0)}
     h+='<div class="panel"><h2>'+TODAY.getFullYear()+' — daily habits completed by month</h2><div class="bars">'+vals.map(function(v,i){return '<div><i style="height:'+v+'%"></i>'+MON[i]+'<br>'+v+'%</div>'}).join('')+'</div><p class="note">Fills in as you log. Months before you started tracking here show 0%.</p></div>'}
