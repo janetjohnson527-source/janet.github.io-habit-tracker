@@ -649,7 +649,23 @@ if(D.habits && !D.habits.some(function(h){return h.id==='posture'})){var si=D.ha
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
 
 /* ============ computed ============ */
-function hDone(dateStr){return D.hlog[dateStr]||[]}
+/* ---- shared habit log: repo file (Muse) + page ticks, one merge rule ---- */
+var REPO_URL='mind-map-data/habit-log.json';
+if(!D.hov)D.hov={};
+if(!D.repoCache)D.repoCache={};
+if(!D.hovMigrated){Object.keys(D.hlog||{}).forEach(function(d){(D.hlog[d]||[]).forEach(function(id){var k=d+'|'+id;if(!D.hov[k])D.hov[k]={v:true,seen:null,at:Date.now()}})});D.hovMigrated=Date.now();save()}
+var repoStatus='not loaded yet';
+function habitIdFor(key){var k=String(key).trim().toLowerCase();for(var i=0;i<D.habits.length;i++){if(D.habits[i].id===k||D.habits[i].name.toLowerCase()===k)return D.habits[i].id}return null}
+function repoNorm(raw){var out={},log=(raw&&raw.log)||{};Object.keys(log).forEach(function(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d))return;var day=log[d]||{};out[d]={};Object.keys(day).forEach(function(k){var id=habitIdFor(k);if(id&&typeof day[k]==='boolean')out[d][id]=day[k]})});return out}
+function repoVal(d,id){var day=D.repoCache[d];return day&&typeof day[id]==='boolean'?day[id]:null}
+function isDone(d,id){var r=repoVal(d,id),o=D.hov[d+'|'+id];if(o&&o.seen===r)return o.v;if(r!==null)return r;return o?o.v:false}
+function hDone(dateStr){return D.habits.filter(function(h){return isDone(dateStr,h.id)}).map(function(h){return h.id})}
+function toggleHabit(d,id){var now=isDone(d,id);D.hov[d+'|'+id]={v:!now,seen:repoVal(d,id),at:Date.now()};save();return !now}
+function loadRepo(){if(!window.fetch)return;fetch(REPO_URL+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+  var n=repoNorm(j),changed=JSON.stringify(n)!==JSON.stringify(D.repoCache);D.repoCache=n;repoStatus='synced '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});save();
+  if(changed){renderHome();if(typeof renderScene==='function'&&SCENES[theme])renderScene();if(cur)renderDrawer()}}).catch(function(){repoStatus='offline — showing last synced copy'})}
+function exportData(){var blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mind-map-backup-'+ymd(new Date())+'.json';document.body.appendChild(a);a.click();a.remove()}
+loadRepo();window.addEventListener('focus',loadRepo);document.addEventListener('visibilitychange',function(){if(!document.hidden)loadRepo()});
 function dailyHabits(){return D.habits.filter(function(h){return !h.weekly})}
 function weekStart(d){var x=new Date(d);var wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);return x}// Monday
 function weeklyCount(h,d){var s=weekStart(d),n=0;for(var i=0;i<7;i++){if(hDone(ymd(addDays(s,i))).indexOf(h.id)>-1)n++}return n}
@@ -769,7 +785,7 @@ function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
 
 /* --- habits --- */
 function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
-  var h=head(b,'Tap a circle to log it. Your log is saved in this browser.')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
+  var h=head(b,'Tap a circle to log it. Voice updates from Muse show up here too ('+esc(repoStatus)+'). <button class="btn white" data-act="export" style="margin-left:6px">Back up my data</button>')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var done=hDone(ymd(TODAY)),t=todayStats();
   if(sub==='today'){h+='<div class="cols"><div class="panel"><h2>Today — '+nice(TODAY)+'</h2><div class="bigrow"><span class="big">'+t.n+'</span><span>of '+t.of+' daily done</span></div><div class="pbar"><i style="width:'+(t.of?t.n/t.of*100:0)+'%"></i></div>'+
     dailyHabits().map(function(x){var on=done.indexOf(x.id)>-1;return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span></div></div>'}).join('')+'</div>'+
@@ -909,7 +925,8 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='img'){imgTarget={key:t.dataset.key,si:+t.dataset.si,id:t.dataset.id};$('#filepick').click();return}
   if(a==='fimg'){imgTarget={f:t.dataset.id};$('#filepick').click();return}
   if(a==='fstat'){D.fashion.forEach(function(f){if(f.id===t.dataset.id)f.status=t.dataset.s});save();renderDrawer();return}
-  if(a==='habit'){var k=ymd(TODAY),arr=D.hlog[k]||[],i=arr.indexOf(t.dataset.id);if(i>-1)arr.splice(i,1);else arr.push(t.dataset.id);D.hlog[k]=arr;save();renderDrawer();if(i<0)toast('Logged ✓');return}
+  if(a==='habit'){var on=toggleHabit(ymd(TODAY),t.dataset.id);renderDrawer();if(on)toast('Logged ✓');return}
+  if(a==='export'){exportData();toast('Backup downloaded');return}
   if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);save();renderDrawer();toast('Cycle reset to Day 1');return}
   if(a==='pundo'){if(D.period.starts.length>1){D.period.starts.pop();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
   if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=ph.c;el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
