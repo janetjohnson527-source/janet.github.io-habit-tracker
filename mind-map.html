@@ -645,6 +645,7 @@ function defaults(){return {
     ['White off-the-shoulder long sleeve top','White, off-the-shoulder, long sleeves. Needs an image reference.'],
     ['Quarter zip sweaters','Quarter zip, sweater / sweatshirt. Color / weight TBD. Needs an image reference.']
     ['Black combat boots — Doc Martens monochrome classic 8-hole, second pair','Black, monochrome Doc Martens, classic 8-hole, second pair. US 7. HIGH PRIORITY — to wear with ankle crop jeans (she has a lot of ankle crop jeans). Needs an image reference.']
+    ['Short charm necklaces — silver','Short, silver, charm necklaces. Specific charms / length TBD. Needs an image reference.']
   ].map(function(a){return {id:uid(),t:a[0],spec:a[1],status:'need',img:''}})
 }}
 var D;
@@ -660,6 +661,7 @@ if(D.fashion && !D.fashion.some(function(f){return f.t==='Black off-the-shoulder
 if(D.fashion && !D.fashion.some(function(f){return f.t==='White off-the-shoulder long sleeve top'})){D.fashion.push({id:uid(),t:'White off-the-shoulder long sleeve top',spec:'White, off-the-shoulder, long sleeves. Needs an image reference.',status:'need',img:''});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.fashion && !D.fashion.some(function(f){return f.t==='Quarter zip sweaters'})){D.fashion.push({id:uid(),t:'Quarter zip sweaters',spec:'Quarter zip, sweater / sweatshirt. Color / weight TBD. Needs an image reference.',status:'need',img:''});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.fashion && !D.fashion.some(function(f){return f.t==='Black combat boots — Doc Martens monochrome classic 8-hole, second pair'})){D.fashion.push({id:uid(),t:'Black combat boots — Doc Martens monochrome classic 8-hole, second pair',spec:'Black, monochrome Doc Martens, classic 8-hole, second pair. US 7. HIGH PRIORITY — to wear with ankle crop jeans (she has a lot of ankle crop jeans). Needs an image reference.',status:'need',img:''});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+if(D.fashion && !D.fashion.some(function(f){return f.t==='Short charm necklaces — silver'})){D.fashion.push({id:uid(),t:'Short charm necklaces — silver',spec:'Short, silver, charm necklaces. Specific charms / length TBD. Needs an image reference.',status:'need',img:''});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
 
 /* ============ computed ============ */
