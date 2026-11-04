@@ -835,6 +835,35 @@ var PH={
   ovu:{n:'Ovulation',c:'#ffd43b',tip:'Peak energy — good day for the big stuff.',body:'An egg is released around the middle of your cycle. Often the peak-energy point — your most outgoing, confident, or strong. It is the turning point before energy starts to taper.'},
   lut:{n:'Luteal',c:'#a78bfa',tip:'Energy tapering — keep plans lighter, stock up.',body:'After ovulation your body winds down toward the next period. Energy often tapers; you might feel more irritable, tired, or emotional, and socializing can feel harder. Keep plans lighter and stock up before bleeding starts.'}
 };
+
+/* ===== theme-matched habit + period colors (from each home scene) ===== */
+var HPAL={
+ haunted:['#4fa39a','#f08cb8','#f2b733','#a35fb5','#f2622e','#8cc7a6','#c39ad6','#f7a07a'],
+ pink:['#f06aa5','#9b6bd6','#ffc94d','#6cc47e','#ff9ec6','#6e4bb5','#f4a259','#b98ee8'],
+ rainbow:['#ff4d4d','#ff9f1c','#ffd60a','#2ec27e','#3a86ff','#8338ec','#ff5fa2','#00c2c7'],
+ psych:['#e8402a','#f5c518','#f28c28','#d94f8a','#3f8f8f','#b5651d','#f3a6b8','#8a5a2b'],
+ chromatic:['#3a5cff','#8a3cff','#e23cf0','#ff4f8a','#ff8a2a','#ffc83a','#2fb5ff','#6a7dff'],
+ strange:['#111111','#3a3a3a','#5a5a5a','#777777','#2a2a2a','#4a4a4a','#686868','#888888'],
+ departure:['#d6402b','#0f2c58','#f3b33d','#2f6fb5','#e98a5b','#6aa6d9','#a52a22','#1e4d8c'],
+ pixel:['#ee6aa5','#c2408a','#ff8fbe','#a855c8','#f04f8f','#d58ce0','#ff6fa0','#8e3fae'],
+ neo:['#9bd12a','#ff5fa8','#6b7cff','#ffa63d','#3fbfef','#a77bff','#ff5b5b','#3cc28a'],
+ satellite:['#e8264a','#ff6b3d','#f07a9a','#ff9a5c','#c21d3d','#ff8a73','#e84a7a','#d94a2a'],
+ patchwork:['#e8579a','#3b4cc0','#f0a33a','#2fa37a','#c06ad6','#ff8fb5','#e0b440','#7a4fd1'],
+ blackcat:['#111111','#3a3a3a','#555555','#707070','#262626','#484848','#626262','#7c7c7c'],
+ checker:['#3a6ee8','#f27fb2','#f5b800','#2fb57a','#ff7a3d','#9b6bd6','#e8423c','#3fb4e8'],
+ crayon:['#ff3d8b','#f5c400','#2f6bff','#2ecc71','#ff8c1a','#9b5de5','#00b8c8','#ff5a5a'],
+ sampler:['#d9534f','#e6a23c','#5b8bd9','#6aa84f','#c77dba','#e88fa8','#2f5f6a','#b8792f'],
+ folk:['#9b7cf0','#f08cb8','#f5c542','#e84a4a','#4fb3a5','#ff9a5c','#c39ad6','#6fa8ff']};
+var PHPAL={
+ haunted:['#f08cb8','#f2622e','#f2b733','#a35fb5'],pink:['#f06aa5','#f4a259','#ffc94d','#9b6bd6'],rainbow:['#ff5fa2','#ff9f1c','#ffd60a','#8338ec'],
+ psych:['#d94f8a','#e8402a','#f5c518','#3f8f8f'],chromatic:['#ff4f8a','#ff8a2a','#ffc83a','#8a3cff'],strange:['#2a2a2a','#5c5c5c','#9a9a9a','#cfcfcf'],
+ departure:['#d6402b','#e98a5b','#f3b33d','#2f6fb5'],pixel:['#ee6aa5','#ff9ec7','#ffd1e3','#a855c8'],neo:['#ff7ab6','#ffb84d','#c6f24e','#7b8cff'],
+ satellite:['#e8264a','#ff8a50','#ffd0c0','#a8163a'],patchwork:['#e8579a','#f0a33a','#f6c85f','#7a4fd1'],blackcat:['#222222','#666666','#a8a8a8','#d6d6d6'],
+ checker:['#f27fb2','#ff7a3d','#ffcc33','#3a6ee8'],crayon:['#ff3d8b','#ff8c1a','#ffd60a','#9b5de5'],sampler:['#d9534f','#e6a23c','#f2d06b','#5b8bd9'],
+ folk:['#f08cb8','#ff9a5c','#f5c542','#9b7cf0']};
+function hcol(x){var p=HPAL[theme];if(!p)return x.color;var i=D.habits.indexOf(x);if(i<0)i=0;return p[i%p.length]}
+function phc(k){var p=PHPAL[theme];return p?p[['mens','foll','ovu','lut'].indexOf(k)]:PH[k].c}
+function txtOn(c){var m=/^#?([0-9a-f]{6})$/i.exec(c||'');if(!m)return '#2a1a1a';var n=parseInt(m[1],16),r=n>>16&255,g=n>>8&255,b=n&255;return (0.299*r+0.587*g+0.114*b)>150?'#2a1a1a':'#ffffff'}
 function nails(){var last=parse(D.nails.last),next=addDays(last,D.nails.interval);return {last:last,next:next,days:daysBetween(TODAY,next)}}
 function upcoming(){return D.events.filter(function(e){return parse(e.date)>=TODAY}).sort(function(a,b){return a.date<b.date?-1:1})}
 function listItems(key){var out=[];D.lists[key].forEach(function(s){out=out.concat(s.items)});return out}
@@ -986,19 +1015,19 @@ function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
 var hsel='all';
 function habitById(id){return D.habits.filter(function(x){return x.id===id})[0]}
 function picker(){return '<div class="tabs hpick" role="group" aria-label="Pick a habit"><button class="chip'+(hsel==='all'?' on':'')+'" data-act="hsel" data-id="all">All habits</button>'+
-  D.habits.map(function(x){return '<button class="chip'+(hsel===x.id?' on':'')+'" data-act="hsel" data-id="'+x.id+'" style="'+(hsel===x.id?'background:'+x.color+';color:#fff':'')+'"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:5px;vertical-align:1px"></span>'+esc(x.name)+'</button>'}).join('')+'</div>'}
+  D.habits.map(function(x){return '<button class="chip'+(hsel===x.id?' on':'')+'" data-act="hsel" data-id="'+x.id+'" style="'+(hsel===x.id?'background:'+hcol(x)+';color:'+txtOn(hcol(x)):'')+'"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+hcol(x)+';margin-right:5px;vertical-align:1px"></span>'+esc(x.name)+'</button>'}).join('')+'</div>'}
 function hasOn(id,d){return hDone(ymd(d)).indexOf(id)>-1}
 function weeksTarget(x,days){return x.weekly*Math.max(1,Math.floor(days/7))}
-function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=x.color,wk=!!x.weekly;
+function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=hcol(x),wk=!!x.weekly;
   if(sub==='week'){var s=weekStart(TODAY),n=0,cells='';for(var i=0;i<7;i++){var d=addDays(s,i),on=hasOn(x.id,d);if(on)n++;
-      cells+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:#fff':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
+      cells+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:'+txtOn(col):'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
     var den=wk?x.weekly:7,p=Math.min(100,Math.round(n/den*100));
     h+='<div class="panel"><h2>'+esc(x.name)+' — week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+p+'%</span><span>'+n+' of '+den+(wk?' this week (3x target)':' days')+'</span></div><div class="pbar"><i style="width:'+p+'%;background:'+col+'"></i></div><div class="cal">'+cells+'</div>'+
       '<p class="note">'+(wk?'Weekly habits are judged against their 3x target, not 7 days.':'% of the 7 days this week.')+'</p></div>'}
   else if(sub==='month'){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y,m+1,0).getDate(),n2=0;for(var dd=1;dd<=dim;dd++)if(hasOn(x.id,new Date(y,m,dd)))n2++;
     var den2=wk?weeksTarget(x,dim):dim,p2=Math.min(100,Math.round(n2/den2*100));
     h+='<div class="panel"><h2>'+esc(x.name)+': '+n2+(n2===1?' day':' days')+' in '+FM[m]+'</h2><div class="bigrow"><span class="big">'+monthPct(x).sp+'%</span><span>'+monthPct(x).sn+' of '+monthPct(x).sden+(wk?' sessions':' days')+' so far</span></div><div class="pbar"><i style="width:'+monthPct(x).sp+'%;background:'+col+'"></i></div>'+
-      monthGrid(TODAY,function(d){var on=hasOn(x.id,d);return {cls:d>TODAY&&!on?' dim':'',style:on?'background:'+col+';color:#fff':'',html:'<small>'+(on?'✓':'')+'</small>'}})+
+      monthGrid(TODAY,function(d){var on=hasOn(x.id,d);return {cls:d>TODAY&&!on?' dim':'',style:on?'background:'+col+';color:'+txtOn(col):'',html:'<small>'+(on?'✓':'')+'</small>'}})+
       '<p class="note">Only '+esc(x.name)+' days are filled in. '+(wk?'% counts toward 3x a week.':'% is out of the days so far this month.')+'</p></div>'}
   else{var vals=[];for(var mm=0;mm<12;mm++){var yy=TODAY.getFullYear(),dm=new Date(yy,mm+1,0).getDate(),c=0,el=0;for(var d3=1;d3<=dm;d3++){var dt=new Date(yy,mm,d3);if(dt>TODAY)break;el++;if(hasOn(x.id,dt))c++}
       var den3=!el?0:(wk?Math.max(x.weekly,Math.round(el/7*x.weekly)):el);vals.push({c:c,p:den3?Math.min(100,Math.round(c/den3*100)):0,den:den3})}
@@ -1041,13 +1070,13 @@ function drawWrap(){var w=wrapData(wrapOff),last=wrapData(1),prev=wrapData(wrapO
   var life=w.ev.map(function(e){return [e.date,esc(e.title)]}).concat(w.ps.map(function(x){return [x,'Period started']}),w.nl.map(function(x){return [x,'Fresh nails']}))
     .sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}).map(function(r){return '<div class="row"><div class="t"><span>'+r[1]+'</span><small>'+nice(parse(r[0]))+'</small></div></div>'}).join('');
   h+='<div class="panel"><h2>What happened</h2>'+(life||'<p class="note">No events, period starts or nail changes logged '+(w.cur?'yet':'this month')+'.</p>')+'</div></div>';
-  h+='<div class="panel"><h2>Every habit</h2>'+w.hs.map(function(o){var x=o.x;return '<div style="padding:5px 0;border-bottom:1.5px dashed rgba(0,0,0,.15)"><div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+x.color+';margin-right:6px"></span>'+esc(x.name)+'</span><span style="font-weight:800;white-space:nowrap">'+o.p+'% <small style="font-weight:600;opacity:.75">· '+o.n+' of '+o.den+(x.weekly?' sessions':' days')+'</small></span></div><div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+o.p+'%;background:'+x.color+'"></i></div></div>'}).join('')+'</div>';
+  h+='<div class="panel"><h2>Every habit</h2>'+w.hs.map(function(o){var x=o.x;return '<div style="padding:5px 0;border-bottom:1.5px dashed rgba(0,0,0,.15)"><div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+hcol(x)+';margin-right:6px"></span>'+esc(x.name)+'</span><span style="font-weight:800;white-space:nowrap">'+o.p+'% <small style="font-weight:600;opacity:.75">· '+o.n+' of '+o.den+(x.weekly?' sessions':' days')+'</small></span></div><div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+o.p+'%;background:'+hcol(x)+'"></i></div></div>'}).join('')+'</div>';
   return h}
 var hDay=null,hEdit=false,hDelPending=null;
-function hRow(x,on,small){if(hEdit)return '<form class="row hedit" data-act="hrename" data-id="'+x.id+'" style="gap:8px;align-items:center"><span class="ck" style="--hc:'+x.color+';border-style:dashed;pointer-events:none"></span>'+
+function hRow(x,on,small){if(hEdit)return '<form class="row hedit" data-act="hrename" data-id="'+x.id+'" style="gap:8px;align-items:center"><span class="ck" style="--hc:'+hcol(x)+';border-style:dashed;pointer-events:none"></span>'+
     '<input value="'+esc(x.name)+'" aria-label="habit name" style="flex:1;min-width:0;font:inherit;padding:6px 10px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:#222">'+
     '<button class="btn white" style="white-space:nowrap">Save</button><button type="button" class="btn'+(hDelPending===x.id?' pink':' white')+'" data-act="hdel" data-id="'+x.id+'" style="white-space:nowrap">'+(hDelPending===x.id?'Tap again to remove':'Remove')+'</button></form>';
-  return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span>'+(small?'<small>'+small+'</small>':'')+'</div></div>'}
+  return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+hcol(x)+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span>'+(small?'<small>'+small+'</small>':'')+'</div></div>'}
 function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
   var h=head(b,'Tap a circle to log it. Voice updates from Muse show up here too ('+esc(repoStatus)+'). <button class="btn white" data-act="export" style="margin-left:6px">Back up my data</button>')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var done=hDone(ymd(TODAY)),t=todayStats();
@@ -1066,7 +1095,7 @@ function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Mon
     '<p class="note">Weekly habits are judged against their 3x target, not 7 days.</p>'+
     '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div>'}
   else if(sub==='week'){var s=weekStart(TODAY);h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="cal">';
-    for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+dailyDone(ds)+' of '+dailyHabits().length+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+x.color+'"></i>'}).join('')+'</div></div>'}
+    for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d));h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+dailyDone(ds)+' of '+dailyHabits().length+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+hcol(x)+'"></i>'}).join('')+'</div></div>'}
     h+='</div><p class="note">Each dot is a habit you logged that day.</p></div>'}
   else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d)),dn=dailyDone(ds),of=dailyHabits().length||1;
       return {cls:d>TODAY?' dim':'',style:dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'',html:'<small>'+(dn?dn+' done<br>'+Math.round(dn/of*100)+'%':'')+'</small>',attr:d<=TODAY?' data-act="hday" data-d="'+ymd(d)+'" role="button" title="Open this day" style="cursor:pointer;'+(dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'')+'"':''}})+'<p class="note">Tap any day to fix it. Darker green = more habits done that day. % is out of your '+dailyHabits().length+' daily habits (strength + walking pad are tracked weekly).</p></div>'+monthByHabit()}
@@ -1082,9 +1111,9 @@ function monthByHabit(){var FM=['January','February','March','April','May','June
   avg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.p},0)/rows.length):0,savg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.sp},0)/rows.length):0,el=TODAY.getDate();
   return '<div class="panel"><h2>'+FM[TODAY.getMonth()]+' — % by habit</h2><div class="bigrow"><span class="big">'+savg+'%</span><span>average so far</span></div>'+
     rows.map(function(o){var x=o.x,r=o.r;return '<button class="row mrow" data-act="hsel" data-id="'+x.id+'" style="width:100%;text-align:left;background:none;border:0;border-bottom:1.5px dashed rgba(0,0,0,.15);padding:6px 0;cursor:pointer;display:block;color:inherit;font:inherit">'+
-      '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+x.color+';margin-right:6px"></span>'+esc(x.name)+'</span>'+
+      '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+hcol(x)+';margin-right:6px"></span>'+esc(x.name)+'</span>'+
       '<span style="font-weight:800;white-space:nowrap">'+r.sp+'% <small style="font-weight:600;opacity:.75">· '+r.sn+' of '+r.sden+(x.weekly?' sessions':' days')+'</small></span></div>'+
-      '<div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+r.sp+'%;background:'+x.color+'"></i></div></button>'}).join('')+
+      '<div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+r.sp+'%;background:'+hcol(x)+'"></i></div></button>'}).join('')+
     '<p class="note">Out of the days so far this month. Strength + walking pad count toward 3x a week. Tap a habit to see its calendar.</p></div>'}
 function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate();
   var h='<div class="cal">'+DOW.map(function(d){return '<div class="hd">'+d+'</div>'}).join('');
@@ -1096,17 +1125,17 @@ function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new 
 function ringSVG(day){var c=D.period.cycle,cx=120,cy=120,R=100,r=64,segs=[['mens',1,D.period.bleed],['foll',D.period.bleed+1,Math.round(c/2)-2],['ovu',Math.round(c/2)-1,Math.round(c/2)],['lut',Math.round(c/2)+1,c]];
   function pt(a,rad){return [cx+rad*Math.sin(a),cy-rad*Math.cos(a)]}
   var h='<svg class="ring" viewBox="0 0 240 240">';segs.forEach(function(s){var a0=(s[1]-1)/c*2*Math.PI,a1=s[2]/c*2*Math.PI,lg=a1-a0>Math.PI?1:0,p0=pt(a0,R),p1=pt(a1,R),q1=pt(a1,r),q0=pt(a0,r);
-    h+='<path d="M'+p0+' A'+R+' '+R+' 0 '+lg+' 1 '+p1+' L'+q1+' A'+r+' '+r+' 0 '+lg+' 0 '+q0+'Z" fill="'+PH[s[0]].c+'" stroke="#3b1f1f" stroke-width="2.5"/>'});
+    h+='<path d="M'+p0+' A'+R+' '+R+' 0 '+lg+' 1 '+p1+' L'+q1+' A'+r+' '+r+' 0 '+lg+' 0 '+q0+'Z" fill="'+phc(s[0])+'" stroke="#3b1f1f" stroke-width="2.5"/>'});
   var a=((day-.5)%c)/c*2*Math.PI,m=pt(a,(R+r)/2);h+='<circle cx="'+m[0]+'" cy="'+m[1]+'" r="11" fill="#3b1f1f" stroke="#fff" stroke-width="3"/><text x="120" y="122" text-anchor="middle" font-family="Poppins" font-weight="900" font-size="28" fill="#3b1f1f">Day '+day+'</text><text x="120" y="144" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="13" fill="#3b1f1f">'+PH[phaseFor(day)].n+'</text></svg>';return h}
 function drawPeriod(b){var p=period(),ph=PH[p.phase];
   var h=head(b,'Estimates use a '+D.period.cycle+'-day cycle and '+D.period.bleed+' bleed days. Tap "Period started today" when it starts and everything recalculates.')+
   '<div class="cols"><div class="panel">'+ringSVG(p.day)+'<p style="font-weight:900;font-size:18px;margin:10px 0 2px">'+ph.n+' — Day '+p.day+'</p><p style="margin:0;font-weight:700">Next period est.: '+nice(p.next)+' <span class="note">(predicted)</span></p>'+
-  '<div class="callout" style="background:'+ph.c+'"><b>What’s normal right now:</b> '+ph.tip+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn pink" data-act="pstart">Period started today</button><button class="btn white" data-act="pundo">Undo last start</button></div></div>'+
-  '<div class="panel"><h2>Tap a phase to see what it means</h2>'+['mens','foll','ovu','lut'].map(function(k){return '<button class="phase" style="background:'+PH[k].c+'" data-act="phase" data-ph="'+k+'">'+PH[k].n+'</button>'}).join('')+'<div id="phinfo" class="callout" style="background:'+ph.c+'"><b>'+ph.n+'</b><br>'+ph.body+'</div>'+
+  '<div class="callout" style="background:'+phc(p.phase)+';color:'+txtOn(phc(p.phase))+'"><b>What’s normal right now:</b> '+ph.tip+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn pink" data-act="pstart">Period started today</button><button class="btn white" data-act="pundo">Undo last start</button></div></div>'+
+  '<div class="panel"><h2>Tap a phase to see what it means</h2>'+['mens','foll','ovu','lut'].map(function(k){return '<button class="phase" style="background:'+phc(k)+';color:'+txtOn(phc(k))+'" data-act="phase" data-ph="'+k+'">'+PH[k].n+'</button>'}).join('')+'<div id="phinfo" class="callout" style="background:'+phc(p.phase)+';color:'+txtOn(phc(p.phase))+'"><b>'+ph.n+'</b><br>'+ph.body+'</div>'+
   '<h2 style="margin-top:16px">Next 7 days</h2>'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(TODAY,i),pk=phaseFor(daysBetween(p.last,d)+1),ev=D.events.filter(function(e){return e.date===ymd(d)});if(ymd(d)===ymd(nails().next))ev=ev.concat([{title:'Nails due'}]);
-    return '<div class="row"><span class="phase" style="background:'+PH[pk].c+';margin:0;min-width:96px;text-align:center">'+PH[pk].n+'</span><div class="t"><span>'+nice(d)+'</span>'+(ev.length?'<small>'+ev.map(function(e){return esc(e.title)}).join(' · ')+'</small>':'')+'</div></div>'}).join('')+'</div></div>'+
+    return '<div class="row"><span class="phase" style="background:'+phc(pk)+';color:'+txtOn(phc(pk))+';margin:0;min-width:96px;text-align:center">'+PH[pk].n+'</span><div class="t"><span>'+nice(d)+'</span>'+(ev.length?'<small>'+ev.map(function(e){return esc(e.title)}).join(' · ')+'</small>':'')+'</div></div>'}).join('')+'</div></div>'+
   '<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var day=daysBetween(p.last,d)+1,pk=phaseFor(day),ev=D.events.filter(function(e){return e.date===ymd(d)});
-      return {style:'background:'+PH[pk].c,html:'<small>Day '+(((day-1)%D.period.cycle+D.period.cycle)%D.period.cycle+1)+(ymd(d)===ymd(p.next)?' · next est.':'')+'</small>'+ev.map(function(e){return '<span class="ev">'+esc(e.title)+'</span>'}).join('')}})+'</div>';
+      return {style:'background:'+phc(pk)+';color:'+txtOn(phc(pk)),html:'<small>Day '+(((day-1)%D.period.cycle+D.period.cycle)%D.period.cycle+1)+(ymd(d)===ymd(p.next)?' · next est.':'')+'</small>'+ev.map(function(e){return '<span class="ev">'+esc(e.title)+'</span>'}).join('')}})+'</div>';
   return h}
 
 /* --- upcoming --- */
@@ -1222,7 +1251,7 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='export'){exportData();toast('Backup downloaded');return}
   if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);save();renderDrawer();toast('Cycle reset to Day 1');return}
   if(a==='pundo'){if(D.period.starts.length>1){D.period.starts.pop();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
-  if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=ph.c;el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
+  if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=phc(t.dataset.ph);el.style.color=txtOn(phc(t.dataset.ph));el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
   if(a==='nailsdone'){D.nails.last=ymd(TODAY);nailLog(D.nails.last);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
   if(a==='delev'){D.events=D.events.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
 });
