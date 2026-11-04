@@ -107,6 +107,7 @@ textarea.field{border-radius:14px;min-height:110px;resize:vertical;width:100%}
 .btn{background:var(--yellow);border:2.5px solid var(--ink);border-radius:999px;padding:6px 14px;font-weight:800;font-size:12px;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
 .btn.pink{background:var(--pink)}.btn.teal{background:var(--teal);color:#fff}.btn.white{background:#fff}
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.hpick .chip{text-transform:none;letter-spacing:0;font-size:12px}
 .tabs .chip.on{background:var(--c,var(--yellow))}
 .big{font-family:var(--fh,Poppins);font-weight:900;font-size:40px;line-height:1;color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
 .bigrow{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
@@ -800,9 +801,33 @@ function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
   return h+'</div>'}
 
 /* --- habits --- */
+var hsel='all';
+function habitById(id){return D.habits.filter(function(x){return x.id===id})[0]}
+function picker(){return '<div class="tabs hpick" role="group" aria-label="Pick a habit"><button class="chip'+(hsel==='all'?' on':'')+'" data-act="hsel" data-id="all">All habits</button>'+
+  D.habits.map(function(x){return '<button class="chip'+(hsel===x.id?' on':'')+'" data-act="hsel" data-id="'+x.id+'" style="'+(hsel===x.id?'background:'+x.color+';color:#fff':'')+'"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+x.color+';margin-right:5px;vertical-align:1px"></span>'+esc(x.name)+'</button>'}).join('')+'</div>'}
+function hasOn(id,d){return hDone(ymd(d)).indexOf(id)>-1}
+function weeksTarget(x,days){return x.weekly*Math.max(1,Math.floor(days/7))}
+function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=x.color,wk=!!x.weekly;
+  if(sub==='week'){var s=weekStart(TODAY),n=0,cells='';for(var i=0;i<7;i++){var d=addDays(s,i),on=hasOn(x.id,d);if(on)n++;
+      cells+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:#fff':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
+    var den=wk?x.weekly:7,p=Math.min(100,Math.round(n/den*100));
+    h+='<div class="panel"><h2>'+esc(x.name)+' — week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+p+'%</span><span>'+n+' of '+den+(wk?' this week (3x target)':' days')+'</span></div><div class="pbar"><i style="width:'+p+'%;background:'+col+'"></i></div><div class="cal">'+cells+'</div>'+
+      '<p class="note">'+(wk?'Weekly habits are judged against their 3x target, not 7 days.':'% of the 7 days this week.')+'</p></div>'}
+  else if(sub==='month'){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y,m+1,0).getDate(),n2=0;for(var dd=1;dd<=dim;dd++)if(hasOn(x.id,new Date(y,m,dd)))n2++;
+    var den2=wk?weeksTarget(x,dim):dim,p2=Math.min(100,Math.round(n2/den2*100));
+    h+='<div class="panel"><h2>'+esc(x.name)+': '+n2+(n2===1?' day':' days')+' in '+FM[m]+'</h2><div class="bigrow"><span class="big">'+p2+'%</span><span>'+n2+' of '+den2+(wk?' (3x a week × '+(den2/3)+' weeks)':' days in '+FM[m])+'</span></div><div class="pbar"><i style="width:'+p2+'%;background:'+col+'"></i></div>'+
+      monthGrid(TODAY,function(d){var on=hasOn(x.id,d);return {cls:d>TODAY&&!on?' dim':'',style:on?'background:'+col+';color:#fff':'',html:'<small>'+(on?'✓':'')+'</small>'}})+
+      '<p class="note">Only '+esc(x.name)+' days are filled in. '+(wk?'% is against the 3x-a-week target.':'% is out of every day in the month.')+'</p></div>'}
+  else{var vals=[];for(var mm=0;mm<12;mm++){var yy=TODAY.getFullYear(),dm=new Date(yy,mm+1,0).getDate(),c=0,el=0;for(var d3=1;d3<=dm;d3++){var dt=new Date(yy,mm,d3);if(dt>TODAY)break;el++;if(hasOn(x.id,dt))c++}
+      var den3=!el?0:(wk?Math.max(x.weekly,Math.round(el/7*x.weekly)):el);vals.push({c:c,p:den3?Math.min(100,Math.round(c/den3*100)):0,den:den3})}
+    var tc=vals.reduce(function(a,v){return a+v.c},0);
+    h+='<div class="panel"><h2>'+esc(x.name)+' — '+TODAY.getFullYear()+'</h2><div class="bigrow"><span class="big">'+tc+'</span><span>'+(wk?'sessions':'days')+' logged this year</span></div><div class="bars">'+vals.map(function(v,i){return '<div><i style="height:'+v.p+'%;background:'+col+'"></i>'+MON[i]+'<br>'+(v.den?v.p+'%':'—')+'<br><small>'+(v.den?v.c:'')+'</small></div>'}).join('')+'</div>'+
+      '<p class="note">'+(wk?'% of the 3x-a-week target for each month.':'% of days in each month.')+' This month counts days so far.</p></div>'}
+  return h}
 function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
   var h=head(b,'Tap a circle to log it. Voice updates from Muse show up here too ('+esc(repoStatus)+'). <button class="btn white" data-act="export" style="margin-left:6px">Back up my data</button>')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var done=hDone(ymd(TODAY)),t=todayStats();
+  if(sub!=='today'){h+=picker();var one=hsel!=='all'&&habitById(hsel);if(one)return h+drawOneHabit(one)}
   if(sub==='today'){h+='<div class="cols"><div class="panel"><h2>Today — '+nice(TODAY)+'</h2><div class="bigrow"><span class="big">'+t.n+'</span><span>of '+t.of+' daily done</span></div><div class="pbar"><i style="width:'+(t.of?t.n/t.of*100:0)+'%"></i></div>'+
     dailyHabits().map(function(x){var on=done.indexOf(x.id)>-1;return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+x.color+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span></div></div>'}).join('')+'</div>'+
     '<div class="panel"><h2>This week — 3x habits</h2>'+D.habits.filter(function(x){return x.weekly}).map(function(x){var c=weeklyCount(x,TODAY),on=done.indexOf(x.id)>-1;
@@ -935,6 +960,7 @@ var imgTarget=null;
 $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-act]');if(!t||t.tagName==='FORM')return;var a=t.dataset.act;
   if(a==='back'){history.back();return}
   if(a==='sub'){sub=t.dataset.sub;renderDrawer();return}
+  if(a==='hsel'){hsel=t.dataset.id;renderDrawer();return}
   if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
   if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;save();renderDrawer();if(it.done)toast('Nice ✓');return}
   if(a==='del'){var s=D.lists[t.dataset.key][+t.dataset.si];s.items=s.items.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
