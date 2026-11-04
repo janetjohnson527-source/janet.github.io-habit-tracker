@@ -168,7 +168,7 @@ html.scene-on #scene{display:flex}
 html.scene-on .wrap,html.scene-on .key{display:none}
 html.scene-on #deco{display:none}
 html.scene-on body.dopen #deco{display:block}
-body.dopen #scene{display:none!important}
+body.dopen #scene{visibility:hidden!important}
 body.dopen #sceneBar,body.dopen #sceneWeb,body.dopen #sceneKey{display:none!important}
 #sceneInner{position:relative;width:640px;height:440px;flex:none;transform-origin:center center}
 .sc-web{display:none}
@@ -489,6 +489,19 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 [data-theme="folk"] .dtitle h1{-webkit-text-stroke:0;color:#f3e3c8;text-shadow:3px 3px 0 #ef4f8a,6px 6px 0 #9b7cf0}
 [data-theme="folk"] .panel{border-radius:24px;border:4px solid var(--c);box-shadow:0 0 0 4px #13202b,0 0 0 7px #f59ac0}
 
+
+/* ===== drawer artwork pulled from each theme's home scene ===== */
+.dwrap{position:relative}
+.dart{position:relative;overflow:hidden;pointer-events:none;flex:none}
+.dart>div{position:absolute;left:0;top:0;width:640px;height:440px;transform-origin:0 0}
+.dart.fade{-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(transparent,#000 9%,#000 91%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent),linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-composite:intersect}
+.dart:not(.frame)>div>:first-child{background:transparent!important;box-shadow:none!important}
+.dart.frame{border:3px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink)}
+.dart-h{position:absolute;right:32px;z-index:0}
+.dart-t{align-self:center}
+.dwrap.has-art>:not(.dart-h):not(.helper){position:relative;z-index:1}
+.dwrap.has-art .dsub{max-width:min(780px,calc(100% - 360px))}
+@media(max-width:900px){.dart-h{display:none}.dwrap.has-art .dsub{max-width:780px}}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -896,10 +909,47 @@ function closeDrawer(){document.body.classList.remove('dopen');if(SCENES[theme])
 window.addEventListener('popstate',function(){if(cur)closeDrawer()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if(cur)history.back()}});
 function head(b,subtxt){return '<button class="back" data-act="back">← Back to map</button><div class="dtitle" style="--c:'+pal(BUCKETS.indexOf(b),b)[1]+'"><h1>'+esc(b.name)+'</h1></div><p class="dsub">'+subtxt+'</p>'}
+
+/* artwork crops from each home scene: [x,y,w,h] in scene units, mode fade|frame|clean */
+var DART={
+ haunted:{h:[60,8,330,212,'fade'],t:[33,66,52,56,'clean']},
+ pink:{h:[40,10,330,205,'fade'],t:[328,193,48,54,'fade']},
+ folders:{h:[20,80,225,85,'clean'],t:[500,318,70,95,'clean']},
+ chromatic:{h:[360,95,240,240,'frame'],t:[158,141,30,30,'clean']},
+ strange:{h:[430,0,175,145,'fade']},
+ departure:{t:[553,333,74,74,'clean']},
+ psych:{h:[180,120,260,168,'fade']},
+ pixel:{h:[400,288,200,75,'clean'],t:[406,290,38,34,'clean']},
+ neo:{h:[95,285,235,110,'clean'],t:[536,136,92,92,'clean']},
+ satellite:{h:[168,272,165,104,'clean'],t:[475,128,44,44,'clean']},
+ patchwork:{h:[480,0,160,80,'frame'],t:[560,160,80,90,'frame']},
+ blackcat:{h:[470,232,165,145,'clean'],t:[80,245,110,125,'clean']},
+ checker:{h:[240,140,150,148,'frame'],t:[178,83,44,66,'clean']},
+ rainbow:{h:[25,95,232,84,'fade'],t:[450,243,82,48,'clean']},
+ crayon:{h:[0,0,160,80,'frame'],t:[480,80,80,80,'frame']},
+ sampler:{h:[5,305,232,72,'clean'],t:[440,248,70,42,'clean']},
+ folk:{h:[28,182,180,215,'fade'],t:[516,16,46,46,'clean']}
+};
+var dartCache={};
+function dartHTML(){if(dartCache[theme])return dartCache[theme];var src=$('#sceneInner');if(!src||!src.innerHTML)return '';
+  var h=src.innerHTML.replace(/\s(data-k|data-act|data-live|tabindex|role)="[^"]*"/g,'').replace(/<a\b/g,'<span').replace(/<\/a>/g,'</span>');
+  var refs={};h.replace(/url\(\s*(?:['"]|&quot;)?#([\w:.-]+)/g,function(m,id){refs[id]=1}).replace(/href="#([\w:.-]+)"/g,function(m,id){refs[id]=1});
+  Object.keys(refs).forEach(function(id){var e=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');h=h.replace(new RegExp('id="'+e+'"','g'),'id="'+id+'-dc"').replace(new RegExp('(url\\(\\s*(?:[\'"]|&quot;)?#)'+e+'(?![\\w:.-])','g'),'$1'+id+'-dc').replace(new RegExp('href="#'+e+'"','g'),'href="#'+id+'-dc"')});
+  return dartCache[theme]=h}
+function dartBox(c,s,cls){return '<div class="dart '+cls+' '+(c[4]||'clean')+'" aria-hidden="true" style="width:'+Math.round(c[2]*s)+'px;height:'+Math.round(c[3]*s)+'px"><div style="transform:scale('+s.toFixed(3)+') translate('+(-c[0])+'px,'+(-c[1])+'px)">'+dartHTML()+'</div></div>'}
+function addDrawerArt(el){var a=DART[theme];if(!a||!SCENES[theme]||sceneLoaded!==theme)return;var html=dartHTML();if(!html)return;
+  if(a.t){var tt=el.querySelector('.dtitle');if(tt)tt.insertAdjacentHTML('beforeend',dartBox(a.t,48/a.t[3],'dart-t'))}
+  if(a.h&&window.innerWidth>900){if(!$('#drawer').classList.contains('open')){setTimeout(function(){if(cur)renderDrawer()},0);return}var c=a.h,tt2=el.querySelector('.dtitle');if(!tt2)return;el.classList.add('has-art');
+    var R=el.getBoundingClientRect(),cut=R.left+R.width*0.62,top=52,lim=200,kids=[].slice.call(el.children),past=false;
+    for(var i=0;i<kids.length;i++){var k=kids[i];if(k===tt2){past=true;continue}if(!past||k.classList.contains('dsub'))continue;
+      var r=0,ch=k.children.length?k.children:[k];for(var q=0;q<ch.length;q++){var cr=ch[q].getBoundingClientRect();if(cr.width)r=Math.max(r,cr.right)}
+      if(r>cut){lim=k.offsetTop-top-14;break}}
+    var H=Math.max(80,Math.min(175,lim)),sc=Math.min(H/c[3],340/c[2]);
+    el.insertAdjacentHTML('afterbegin',dartBox(c,sc,'dart-h'));var d=el.firstElementChild;d.style.top=(top+Math.max(0,(Math.min(175,lim)-c[3]*sc)/2))+'px'}}
 function renderDrawer(){var b=bucketOf(cur),h='';var el=$('#dwrap');el.style.setProperty('--c',pal(BUCKETS.indexOf(b),b)[1]);
   if(cur==='habits')h=drawHabits(b);else if(cur==='period')h=drawPeriod(b);else if(cur==='upcoming')h=drawUpcoming(b);
   else if(cur==='nails')h=drawNails(b);else if(cur==='endeavors')h=drawEndeavors(b);else h=drawList(b);
-  el.innerHTML=h;renderHelper();}
+  el.innerHTML=h;el.classList.remove('has-art');addDrawerArt(el);renderHelper();}
 
 /* --- generic list --- */
 var LISTSUB={art:'Each initiative is its own header — check one off when it’s done.',tobuy:'Store split is a guess — move things as you like. Fashion "Need" items from Endeavors show up here automatically.',
@@ -1184,7 +1234,7 @@ var DECO={
     return '<svg style="left:0;top:0;width:100%;height:100%" viewBox="0 0 2000 860" preserveAspectRatio="none">'+p+'</svg><div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.55))"></div>'+
     '<svg style="left:0;top:0;width:180px;height:140px" viewBox="0 0 160 120"><path d="M0 0 L100 0 M0 0 L0 110 M0 0 L80 70 M0 0 L40 100 M0 0 L65 30 M40 0 Q30 18 0 20 M70 0 Q50 40 0 46 M96 0 Q70 64 0 78" stroke="#f2f0ea" stroke-width="1" fill="none" opacity=".7"/></svg>'+
     '<svg class="dz-bob" style="right:7%;top:0;width:40px;height:160px" viewBox="0 0 40 160"><path d="M20 0 V120" stroke="#f2f0ea" stroke-width="1"/><ellipse cx="20" cy="128" rx="9" ry="11" fill="#0f0f0f"/><path d="M11 122 l-9 -6 M11 128 h-11 M11 134 l-9 6 M29 122 l9 -6 M29 128 h11 M29 134 l9 6" stroke="#0f0f0f" stroke-width="2"/></svg>'}
-  ,departure:function(){return '<svg class="dz-drift" style="left:6%;top:12%;width:220px;height:70px" viewBox="0 0 220 70"><g fill="#fff" opacity=".85"><ellipse cx="60" cy="44" rx="56" ry="18"/><ellipse cx="90" cy="32" rx="34" ry="22"/><ellipse cx="140" cy="46" rx="60" ry="16"/></g></svg>'+
+  ,departure:function(){return '<svg class="dz-drift" style="left:56%;top:6%;width:220px;height:70px" viewBox="0 0 220 70"><g fill="#fff" opacity=".85"><ellipse cx="60" cy="44" rx="56" ry="18"/><ellipse cx="90" cy="32" rx="34" ry="22"/><ellipse cx="140" cy="46" rx="60" ry="16"/></g></svg>'+
     '<svg class="dz-drift" style="right:4%;top:60%;width:260px;height:80px;animation-delay:-5s" viewBox="0 0 220 70"><g fill="#fff" opacity=".7"><ellipse cx="60" cy="44" rx="56" ry="18"/><ellipse cx="90" cy="32" rx="34" ry="22"/><ellipse cx="140" cy="46" rx="60" ry="16"/></g></svg>'+
     '<svg class="dz-walk" style="left:0;top:22%;width:200px;height:60px;animation-duration:30s" viewBox="0 0 200 60"><path d="M0 34 H110" stroke="#fff" stroke-width="3" stroke-dasharray="2 8" opacity=".7"/><path d="M110 30 L170 24 C186 22,196 28,196 31 C196 34,186 38,170 37 L110 34 Z" fill="#f3e6cc"/><path d="M140 26 L128 4 L138 4 L160 25 Z M140 35 L130 54 L140 54 L160 36 Z" fill="#d6402b"/><path d="M114 30 L106 18 L114 18 L122 29 Z" fill="#d6402b"/></svg>'}
   ,pixel:function(){var cl='M8 0h24v8h8v8h8v8h-56v-8h8v-8h8z';return '<svg style="left:5%;top:12%;width:120px;height:48px" viewBox="0 0 56 24" shape-rendering="crispEdges"><path d="'+cl+'" fill="#fff"/></svg><svg class="dz-drift" style="right:8%;top:22%;width:160px;height:64px" viewBox="0 0 56 24" shape-rendering="crispEdges"><path d="'+cl+'" fill="#fff"/></svg>'+
