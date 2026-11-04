@@ -44,6 +44,8 @@ Do not edit `mind-map.html` to log habits.
 
 For weekly habits, mark `true` on each day it was done; the page counts them toward the 3x target.
 
+Janet can rename or remove habits on the page. Renaming keeps the same id, so always log by **id** (names can change). A habit she removed is ignored if it appears in this file.
+
 ## How the page combines Muse + Janet's own taps
 
 One rule, per habit per date: **whichever changed most recently wins.**
