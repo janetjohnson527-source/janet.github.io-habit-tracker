@@ -578,6 +578,7 @@ function defaults(){return {
     {id:'bank',name:'Checking bank balance via Money Pals',color:'#2b6cb0'},
     {id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'},
     {id:'collagen',name:'Collagen',color:'#ffb38a'},
+    {id:'posture',name:'Posture exercises',color:'#e0aaff'},
     {id:'strength',name:'Strength training',color:'#ff6b6b',weekly:3},{id:'walk',name:'Walking pad',color:'#2fbf71',weekly:3}
   ],
   hlog:{},
@@ -644,6 +645,7 @@ try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){D=null}
 if(!D)D=defaults();
 if(D.habits && !D.habits.some(function(h){return h.id==='lymph'})){D.habits.splice(13,0,{id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='collagen'})){D.habits.splice(14,0,{id:'collagen',name:'Collagen',color:'#ffb38a'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+if(D.habits && !D.habits.some(function(h){return h.id==='posture'})){var si=D.habits.findIndex(function(h){return h.id==='strength'});D.habits.splice(si<0?D.habits.length:si,0,{id:'posture',name:'Posture exercises',color:'#e0aaff'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){toast('Couldn’t save — storage is full')}}
 
 /* ============ computed ============ */
