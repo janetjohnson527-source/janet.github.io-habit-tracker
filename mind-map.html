@@ -170,7 +170,8 @@ html.scene-on #deco{display:none}
 html.scene-on body.dopen #deco{display:block}
 body.dopen #scene{visibility:hidden!important}
 body.dopen #sceneBar,body.dopen #sceneWeb,body.dopen #sceneKey{display:none!important}
-#sceneInner{position:relative;width:640px;height:440px;flex:none;transform-origin:center center}
+#sceneInner{position:relative;z-index:1;width:640px;height:440px;flex:none;transform-origin:center center}
+.sext{position:absolute;left:0;top:0;width:640px;height:440px;transform-origin:0 0;pointer-events:none;display:none;z-index:0;overflow:hidden}
 .sc-web{display:none}
 #sceneInner svg:has(#hhs-hg){display:none}
 [data-theme="haunted"] #sceneInner>div{background:transparent!important;overflow:visible!important}
@@ -664,7 +665,7 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 <svg class="spk fo-only" aria-hidden="true" style="left:22%;top:110px" width="20" height="20" viewBox="-15 -15 30 30"><path class="tw" style="animation-delay:-.5s" fill="#ffb627" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
 
 <div id="sceneKey"><button type="button" data-act="more">More ▾</button><button type="button" data-act="dump">✎ Dump</button><button type="button" data-act="where">✦ Ideas</button></div>
-<div id="scene" aria-label="Home"><svg id="sceneWeb" viewBox="560 0 80 80" aria-hidden="true"><g fill="none" stroke="#f7e3b5" stroke-width=".9" opacity=".7"><path d="M640 0 L560 0 M640 0 L640 80 M640 0 L580 50 M640 0 L606 70 M640 0 L590 26 M600 0 Q610 14 640 16 M580 0 Q596 28 640 36 M562 0 Q580 44 640 58"/></g></svg><div id="sceneInner"></div><svg id="sceneGrain" aria-hidden="true"><filter id="scg"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#scg)"/></svg></div>
+<div id="scene" aria-label="Home"><div id="sceneExtL" class="sext" aria-hidden="true"></div><div id="sceneExtR" class="sext" aria-hidden="true"></div><svg id="sceneWeb" viewBox="560 0 80 80" aria-hidden="true"><g fill="none" stroke="#f7e3b5" stroke-width=".9" opacity=".7"><path d="M640 0 L560 0 M640 0 L640 80 M640 0 L580 50 M640 0 L606 70 M640 0 L590 26 M600 0 Q610 14 640 16 M580 0 Q596 28 640 36 M562 0 Q580 44 640 58"/></g></svg><div id="sceneInner"></div><svg id="sceneGrain" aria-hidden="true"><filter id="scg"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#scg)"/></svg></div>
 <div class="wrap">
   <div class="titlebox">
     <h1 class="ttl">JANET'S MIND MAP</h1>
@@ -1387,10 +1388,22 @@ function liveText(e){var k=e.dataset.live,t=todayStats(),n=nails();
   return out+(e.dataset.suf||'')}
 function liveVal(k){return liveText({dataset:{live:k}})}
 var FOCUS={haunted:120,folders:110,chromatic:120,strange:330,departure:110,psych:215,pixel:110,neo:120,satellite:215,patchwork:110,blackcat:110,checker:200,pink:150,rainbow:150,crayon:100,sampler:120,folk:250};
+
+/* side extensions: continue a scene's background past its edges (mirrored) on wide screens */
+var SEXT={strange:function(body){var t=document.createElement('div');t.innerHTML=body;var root=t.firstElementChild,svg=root&&root.querySelector('svg');if(!svg)return '';
+  [].slice.call(svg.children).forEach(function(c){var tg=c.tagName.toLowerCase(),f=c.getAttribute('fill');if(tg==='rect'&&c.getAttribute('filter')){c.setAttribute('x','-20');c.setAttribute('y','-20');c.setAttribute('width','680');c.setAttribute('height','480')}if(tg==='defs'||tg==='rect'||(tg==='path'&&(f==='#0f0f0f'||f==='#0b0b0b')))return;c.remove()});
+  return '<div style="position:absolute;inset:0;background:#8c8c8c">'+svg.outerHTML+'</div>'}},sextFor=null;
+function fitExt(s,W,H,on){var L=$('#sceneExtL'),R=$('#sceneExtR');if(!L)return;var f=SEXT[theme];
+  if(!on||!f||!SCENES[theme]){L.style.display=R.style.display='none';return}
+  if(sextFor!==theme){var h=f(SCENES[theme].body);L.innerHTML=R.innerHTML=h;sextFor=theme}
+  var lx=W/2-320*s,rx=W/2+320*s,top=H/2-220*s;if(lx<=0.5){L.style.display=R.style.display='none';return}
+  var K=Math.max(20,Math.min(640,lx/(3*s))),sx=lx/K,sxr=(W-rx)/K;
+  L.style.display=R.style.display='block';L.style.transform='translate('+lx+'px,'+top+'px) scale('+(-sx)+','+s+') ';R.style.transform='translate('+(rx+640*sxr)+'px,'+top+'px) scale('+(-sxr)+','+s+')';$('#scene').style.backgroundColor='#121212'}
 function fitScene(){var el=$('#sceneInner'),W=window.innerWidth,H=window.innerHeight;var s=Math.min(W/640,H/440),off=0;
   if(document.body.classList.contains('dopen')){var BH=Math.round(Math.min(220,Math.max(150,H*.24)));document.documentElement.style.setProperty('--bh',BH+'px');s=Math.min(BH/240,W/640);var vis=BH/s;off=Math.max(0,Math.min(Math.max(0,440-vis),(FOCUS[theme]||120)-vis/2));H=BH;
     el.style.transformOrigin='top center';el.style.transform='translateY('+(-off*s).toFixed(1)+'px) scale('+s+')'}
   else{el.style.transformOrigin='center center';el.style.transform='scale('+s+')'}
+  try{fitExt(s,W,H,!document.body.classList.contains('dopen'))}catch(e){}
   var sc=SCENES[theme];var g=$('#sceneGrain');g.style.display=theme==='haunted'?'block':'none';
   if(sc&&typeof sc.bg==='object'){var S=$('#scene').style;S.background='';S.backgroundColor=sc.bg.c;S.backgroundImage=sc.bg.i;S.backgroundSize=sc.bg.s.split(',').map(function(x){return /px/.test(x)?x.replace(/[\d.]+px/g,function(p){return (parseFloat(p)*s).toFixed(1)+'px'}):x}).join(',');S.backgroundPosition='center'}
   else if(sc&&sc.ground){var gt=off||document.body.classList.contains('dopen')?Math.round((sc.ground[0]-off)*s):Math.round((H-440*s)/2+sc.ground[0]*s);$('#scene').style.background='linear-gradient(to bottom,'+sc.bg+' 0 '+gt+'px,'+sc.ground[1]+' '+gt+'px 100%)'}else if(sc){$('#scene').style.background=sc.bg}
