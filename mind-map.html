@@ -566,6 +566,9 @@ body.dopen .wrappill{display:none}
 .row.done .star{display:none}
 [data-theme="strange"] .row .star.on,[data-theme="blackcat"] .row .star.on{color:#111;text-shadow:none}
 [data-theme="strange"] .row.pri,[data-theme="blackcat"] .row.pri{background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 70%)}
+
+.psym.on{background:var(--c,#ff8fab);color:#fff}
+[data-theme="lava"] .psym.on{background:#ff5ad9;color:#0a0612}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -888,12 +891,12 @@ function weekStart(d){var x=new Date(d);var wd=(x.getDay()+6)%7;x.setDate(x.getD
 function weeklyCount(h,d){var s=weekStart(d),n=0;for(var i=0;i<7;i++){if(hDone(ymd(addDays(s,i))).indexOf(h.id)>-1)n++}return n}
 function todayStats(){var dh=dailyHabits(),done=hDone(ymd(TODAY));var n=dh.filter(function(h){return done.indexOf(h.id)>-1}).length;return {n:n,of:dh.length}}
 function period(){
-  var p=D.period,last=parse(p.starts[p.starts.length-1]);
+  var p=D.period,td0=ymd(TODAY),ok0=p.starts.filter(function(x){return x<=td0}).sort(),last=parse(ok0.length?ok0[ok0.length-1]:p.starts[0]);
   var day=daysBetween(last,TODAY)+1;
   var next=addDays(last,p.cycle);
   return {day:day,last:last,next:next,phase:phaseFor(day)}
 }
-function phaseFor(day){var c=D.period.cycle,b=D.period.bleed,ov=Math.round(c/2);day=((day-1)%c+c)%c+1;
+function phaseFor(day){var c=D.period.cycle,b=(day>=1&&day<=c&&typeof curBleed==='function')?curBleed():D.period.bleed,ov=Math.round(c/2);day=((day-1)%c+c)%c+1;
   if(day<=b)return 'mens';if(day<ov-1)return 'foll';if(day<=ov)return 'ovu';return 'lut'}
 var PH={
   mens:{n:'Menstrual',c:'#ff8fab',tip:'Rest first, low energy is normal. Leave space.',body:'Your body is shedding the lining it built up. That is the bleeding. It can come with cramps, tiredness, and feeling more emotional than usual. This is the rest part — low energy and wanting to skip plans is normal here.'},
@@ -1007,7 +1010,7 @@ $('#map').addEventListener('click',function(e){var b=e.target.closest('.folder')
 
 /* ============ drawers ============ */
 var cur=null,sub='today';
-function openDrawer(k,tab){document.body.classList.add('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=k;sub=tab||(k==='habits'?'today':'');hDay=TODAY;hEdit=false;hDelPending=null;renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
+function openDrawer(k,tab){document.body.classList.add('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=k;sub=tab||(k==='habits'?'today':'');hDay=TODAY;hEdit=false;hDelPending=null;pDate=null;renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
 function closeDrawer(){document.body.classList.remove('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=null;if($('#helper'))$('#helper').remove();$('#drawer').classList.remove('open');document.body.style.overflow='';renderHome();if(SCENES[theme])renderScene()}
 window.addEventListener('popstate',function(){if(cur)closeDrawer()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if(cur)history.back()}});
@@ -1245,20 +1248,68 @@ function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new 
   return h+'</div>'}
 
 /* --- period --- */
-function ringSVG(day){var c=D.period.cycle,cx=120,cy=120,R=100,r=64,segs=[['mens',1,D.period.bleed],['foll',D.period.bleed+1,Math.round(c/2)-2],['ovu',Math.round(c/2)-1,Math.round(c/2)],['lut',Math.round(c/2)+1,c]];
+function ringSVG(day){var c=D.period.cycle,cx=120,cy=120,R=100,r=64,segs=[['mens',1,curBleed()],['foll',curBleed()+1,Math.round(c/2)-2],['ovu',Math.round(c/2)-1,Math.round(c/2)],['lut',Math.round(c/2)+1,c]];
   function pt(a,rad){return [cx+rad*Math.sin(a),cy-rad*Math.cos(a)]}
   var h='<svg class="ring" viewBox="0 0 240 240">';segs.forEach(function(s){var a0=(s[1]-1)/c*2*Math.PI,a1=s[2]/c*2*Math.PI,lg=a1-a0>Math.PI?1:0,p0=pt(a0,R),p1=pt(a1,R),q1=pt(a1,r),q0=pt(a0,r);
     h+='<path d="M'+p0+' A'+R+' '+R+' 0 '+lg+' 1 '+p1+' L'+q1+' A'+r+' '+r+' 0 '+lg+' 0 '+q0+'Z" fill="'+phc(s[0])+'" stroke="#3b1f1f" stroke-width="2.5"/>'});
   var a=((day-.5)%c)/c*2*Math.PI,m=pt(a,(R+r)/2);h+='<circle cx="'+m[0]+'" cy="'+m[1]+'" r="11" fill="#3b1f1f" stroke="#fff" stroke-width="3"/><text x="120" y="122" text-anchor="middle" font-family="Poppins" font-weight="900" font-size="28" fill="#3b1f1f">Day '+day+'</text><text x="120" y="144" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="13" fill="#3b1f1f">'+PH[phaseFor(day)].n+'</text></svg>';return h}
+
+/* ===== period notes: symptoms + what helps, so "what's normal" learns ===== */
+var PSYM=['Cramps','Bloating','Headache','Tired','Low mood','Anxious','Irritable','Cravings','Breakouts','Back pain','Tender breasts','Can’t sleep','High energy','Feeling great'];
+var pDate=null;
+function plog(){if(!D.plog)D.plog={};return D.plog}
+function ptips(){if(!D.ptips)D.ptips={mens:[],foll:[],ovu:[],lut:[]};return D.ptips}
+function cdMod(cd){var c=D.period.cycle;return ((cd-1)%c+c)%c+1}
+function cycleDayOf(ds){var st=D.period.starts.slice().sort(),last=null;for(var i=0;i<st.length;i++){if(st[i]<=ds)last=st[i]}if(!last)return null;return daysBetween(parse(last),parse(ds))+1}
+function pPattern(day){var c=D.period.cycle,L=plog(),cnt={},n=0,notes=[];
+  Object.keys(L).forEach(function(ds){var cd=cycleDayOf(ds);if(cd===null)return;cd=cdMod(cd);var dd=Math.abs(cd-day);dd=Math.min(dd,c-dd);if(dd>1)return;
+    var e=L[ds];if(!e)return;if((e.s||[]).length||e.n)n++;(e.s||[]).forEach(function(x){cnt[x]=(cnt[x]||0)+1});if(e.n)notes.push({d:ds,n:e.n})});
+  var top=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}).map(function(k){return {s:k,c:cnt[k]}});notes.sort(function(a,b){return a.d<b.d?1:-1});return {n:n,top:top,notes:notes}}
+function pNormal(p){var day=cdMod(p.day),pt=pPattern(day),tips=ptips()[p.phase]||[],h='';
+  if(pt.top.length){var lst=pt.top.slice(0,4).map(function(o){return o.s.toLowerCase()+(o.c>1?' ('+o.c+'×)':'')}).join(', ');
+    h+='<div style="margin-top:8px"><b>For you, around day '+day+':</b> '+(pt.n>1?'you usually log ':'last time you logged ')+esc(lst)+'.</div>'}
+  if(pt.notes.length)h+='<div style="margin-top:6px"><b>Your note'+(pt.notes.length>1?' (latest)':'')+':</b> “'+esc(pt.notes[0].n)+'”</div>';
+  if(tips.length)h+='<div style="margin-top:6px"><b>What helps you:</b> '+tips.map(function(t){return esc(t.t)}).join(' · ')+'</div>';
+  return h}
+/* ---- adjusting the period itself ---- */
+function pEnds(){if(!D.period.ends)D.period.ends={};return D.period.ends}
+function curBleed(){var p=D.period,last=p.starts[p.starts.length-1],e=pEnds()[last];return e?Math.max(1,daysBetween(parse(last),parse(e))+1):p.bleed}
+function pRecalc(){var P=D.period,st=P.starts.slice().sort(),gaps=[];P.starts=st;
+  for(var i=1;i<st.length;i++){var g=daysBetween(parse(st[i-1]),parse(st[i]));if(g>=18&&g<=50)gaps.push(g)}
+  if(gaps.length&&!P.cycleManual){var g3=gaps.slice(-3);P.cycle=Math.round(g3.reduce(function(a,b){return a+b},0)/g3.length)}
+  var lens=Object.keys(pEnds()).filter(function(k){return st.indexOf(k)>-1}).sort().slice(-3).map(function(k){return daysBetween(parse(k),parse(pEnds()[k]))+1}).filter(function(x){return x>=1&&x<=12});
+  if(lens.length&&!P.bleedManual)P.bleed=Math.round(lens.reduce(function(a,b){return a+b},0)/lens.length)}
+function drawPAdjust(p){var P=D.period,last=P.starts[P.starts.length-1],end=pEnds()[last],st=P.starts.slice().sort().reverse(),h='';
+  h+='<div class="panel"><h2>Adjust your period</h2>'+
+    '<form class="add" data-act="pstartset"><label style="font-weight:700;font-size:13px;align-self:center">It started on</label><input type="date" value="'+ymd(TODAY)+'" max="'+ymd(TODAY)+'" aria-label="start date" class="field" style="width:auto;flex:0 0 auto"><button class="btn pink">Save start</button></form>'+
+    '<form class="add" data-act="pendset" style="margin-top:8px"><label style="font-weight:700;font-size:13px;align-self:center">This one ended on</label><input type="date" value="'+(end||'')+'" min="'+last+'" max="'+ymd(TODAY)+'" aria-label="end date" class="field" style="width:auto;flex:0 0 auto"><button class="btn white">Save end</button>'+(end?'<span class="note" style="margin:0;align-self:center">'+curBleed()+' days this time</span>':'')+'</form>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px">'+
+      '<form data-act="pcycle" class="add"><label style="font-weight:700;font-size:13px;align-self:center">Cycle length</label><input type="number" min="18" max="50" value="'+P.cycle+'" aria-label="cycle length in days" class="field" style="width:76px;flex:0 0 76px"><button class="btn white">Set</button></form>'+
+      '<form data-act="pbleed" class="add"><label style="font-weight:700;font-size:13px;align-self:center">Period length</label><input type="number" min="1" max="12" value="'+P.bleed+'" aria-label="period length in days" class="field" style="width:76px;flex:0 0 76px"><button class="btn white">Set</button></form></div>'+
+    '<p class="note">These update on their own from the starts and ends you log (average of your last 3). Set one by hand and it stays put until you tap Auto. '+((P.cycleManual||P.bleedManual)?'<button class="chip" data-act="pauto" style="text-transform:none;letter-spacing:0">Auto</button>':'')+'</p>'+
+    '<h2 style="margin-top:14px">Past starts</h2>'+st.slice(0,8).map(function(d,i){var e=pEnds()[d],nx=P.starts.slice().sort()[P.starts.slice().sort().indexOf(d)+1];return '<div class="row"><div class="t"><span>'+nice(parse(d))+(i===0?' · current':'')+'</span><small>'+(e?(daysBetween(parse(d),parse(e))+1)+'-day period':'end not logged')+(nx?' · '+daysBetween(parse(d),parse(nx))+'-day cycle':'')+'</small></div>'+(P.starts.length>1?'<button class="x" data-act="pstartdel" data-d="'+d+'" aria-label="delete this start">✕</button>':'')+'</div>'}).join('')+'</div>';
+  return h}
+function drawPNotes(p){var ds=pDate||ymd(TODAY),e=plog()[ds]||{s:[],n:''},cd=cycleDayOf(ds),pk=cd?phaseFor(cd):null,h='';
+  h+='<div class="cols"><div class="panel"><h2>Log how you feel</h2><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><input type="date" data-act="pdate" value="'+ds+'" max="'+ymd(TODAY)+'" class="field" style="width:auto;padding:6px 10px" aria-label="day to log"><span class="note" style="margin:0">'+(cd?'Day '+cdMod(cd)+' · '+PH[pk].n:'')+'</span></div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:6px">'+PSYM.concat((e.s||[]).filter(function(x){return PSYM.indexOf(x)<0})).map(function(x){var on=(e.s||[]).indexOf(x)>-1;return '<button class="chip psym'+(on?' on':'')+'" data-act="psym" data-s="'+esc(x)+'" aria-pressed="'+on+'" style="text-transform:none;letter-spacing:0;font-size:12px">'+(on?'✓ ':'')+esc(x)+'</button>'}).join('')+'</div>'+
+    '<form class="add" data-act="psymadd" style="margin-top:8px"><input placeholder="Something else? e.g. nausea" aria-label="other symptom"><button class="btn white">Add</button></form>'+
+    '<form data-act="pnote" style="margin-top:10px"><textarea class="field" rows="3" placeholder="Notes for this day — how you felt, what helped, what didn’t…" aria-label="note">'+esc(e.n||'')+'</textarea><div style="margin-top:6px;display:flex;gap:8px;align-items:center"><button class="btn">Save note</button>'+(e.n?'<span class="note" style="margin:0">Saved ✓</span>':'')+'</div></form>'+
+    '<p class="note">Your logs teach the “What’s normal right now” box — after a cycle or two it shows what you usually feel on each day.</p></div>';
+  var T=ptips();h+='<div class="panel"><h2>What helps you</h2><p class="note" style="margin-top:0">Your own tips for each phase. They show up in “What’s normal right now” during that phase.</p>'+
+    ['mens','foll','ovu','lut'].map(function(k){return '<div style="margin-top:8px"><span class="phase" style="background:'+phc(k)+';color:'+txtOn(phc(k))+';margin:0 0 4px">'+PH[k].n+'</span>'+(T[k]||[]).map(function(t){return '<div class="row"><div class="t"><span>'+esc(t.t)+'</span></div><button class="x" data-act="ptipdel" data-ph="'+k+'" data-id="'+t.id+'" aria-label="remove tip">✕</button></div>'}).join('')+'</div>'}).join('')+
+    '<form class="add" data-act="ptip" style="margin-top:10px"><select class="field" style="width:auto" aria-label="phase">'+['mens','foll','ovu','lut'].map(function(k){return '<option value="'+k+'"'+(k===p.phase?' selected':'')+'>'+PH[k].n+'</option>'}).join('')+'</select><input placeholder="e.g. heating pad + early night" aria-label="tip"><button class="btn">Add</button></form></div></div>';
+  var L=plog(),keys=Object.keys(L).filter(function(k){var x=L[k];return x&&((x.s||[]).length||x.n)}).sort().reverse();
+  if(keys.length)h+='<div class="panel"><h2>Your log</h2>'+keys.slice(0,10).map(function(k){var x=L[k],c=cycleDayOf(k),pp=c?phaseFor(c):null;return '<div class="row"><span class="phase" style="'+(pp?'background:'+phc(pp)+';color:'+txtOn(phc(pp))+';':'')+'margin:0;min-width:70px;text-align:center">'+(c?'Day '+cdMod(c):'—')+'</span><div class="t"><span>'+nice(parse(k))+(x.s&&x.s.length?' — '+esc(x.s.join(', ')):'')+'</span>'+(x.n?'<small>'+esc(x.n)+'</small>':'')+'</div><button class="chip" data-act="pdatego" data-d="'+k+'" style="text-transform:none;letter-spacing:0">Edit</button><button class="x" data-act="plogdel" data-d="'+k+'" aria-label="delete log">✕</button></div>'}).join('')+(keys.length>10?'<p class="note">+ '+(keys.length-10)+' earlier</p>':'')+'</div>';
+  return h+drawPAdjust(p)}
 function drawPeriod(b){var p=period(),ph=PH[p.phase];
   var h=head(b,'Estimates use a '+D.period.cycle+'-day cycle and '+D.period.bleed+' bleed days. Tap "Period started today" when it starts and everything recalculates.')+
   '<div class="cols"><div class="panel">'+ringSVG(p.day)+'<p style="font-weight:900;font-size:18px;margin:10px 0 2px">'+ph.n+' — Day '+p.day+'</p><p style="margin:0;font-weight:700">Next period est.: '+nice(p.next)+' <span class="note">(predicted)</span></p>'+
-  '<div class="callout" style="background:'+phc(p.phase)+';color:'+txtOn(phc(p.phase))+'"><b>What’s normal right now:</b> '+ph.tip+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn pink" data-act="pstart">Period started today</button><button class="btn white" data-act="pundo">Undo last start</button></div></div>'+
+  '<div class="callout" style="background:'+phc(p.phase)+';color:'+txtOn(phc(p.phase))+'"><b>What’s normal right now:</b> '+ph.tip+pNormal(p)+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn pink" data-act="pstart">Period started today</button><button class="btn white" data-act="pundo">Undo last start</button>'+(p.day<=12&&!pEnds()[D.period.starts[D.period.starts.length-1]]?'<button class="btn white" data-act="pend">Period ended today</button>':'')+'</div></div>'+
   '<div class="panel"><h2>Tap a phase to see what it means</h2>'+['mens','foll','ovu','lut'].map(function(k){return '<button class="phase" style="background:'+phc(k)+';color:'+txtOn(phc(k))+'" data-act="phase" data-ph="'+k+'">'+PH[k].n+'</button>'}).join('')+'<div id="phinfo" class="callout" style="background:'+phc(p.phase)+';color:'+txtOn(phc(p.phase))+'"><b>'+ph.n+'</b><br>'+ph.body+'</div>'+
   '<h2 style="margin-top:16px">Next 7 days</h2>'+[0,1,2,3,4,5,6].map(function(i){var d=addDays(TODAY,i),pk=phaseFor(daysBetween(p.last,d)+1),ev=D.events.filter(function(e){return e.date===ymd(d)});if(ymd(d)===ymd(nails().next))ev=ev.concat([{title:'Nails due'}]);
     return '<div class="row"><span class="phase" style="background:'+phc(pk)+';color:'+txtOn(phc(pk))+';margin:0;min-width:96px;text-align:center">'+PH[pk].n+'</span><div class="t"><span>'+nice(d)+'</span>'+(ev.length?'<small>'+ev.map(function(e){return esc(e.title)}).join(' · ')+'</small>':'')+'</div></div>'}).join('')+'</div></div>'+
   '<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var day=daysBetween(p.last,d)+1,pk=phaseFor(day),ev=D.events.filter(function(e){return e.date===ymd(d)});
-      return {style:'background:'+phc(pk)+';color:'+txtOn(phc(pk)),html:'<small>Day '+(((day-1)%D.period.cycle+D.period.cycle)%D.period.cycle+1)+(ymd(d)===ymd(p.next)?' · next est.':'')+'</small>'+ev.map(function(e){return '<span class="ev">'+esc(e.title)+'</span>'}).join('')}})+'</div>';
+      var lg=plog()[ymd(d)],has=lg&&((lg.s||[]).length||lg.n);return {style:'background:'+phc(pk)+';color:'+txtOn(phc(pk)),html:'<small>Day '+(((day-1)%D.period.cycle+D.period.cycle)%D.period.cycle+1)+(ymd(d)===ymd(p.next)?' · next est.':'')+(has?' · 📝':'')+'</small>'+ev.map(function(e){return '<span class="ev">'+esc(e.title)+'</span>'}).join('')}})+'</div>'+drawPNotes(p);
   return h}
 
 /* --- upcoming --- */
@@ -1308,6 +1359,9 @@ function helperTips(ctx){
   var dnext=daysBetween(TODAY,p.next);
   if(dnext>=0&&dnext<=4)add(['home','period','tobuy'],7,'🩸','Period est. in '+dnext+' days — stock up on supplies + comfort food now.',ctx==='tobuy'?null:'tobuy');
   add(['home','period'],4,'🌙',ph.n+' phase — '+ph.tip,ctx==='period'?null:'period');
+  try{var cyc=D.period.cycle;for(var ah=1;ah<=2;ah++){var dday=((p.day+ah-1)%cyc+cyc)%cyc+1,pt2=pPattern(dday);if(pt2.n>=2&&pt2.top.length&&pt2.top[0].c>=2){var hl=(ptips()[phaseFor(dday)]||[])[0];
+      add(['home','period'],7,'🔮','Heads up: around day '+dday+' ('+(ah===1?'tomorrow':'in 2 days')+') you usually get '+pt2.top[0].s.toLowerCase()+'.'+(hl?' What helps you: '+hl.t+'.':''),ctx==='period'?null:'period');break}}}catch(e){}
+  var tdl=plog()[ymd(TODAY)];if(!(tdl&&((tdl.s||[]).length||tdl.n))&&p.phase==='mens')add(['period'],5,'📝','Log how you feel today — it teaches “what’s normal for you”.');
   if(low)add(['todo','art','endeavors'],6,'🌙',ph.n+' phase, energy runs lower — pick one small thing, skip the big ones.','period');
   else add(['todo','art','endeavors'],5,'⚡',ph.n+' phase, energy is up — good window for a bigger one (purge closet, backfill art).','period');
   // priorities
@@ -1388,15 +1442,32 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
     var gone=habitById(id);D.habits=D.habits.filter(function(x){return x.id!==id});D.removedHabits=D.removedHabits||[];if(D.removedHabits.indexOf(id)<0)D.removedHabits.push(id);
     if(hsel===id)hsel='all';hDelPending=null;save();renderDrawer();toast('Removed '+(gone?gone.name:'habit'));return}
   if(a==='export'){exportData();toast('Backup downloaded');return}
-  if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);save();renderDrawer();toast('Cycle reset to Day 1');return}
-  if(a==='pundo'){if(D.period.starts.length>1){D.period.starts.pop();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
+  if(a==='psym'){var dk=pDate||ymd(TODAY),L0=plog(),en=L0[dk]||(L0[dk]={s:[],n:''}),sy=t.dataset.s,ix=en.s.indexOf(sy);if(ix>-1)en.s.splice(ix,1);else en.s.push(sy);save();renderDrawer();return}
+  if(a==='ptipdel'){var TT=ptips();TT[t.dataset.ph]=(TT[t.dataset.ph]||[]).filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
+  if(a==='plogdel'){delete plog()[t.dataset.d];save();renderDrawer();toast('Log removed');return}
+  if(a==='pdatego'){pDate=t.dataset.d;renderDrawer();var pf=$('#dwrap input[data-act="pdate"]');if(pf)pf.scrollIntoView({block:'center'});return}
+  if(a==='pend'){pEnds()[D.period.starts[D.period.starts.length-1]]=ymd(TODAY);pRecalc();save();renderDrawer();toast('Logged — '+curBleed()+'-day period');return}
+  if(a==='pstartdel'){if(D.period.starts.length<2)return;D.period.starts=D.period.starts.filter(function(x){return x!==t.dataset.d});delete pEnds()[t.dataset.d];pRecalc();save();renderDrawer();toast('Start removed');return}
+  if(a==='pauto'){delete D.period.cycleManual;delete D.period.bleedManual;pRecalc();save();renderDrawer();toast('Back to automatic');return}
+  if(a==='pstart'){var td=ymd(TODAY);if(D.period.starts.indexOf(td)<0)D.period.starts.push(td);pRecalc();save();renderDrawer();toast('Cycle reset to Day 1');return}
+  if(a==='pundo'){if(D.period.starts.length>1){var popd=D.period.starts.pop();delete pEnds()[popd];pRecalc();save();renderDrawer();toast('Undone')}else toast('Nothing to undo');return}
   if(a==='phase'){var ph=PH[t.dataset.ph],el=$('#phinfo');el.style.background=phc(t.dataset.ph);el.style.color=txtOn(phc(t.dataset.ph));el.innerHTML='<b>'+ph.n+'</b><br>'+ph.body;return}
   if(a==='nailsdone'){D.nails.last=ymd(TODAY);nailLog(D.nails.last);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
   if(a==='delev'){D.events=D.events.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
 });
+$('#dwrap').addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.act==='pdate'&&t.value){pDate=t.value>ymd(TODAY)?ymd(TODAY):t.value;renderDrawer();var pf=$('#dwrap input[data-act="pdate"]');if(pf)pf.scrollIntoView({block:'center'})}});
 $('#dwrap').addEventListener('submit',function(e){e.preventDefault();var f=e.target,a=f.dataset.act,ins=f.querySelectorAll('input');
   if(a==='add'){var v=ins[0].value.trim();if(!v)return;D.lists[f.dataset.key][+f.dataset.si].items.push({id:uid(),t:v,done:false,addedOn:ymd(TODAY)})}
   else if(a==='hrename'){var nm=ins[0].value.trim(),hx=habitById(f.dataset.id);if(!nm||!hx)return;hx.name=nm;save();renderDrawer();toast('Renamed ✓');return}
+  else if(a==='pnote'){var dk2=pDate||ymd(TODAY),L1=plog(),en2=L1[dk2]||(L1[dk2]={s:[],n:''});en2.n=f.querySelector('textarea').value.trim();save();renderDrawer();toast('Note saved');return}
+  else if(a==='psymadd'){var sv=ins[0].value.trim();if(!sv)return;var dk3=pDate||ymd(TODAY),L2=plog(),en3=L2[dk3]||(L2[dk3]={s:[],n:''});if(en3.s.indexOf(sv)<0)en3.s.push(sv);save();renderDrawer();return}
+  else if(a==='ptip'){var tv=ins[0].value.trim();if(!tv)return;var TT2=ptips(),phk=f.querySelector('select').value;(TT2[phk]=TT2[phk]||[]).push({id:uid(),t:tv});save();renderDrawer();toast('Tip saved for '+PH[phk].n);return}
+  else if(a==='pstartset'){var sd=ins[0].value;if(!sd||sd>ymd(TODAY))return toast('Pick a date up to today');var P0=D.period,lastS=P0.starts.slice().sort().pop();
+    if(lastS&&Math.abs(daysBetween(parse(lastS),parse(sd)))<=10){P0.starts=P0.starts.filter(function(x){return x!==lastS});var oe=pEnds()[lastS];delete pEnds()[lastS];if(oe&&oe>=sd)pEnds()[sd]=oe;toast('Start moved to '+nice(parse(sd)))}else toast('New start logged: '+nice(parse(sd)));
+    if(P0.starts.indexOf(sd)<0)P0.starts.push(sd);pRecalc();save();renderDrawer();return}
+  else if(a==='pendset'){var ed=ins[0].value,ls=D.period.starts.slice().sort().pop();if(!ed)return;if(ed<ls)return toast('End can’t be before the start');pEnds()[ls]=ed;pRecalc();save();renderDrawer();toast('Logged — '+curBleed()+'-day period');return}
+  else if(a==='pcycle'){var cv=+ins[0].value;if(!(cv>=18&&cv<=50))return toast('Pick 18–50 days');D.period.cycle=cv;D.period.cycleManual=true;save();renderDrawer();toast('Cycle set to '+cv+' days');return}
+  else if(a==='pbleed'){var bv=+ins[0].value;if(!(bv>=1&&bv<=12))return toast('Pick 1–12 days');D.period.bleed=bv;D.period.bleedManual=true;save();renderDrawer();toast('Period length set to '+bv+' days');return}
   else if(a==='addhabit'){var v2=ins[0].value.trim();if(!v2)return;D.habits.splice(dailyHabits().length,0,{id:uid(),name:v2,color:['#2f9be8','#ff6b9d','#9b7ede','#2fbf71','#ff8a3d'][D.habits.length%5]})}
   else if(a==='addev'){if(!ins[0].value||!ins[1].value.trim())return toast('Add a date and a name');D.events.push({id:uid(),date:ins[0].value,title:ins[1].value.trim(),when:'',addedOn:ymd(TODAY)})}
   else if(a==='nailset'){var n=parseInt(ins[0].value,10);if(n>0)D.nails.interval=n}
