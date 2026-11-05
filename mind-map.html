@@ -1085,7 +1085,7 @@ function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
   var h=head(b,LISTSUB[key]||'')+'<div class="cols">';
   secs.forEach(function(s,si){h+='<div class="panel"><h2>'+esc(s.name)+'</h2>'+(s.items.length?priSort(s.items).map(function(it){return rowHTML(key,si,it,img)}).join(''):'<p class="note">Nothing yet.</p>')+
     '<form class="add" data-act="add" data-key="'+key+'" data-si="'+si+'"><input placeholder="Add to '+esc(s.name)+'…" aria-label="new item"><button class="btn">Add</button></form></div>'});
-  if(key==='tobuy'){var fn=fashionNeeds();h+='<div class="panel"><h2>From the fashion gap list</h2>'+fn.map(function(f){return '<div class="row"><span class="ck" style="border-style:dashed"></span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.spec)+'</small></div></div>'}).join('')+
+  if(key==='tobuy'){var fn=fashionNeeds();h+='<div class="panel"><h2>From the fashion gap list</h2>'+priSort(fn).map(function(f){return '<div class="row'+(f.pri?' pri':'')+'"><span class="ck" style="border-style:dashed"></span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.spec)+'</small></div><button class="star'+(f.pri?' on':'')+'" data-act="fpri" data-id="'+f.id+'" aria-label="'+(f.pri?'remove priority':'mark as priority')+'">'+(f.pri?'★':'☆')+'</button></div>'}).join('')+
     '<p class="note">Mark items "Have" in Endeavors → Fashion and they drop off here.</p><button class="btn pink" data-act="go" data-k="endeavors">Open fashion list →</button></div>'}
   return h+'</div>'}
 
@@ -1371,8 +1371,12 @@ function helperTips(ctx){
   if(PRIORDER.indexOf(ctx)>-1){var mine=priItems(ctx);
     if(mine.length)add([ctx],8,'★','Start here: '+mine[0].t+(mine.length>1?' — then '+mine[1].t+'.':'.'));
     if(mine.length>3)add([ctx],6,'🎯',mine.length+' starred here — 3 is the sweet spot. Un-star the ones that can wait.');
-    if(!mine.length&&(ctx==='todo'||ctx==='tobuy'))add([ctx],3,'☆','Tap ☆ on the 1–3 things that matter most — they jump to the top and show on your home screen.');
+    if(!mine.length&&(ctx==='todo'||ctx==='tobuy')&&!priCands().some(function(c){return c.k===ctx}))add([ctx],3,'☆','Tap ☆ on the 1–3 things that matter most — they jump to the top and show on your home screen.');
     var other=allP.filter(function(x){return x.k!==ctx});if(mine.length===0&&other.length)add([ctx],2,'★','Your top priority right now is in '+other[0].b+': '+other[0].t+'.',other[0].k)}
+  try{var cands=priCands();
+    if(ctx==='home'&&allP.length<3&&cands.length)add(['home'],tpz?6:8,'☆','',null),T[T.length-1]=Object.assign(priSuggestTip(cands[0]),{prio:tpz?6:8});
+    if(PRIORDER.indexOf(ctx)>-1){var mineC=cands.filter(function(c){return c.k===ctx});if(priItems(ctx).length<3&&mineC.length){T.push(Object.assign(priSuggestTip(mineC[0]),{prio:9}));if(mineC[1])T.push(Object.assign(priSuggestTip(mineC[1]),{prio:5}))}}
+  }catch(e){}
   // movement -> art + work
   if(moved)add(['art','habits','home'],5,'🏃','You moved today — that energy carries into art + work. Good time for a drawing session.',ctx==='art'?null:'art');
   else add(['art','habits'],4,'🏃','A short walk or stretch first tends to unlock art + work energy.',ctx==='habits'?null:'habits');
@@ -1401,7 +1405,7 @@ function helperTips(ctx){
   if(ctx==='recipes')add(['recipes'],3,'🥪','The work-lunch sandwich is toaster + oven only — easy desk lunch this week.');
   return T.sort(function(a,b){return b.prio-a.prio});
 }
-function tipHTML(x){var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a>':(x.go?' <button class="go" data-hgo="'+x.go+'">open →</button>':'');
+function tipHTML(x){if(x.star)return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+' <button class="go" data-hstar="'+x.star.id+'">★ Star it</button> <button class="go" data-hskip="'+x.star.id+'" style="opacity:.7">not now</button></span></div>';var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a>':(x.go?' <button class="go" data-hgo="'+x.go+'">open →</button>':'');
   return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+link+'</span></div>'}
 function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
   var tips=helperTips(cur).slice(0,2);if(!tips.length)return;
@@ -1410,13 +1414,41 @@ function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
   el.innerHTML='<div class="hh"><span class="star">✦</span>'+(mini?'helper · '+tips.length:'HELPER')+'<button type="button" data-hmin aria-label="'+(mini?'expand':'minimize')+'">'+(mini?'+':'–')+'</button></div>'+tips.map(tipHTML).join('');
   $('#drawer').appendChild(el);
   el.addEventListener('click',function(e){var m=e.target.closest('[data-hmin]');if(m){try{localStorage.setItem(HKEY,mini?'0':'1')}catch(_){}renderHelper();return}
+    var st=e.target.closest('[data-hstar]');if(st){var c=priCands().filter(function(x){return x.id===st.dataset.hstar})[0];if(c){starCand(c);renderDrawer();toast('★ '+c.t)}return}
+    var sk=e.target.closest('[data-hskip]');if(sk){PRI_SKIP[sk.dataset.hskip]=1;renderHelper();return}
     var g=e.target.closest('[data-hgo]');if(g){cur=g.dataset.hgo;sub=cur==='habits'?'today':'';renderDrawer();$('#drawer').scrollTop=0}});
 }
 /* ============ drawer events ============ */
 
+
+/* ===== priority suggestions: the helper recommends WHAT to star, and why ===== */
+var PRI_SKIP={};
+function priCands(){var out=[],p=period(),phase=p.phase,dnext=daysBetween(TODAY,p.next),u=upcoming().filter(function(e){return daysBetween(TODAY,parse(e.date))<=14}),m=TODAY.getMonth();
+  var todoTxt=listItems('todo').filter(function(x){return !x.done}).map(function(x){return x.t.toLowerCase()}).join(' | ');
+  var STOP={the:1,and:1,for:1,new:1,with:1,from:1,into:1,your:1,back:1,take:1,put:1,get:1,buy:1,more:1,old:1,up:1,out:1};
+  function words(t){return (t.toLowerCase().match(/[a-z]{4,}/g)||[]).filter(function(w){return !STOP[w]})}
+  function score(t,note,key,item,fashion){var sc=0,why=[],txt=(t+' '+(note||'')).toLowerCase();
+    if(/high priority|urgent|asap|\bsoon\b|first|before /.test(txt)){sc+=4;why.push(/high priority/.test(txt)?'you marked it high priority':'you noted it’s time-sensitive')}
+    if(/\b(call|book (a|an|the|my)|appointment|appt|schedule|renew|pay|bill|deadline|return|refund|cancel|rsvp|register|insurance|pharmacy|doctor|dentist|vet)\b/.test(txt)){sc+=3;why.push('it’s time-sensitive')}
+    if(/flu shot|vaccine|booster/.test(txt)&&m>=8&&m<=11){sc+=3;why.push('it’s flu season')}
+    u.forEach(function(e){var ew=words(e.title+' '+(e.when||''));if(words(t).some(function(w){return ew.indexOf(w)>-1})){sc+=3;why.push('it ties to '+e.title+' ('+nice(parse(e.date))+')')}});
+    if(/\btrip|travel|flight|pack|suitcase|toiletr/.test(txt)&&u.some(function(e){return /flight|trip|travel/i.test(e.title)})){sc+=3;why.push('your trip is coming up')}
+    if(dnext>=0&&dnext<=5&&/\b(pad|pads|tampon|ibuprofen|advil|midol|heating pad|chocolate|period)\b/.test(txt)){sc+=4;why.push('your period is due in '+dnext+' day'+(dnext===1?'':'s'))}
+    if(key==='tobuy'&&!fashion&&t.trim().split(/\s+/).length>=2&&todoTxt.indexOf(t.toLowerCase().trim())>-1){sc+=2;why.push('it unblocks something on your To Do')}
+    if(/winter|coat|boots|gloves|scarf|heater|socks/.test(txt)&&(m>=9||m<=1)){sc+=1;why.push('it’s cold-weather season')}
+    var age=item&&item.addedOn?daysBetween(parse(item.addedOn),TODAY):null;if(age!==null&&age>=21){sc+=1;why.push('it’s been waiting '+age+' days')}
+    var big=/purge|organi[sz]e|clean|fix|build|backfill|rebrand|deep|repair|install/.test(txt),small=t.length<28||/^(buy|call|email|text|order)\b/.test(t.toLowerCase());
+    if((phase==='foll'||phase==='ovu')&&big){sc+=1;why.push('your energy is up — good window for a bigger one')}
+    if((phase==='mens'||phase==='lut')&&small&&sc>0){sc+=1;why.push('it’s small enough for a lower-energy week')}
+    return {sc:sc,why:why}}
+  Object.keys(D.lists).forEach(function(key){D.lists[key].forEach(function(sct,si){sct.items.forEach(function(it){if(it.done||it.pri||PRI_SKIP[it.id])return;var r=score(it.t,it.note,key,it);if(r.sc>=3)out.push({k:key,si:si,id:it.id,b:bucketOf(key).name,t:it.t,sc:r.sc+(key==='todo'?0.5:0),why:r.why})})})});
+  (D.fashion||[]).forEach(function(f){if(f.status!=='need'||f.pri||PRI_SKIP[f.id])return;var r=score(f.t,f.spec,'tobuy',null,true);if(r.sc>=3)out.push({k:'tobuy',fid:f.id,id:f.id,b:'To Buy · fashion list',t:f.t,sc:r.sc,why:r.why})});
+  out.sort(function(a,b){return b.sc-a.sc});return out}
+function priSuggestTip(c){return {prio:7,ic:'☆',txt:'Worth starring: '+c.t+' ('+c.b+') — '+c.why.slice(0,2).join(', ')+'.',star:c}}
+function starCand(c){if(c.fid){D.fashion.forEach(function(f){if(f.id===c.fid){f.pri=true;f.priOn=ymd(TODAY)}})}else{var it=findItem(c.k,c.si,c.id);if(it){it.pri=true;it.priOn=ymd(TODAY)}}save()}
 /* ===== priority ===== */
 function priSort(items){return items.map(function(x,i){return [x,i]}).sort(function(a,b){var pa=a[0].pri&&!a[0].done?0:1,pb=b[0].pri&&!b[0].done?0:1;return pa-pb||a[1]-b[1]}).map(function(z){return z[0]})}
-function priItems(k){var out=[];(k?[k]:Object.keys(D.lists)).forEach(function(key){(D.lists[key]||[]).forEach(function(sct){sct.items.forEach(function(it){if(it.pri&&!it.done)out.push({k:key,b:bucketOf(key).name,t:it.t,it:it})})})});return out}
+function priItems(k){var out=[];(k?[k]:Object.keys(D.lists)).forEach(function(key){(D.lists[key]||[]).forEach(function(sct){sct.items.forEach(function(it){if(it.pri&&!it.done)out.push({k:key,b:bucketOf(key).name,t:it.t,it:it})})})});if(!k||k==='tobuy')(D.fashion||[]).forEach(function(f){if(f.pri&&f.status==='need')out.push({k:'tobuy',b:'To Buy',t:f.t,it:f})});return out}
 var PRIORDER=['todo','tobuy','art','endeavors','hobbies','recipes','topics','tattoo','movies'];
 function topPri(){var all=priItems();all.sort(function(a,b){return PRIORDER.indexOf(a.k)-PRIORDER.indexOf(b.k)});return all[0]||null}
 function findItem(key,si,id){return D.lists[key][si].items.filter(function(x){return x.id===id})[0]}
@@ -1427,6 +1459,7 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='hsel'){hsel=t.dataset.id;renderDrawer();return}
   if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
   if(a==='wrapoff'){wrapOff=+t.dataset.off;if(cur!=='wrapped'){cur='wrapped';sub=''}renderDrawer();$('#drawer').scrollTop=0;return}
+  if(a==='fpri'){D.fashion.forEach(function(f){if(f.id===t.dataset.id){if(f.pri){delete f.pri;delete f.priOn}else{f.pri=true;f.priOn=ymd(TODAY)}}});save();renderDrawer();return}
   if(a==='pri'){var ip=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);if(ip.pri){delete ip.pri;delete ip.priOn}else{ip.pri=true;ip.priOn=ymd(TODAY)}save();renderDrawer();toast(ip.pri?'★ Marked as priority':'Priority removed');return}
   if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;if(it.done)it.doneOn=ymd(TODAY);else delete it.doneOn;save();renderDrawer();if(it.done)toast('Nice ✓');return}
   if(a==='del'){var s=D.lists[t.dataset.key][+t.dataset.si];s.items=s.items.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
@@ -1489,8 +1522,9 @@ $('#dumpBtn').addEventListener('click',function(){openModal('<h2>Brain dump</h2>
   $('#dumpf').addEventListener('submit',function(e){e.preventDefault();var lines=$('#dumpf textarea').value.split('\n').map(function(s){return s.trim()}).filter(Boolean),k=$('#dumpf select').value;if(!lines.length)return;
     lines.forEach(function(l){var pr=/^\s*(!|\*)\s*/.test(l);l=l.replace(/^\s*(!|\*)\s*/,'');if(!l)return;var o={id:uid(),t:l,done:false,addedOn:ymd(TODAY)};if(pr){o.pri=true;o.priOn=ymd(TODAY)}D.lists[k][0].items.push(o)});D.dumps=D.dumps||[];D.dumps.push({d:ymd(TODAY),n:lines.length});save();renderHome();closeModal();toast(lines.length+' added to '+bucketOf(k).name)})});
 $('#nextBtn').addEventListener('click',function(){var tips=helperTips('home');
-  openModal('<h2>Where next?</h2><p class="note" style="margin-top:0">Most important first.</p>'+tips.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':'')+'</div>'}).join('')+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
-  $('#mpanel').querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})})});
+  openModal('<h2>Where next?</h2><p class="note" style="margin-top:0">Most important first.</p>'+tips.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.star?'<button class="btn" data-mstar="'+x.star.id+'">★ Star it</button>':x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':'')+'</div>'}).join('')+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
+  $('#mpanel').querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})});
+  $('#mpanel').querySelectorAll('[data-mstar]').forEach(function(bt){bt.addEventListener('click',function(){var c=priCands().filter(function(x){return x.id===bt.dataset.mstar})[0];if(c){starCand(c);toast('★ '+c.t);bt.outerHTML='<span class="note" style="margin:0">★ starred</span>';renderHome();if(SCENES[theme])renderScene()}})})});
 
 /* ============ themes ============ */
 var TKEY='janet-mind-map-theme';
