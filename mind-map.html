@@ -112,7 +112,9 @@ textarea.field{border-radius:14px;min-height:110px;resize:vertical;width:100%}
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .hpick .chip{text-transform:none;letter-spacing:0;font-size:12px}
 .tabs .chip.on{background:var(--c,var(--yellow))}
-.big{font-family:var(--fh,Poppins);font-weight:900;font-size:40px;line-height:1;color:#fff;-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+.big{font-family:var(--fh,Poppins);font-weight:900;font-size:40px;line-height:1;color:var(--tx,var(--ink));-webkit-text-stroke:0;text-shadow:2px 2px 0 color-mix(in srgb,var(--c,#ffb627) 55%,transparent)}
+.panel .big,.bigrow .big{color:inherit;font-size:34px;font-weight:900;letter-spacing:-.01em}
+[data-theme="sampler"] .bigrow .big{font-family:var(--fb,monospace)}
 .bigrow{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
 .bigrow span{font-weight:800;font-size:13px}
 .pbar{height:12px;background:var(--paper);border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;margin:6px 0 12px}
