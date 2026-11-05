@@ -557,6 +557,15 @@ body.dopen .wrappill{display:none}
 .whero h2{font-family:var(--fh,Poppins);font-size:46px!important;margin:6px 0 6px!important;line-height:1}
 [data-theme="lava"] .wstats small,[data-theme="lava"] .wcard .wk{color:#e6dcff;opacity:.9}
 .wnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+
+/* ===== priority star ===== */
+.row .star{flex:none;background:none;border:0;font-size:18px;font-family:system-ui,-apple-system,sans-serif;line-height:1;padding:2px 4px;cursor:pointer;color:var(--muted,#999);opacity:.55;transition:transform .15s}
+.row .star:hover{opacity:1;transform:scale(1.2)}
+.row .star.on{color:#f5b301;opacity:1;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.row.pri{background:linear-gradient(90deg,rgba(255,196,0,.16),transparent 70%);border-radius:10px;padding-left:6px;margin-left:-6px}
+.row.done .star{display:none}
+[data-theme="strange"] .row .star.on,[data-theme="blackcat"] .row .star.on{color:#111;text-shadow:none}
+[data-theme="strange"] .row.pri,[data-theme="blackcat"] .row.pri{background:linear-gradient(90deg,rgba(0,0,0,.08),transparent 70%)}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -965,16 +974,16 @@ function summary(k){
   else if(k==='money'){s.num='Open';s.unit='separate app';s.pct=100;s.lines=[{t:'Lives on its own page'},{t:'Tile + link only'}];s.next='open Money Pals ↗';s.pill='Link';s.tags=[]}
   else{var it=listItems(k);if(k==='tobuy')it=it.concat(fashionNeeds());var dn=it.filter(function(x){return x.done}).length;
     s.num=String(it.length-dn);s.unit=k==='tobuy'?'to get':'open';s.pct=it.length?dn/it.length*100:0;
-    s.lines=it.filter(function(x){return !x.done}).slice(0,3).map(function(x){return {t:x.t}});
+    s.lines=priSort(it.filter(function(x){return !x.done})).slice(0,3).map(function(x){return {t:(x.pri?'★ ':'')+x.t}});var np=it.filter(function(x){return x.pri&&!x.done}).length;
     if(!s.lines.length)s.lines=[{t:it.length?'All done ✓':'Nothing here yet — add one'}];
     var nx={art:'backfill one piece',tobuy:'rug waits on Wayfair',todo:'pick one small one',tattoo:'drop one idea',recipes:'try it once this week',hobbies:'sewing first',topics:'add a topic',movies:'add a movie'};
     s.next=nx[k]||'';s.pill=!it.length||!dn?'Untouched':(dn===it.length?'Win':'In progress');
-    s.tags=!dn?['untouched']:(dn===it.length?['wins']:['in-progress'])}
+    s.tags=!dn?['untouched']:(dn===it.length?['wins']:['in-progress']);if(np){s.tags.push('priority');s.next='★ '+priItems(k)[0].t}}
   return s;
 }
 
 /* ============ home ============ */
-var FILTERS=[['all','All'],['due-soon','Due soon'],['in-progress','In progress'],['untouched','Untouched'],['wins','Wins']],filt='all';
+var FILTERS=[['all','All'],['priority','★ Priority'],['due-soon','Due soon'],['in-progress','In progress'],['untouched','Untouched'],['wins','Wins']],filt='all';
 function renderHome(){
   $('#today').textContent=nice(TODAY)+', '+TODAY.getFullYear()+'  ·  every little thing in its folder ♡';
   $('#chips').innerHTML=FILTERS.map(function(f){return '<button class="chip'+(f[0]===filt?' on':'')+'" data-f="'+f[0]+'">'+f[1]+'</button>'}).join('');
@@ -1059,12 +1068,13 @@ function renderDrawer(){var b=bucketOf(cur),h='';var el=$('#dwrap');el.style.set
 /* --- generic list --- */
 var LISTSUB={art:'Each initiative is its own header — check one off when it’s done.',tobuy:'Store split is a guess — move things as you like. Fashion "Need" items from Endeavors show up here automatically.',
   todo:'Small stuff, one at a time.',tattoo:'Drop an idea, add an image, move on.',recipes:'Things to cook.',hobbies:'Sewing first — overlaps fashion / closet only.',topics:'Things to look into.',movies:'Things to watch.'};
-function rowHTML(key,si,it,withImg){return '<div class="row'+(it.done?' done':'')+'"><button class="ck'+(it.done?' on':'')+'" data-act="tick" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="done">'+(it.done?'✓':'')+'</button>'+
+function rowHTML(key,si,it,withImg){return '<div class="row'+(it.done?' done':'')+(it.pri&&!it.done?' pri':'')+'"><button class="ck'+(it.done?' on':'')+'" data-act="tick" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="done">'+(it.done?'✓':'')+'</button>'+
   '<div class="t"><span>'+esc(it.t)+'</span>'+(it.note?'<small>'+esc(it.note)+'</small>':'')+(withImg?(it.img?'<img src="'+it.img+'" alt="" style="margin-top:6px;max-width:220px;border:2px solid var(--ink);border-radius:10px;display:block">':'<button class="btn white" style="margin-top:6px" data-act="img" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'">+ image</button>'):'')+'</div>'+
+  '<button class="star'+(it.pri?' on':'')+'" data-act="pri" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="'+(it.pri?'remove priority':'mark as priority')+'" title="'+(it.pri?'Priority — tap to unstar':'Mark as priority')+'">'+(it.pri?'★':'☆')+'</button>'+
   '<button class="x" data-act="del" data-key="'+key+'" data-si="'+si+'" data-id="'+it.id+'" aria-label="remove">✕</button></div>'}
 function drawList(b){var key=b.k,secs=D.lists[key],img=key==='tattoo';
   var h=head(b,LISTSUB[key]||'')+'<div class="cols">';
-  secs.forEach(function(s,si){h+='<div class="panel"><h2>'+esc(s.name)+'</h2>'+(s.items.length?s.items.map(function(it){return rowHTML(key,si,it,img)}).join(''):'<p class="note">Nothing yet.</p>')+
+  secs.forEach(function(s,si){h+='<div class="panel"><h2>'+esc(s.name)+'</h2>'+(s.items.length?priSort(s.items).map(function(it){return rowHTML(key,si,it,img)}).join(''):'<p class="note">Nothing yet.</p>')+
     '<form class="add" data-act="add" data-key="'+key+'" data-si="'+si+'"><input placeholder="Add to '+esc(s.name)+'…" aria-label="new item"><button class="btn">Add</button></form></div>'});
   if(key==='tobuy'){var fn=fashionNeeds();h+='<div class="panel"><h2>From the fashion gap list</h2>'+fn.map(function(f){return '<div class="row"><span class="ck" style="border-style:dashed"></span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.spec)+'</small></div></div>'}).join('')+
     '<p class="note">Mark items "Have" in Endeavors → Fashion and they drop off here.</p><button class="btn pink" data-act="go" data-k="endeavors">Open fashion list →</button></div>'}
@@ -1104,7 +1114,7 @@ function wrapData(off){var f=wrapMonth(off),y=f.getFullYear(),m=f.getMonth(),dim
       var den=x.weekly?Math.max(x.weekly,Math.round(days/7*x.weekly)):days;return {x:x,n:n,den:den,p:Math.min(100,Math.round(n/den*100)),streak:best}});
   var total=hs.reduce(function(a,o){return a+o.n},0),bd=null,bdn=0;for(var d=1;d<=days;d++){var c=hDone(ymd(new Date(y,m,d))).length;if(c>bdn){bdn=c;bd=new Date(y,m,d)}}
   var avg=hs.length?Math.round(hs.reduce(function(a,o){return a+o.p},0)/hs.length):0,st=hs.filter(function(o){return !o.x.weekly}).sort(function(a,b){return b.streak-a.streak})[0];
-  var fin=[];Object.keys(D.lists).forEach(function(k){D.lists[k].forEach(function(sct){sct.items.forEach(function(it){if(it.done&&it.doneOn&&it.doneOn.slice(0,7)===pre)fin.push({b:bucketOf(k).name,t:it.t})})})});
+  var fin=[];Object.keys(D.lists).forEach(function(k){D.lists[k].forEach(function(sct){sct.items.forEach(function(it){if(it.done&&it.doneOn&&it.doneOn.slice(0,7)===pre)fin.push({pri:!!it.pri,b:bucketOf(k).name,t:it.t})})})});
   var ev=D.events.filter(function(e){return e.date.slice(0,7)===pre&&parse(e.date)<=TODAY}).sort(function(a,b){return a.date<b.date?-1:1});
   var ps=D.period.starts.filter(function(x){return x.slice(0,7)===pre}),nl=(D.nails.history||[]).concat([D.nails.last]).filter(function(x,i,a){return x&&x.slice(0,7)===pre&&a.indexOf(x)===i});
   return {y:y,m:m,name:FMN[m],cur:cur,days:days,hs:hs,total:total,bestDay:bd,bestDayN:bdn,avg:avg,streak:st,fin:fin,ev:ev,ps:ps,nl:nl,has:total>0||fin.length>0}}
@@ -1153,7 +1163,7 @@ function drawWrapped(b){var A=wrapAll(wrapOff),w=A.w,h=head(b,'Your month across
     '<button class="chip'+(wrapOff===1?' on':'')+'" data-act="wrapoff" data-off="1">'+FMN[wrapMonth(1).getMonth()]+' wrapped</button><button class="chip'+(wrapOff===0?' on':'')+'" data-act="wrapoff" data-off="0">'+FMN[TODAY.getMonth()]+' so far</button>'+
     (wrapOff>1?'<button class="chip" data-act="wrapoff" data-off="'+(wrapOff-1)+'">'+FMN[wrapMonth(wrapOff-1).getMonth()]+' →</button>':'')+'</div>';
   if(!A.any){return h+'<div class="panel whero"><div class="wk" style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.7">month in review</div><h2>'+w.name+', wrapped</h2><p>Nothing was tracked here in '+w.name+'.</p><p class="note">Your first full wrap arrives '+FMN[(TODAY.getMonth()+1)%12]+' 1. Until then, peek at this month so far.</p><button class="btn" data-act="wrapoff" data-off="0">See '+FMN[TODAY.getMonth()]+' so far →</button></div>'}
-  var finN=w.fin.length,addN=A.added.length,line=[w.total?w.total+' habit check-off'+(w.total===1?'':'s'):'',finN?finN+' thing'+(finN===1?'':'s')+' finished':'',(w.streak&&w.streak.streak>=3)?w.streak.streak+'-day '+esc(w.streak.x.name.toLowerCase())+' streak 🔥':''].filter(Boolean).join(' · ');
+  var finN=w.fin.length,priN=w.fin.filter(function(f){return f.pri}).length,addN=A.added.length,line=[w.total?w.total+' habit check-off'+(w.total===1?'':'s'):'',finN?finN+' thing'+(finN===1?'':'s')+' finished'+(priN?' ('+priN+' ★)':''):'',(w.streak&&w.streak.streak>=3)?w.streak.streak+'-day '+esc(w.streak.x.name.toLowerCase())+' streak 🔥':''].filter(Boolean).join(' · ');
   var prev=wrapData(wrapOff+1),cmp=prev.has&&w.has?(w.avg-prev.avg):null;
   h+='<div class="panel whero"><div class="wk" style="font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.7">'+(w.cur?'so far this month':'your month in review')+'</div><h2>'+w.name+(w.cur?' so far':', wrapped')+'</h2><div style="font-size:16px;font-weight:700">'+(line||'A quiet month — and that counts too.')+'</div>'+
     (cmp!==null?'<div class="note" style="margin-top:6px">'+(cmp>0?'Habits up '+cmp+' points from '+prev.name+' ✦':cmp<0?'Habits down '+(-cmp)+' points from '+prev.name+' — new month, fresh start':'Habits even with '+prev.name)+'</div>':'')+'</div>';
@@ -1171,7 +1181,7 @@ function drawWrapped(b){var A=wrapAll(wrapOff),w=A.w,h=head(b,'Your month across
     (topB?'<div class="panel wcard"><div class="wk">Most-finished list</div><div class="wbig">'+A.byB[topB]+'</div><div class="wline">'+esc(topB)+'</div><p class="note">checked off</p></div>':'')+'</div>';
   // finished + added + life
   h+='<div class="cols">';
-  h+='<div class="panel"><h2>Things you finished</h2>'+(finN?w.fin.map(function(f){return '<div class="row"><span class="ck on" style="pointer-events:none;--hc:#1fb59a">✓</span><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.b)+'</small></div></div>'}).join(''):'<p class="note">Nothing checked off in your lists '+(w.cur?'yet this month':'this month')+'. Check-offs are dated from Nov 3 on, so they show up here.</p>')+'</div>';
+  h+='<div class="panel"><h2>Things you finished</h2>'+(finN?w.fin.map(function(f){return '<div class="row"><span class="ck on" style="pointer-events:none;--hc:#1fb59a">✓</span><div class="t"><span>'+(f.pri?'★ ':'')+esc(f.t)+'</span><small>'+esc(f.b)+'</small></div></div>'}).join(''):'<p class="note">Nothing checked off in your lists '+(w.cur?'yet this month':'this month')+'. Check-offs are dated from Nov 3 on, so they show up here.</p>')+'</div>';
   h+='<div class="panel"><h2>New on your mind</h2>'+(addN?'<p class="note" style="margin-top:0">'+addN+' new item'+(addN===1?'':'s')+(A.dumps?' · '+A.dumps+' from brain dumps':'')+'</p>'+A.added.slice(0,12).map(function(f){return '<div class="row"><div class="t"><span>'+esc(f.t)+'</span><small>'+esc(f.b)+'</small></div></div>'}).join('')+(addN>12?'<p class="note">+ '+(addN-12)+' more</p>':''):'<p class="note">New list items and brain dumps are dated from Nov 4 on, so they’ll show up here.</p>')+'</div>';
   var life=w.ev.map(function(e){return [e.date,esc(e.title)]}).concat(w.ps.map(function(x){return [x,'Period started']}),w.nl.map(function(x){return [x,'Fresh nails 💅']}),A.have.map(function(f){return [f.haveOn,'Got: '+esc(f.t)]}))
     .sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0}).map(function(r){return '<div class="row"><div class="t"><span>'+r[1]+'</span><small>'+nice(parse(r[0]))+'</small></div></div>'}).join('');
@@ -1294,6 +1304,15 @@ function helperTips(ctx){
   add(['home','period'],4,'🌙',ph.n+' phase — '+ph.tip,ctx==='period'?null:'period');
   if(low)add(['todo','art','endeavors'],6,'🌙',ph.n+' phase, energy runs lower — pick one small thing, skip the big ones.','period');
   else add(['todo','art','endeavors'],5,'⚡',ph.n+' phase, energy is up — good window for a bigger one (purge closet, backfill art).','period');
+  // priorities
+  var tpz=topPri(),allP=priItems();
+  if(tpz)add(['home'],8,'★','Top priority: '+tpz.t+' ('+tpz.b+').',tpz.k);
+  if(tpz&&low)add(['home'],6,'🌙',ph.n+' phase — if you only do one thing today, make it '+tpz.t+'.',tpz.k);
+  if(PRIORDER.indexOf(ctx)>-1){var mine=priItems(ctx);
+    if(mine.length)add([ctx],8,'★','Start here: '+mine[0].t+(mine.length>1?' — then '+mine[1].t+'.':'.'));
+    if(mine.length>3)add([ctx],6,'🎯',mine.length+' starred here — 3 is the sweet spot. Un-star the ones that can wait.');
+    if(!mine.length&&(ctx==='todo'||ctx==='tobuy'))add([ctx],3,'☆','Tap ☆ on the 1–3 things that matter most — they jump to the top and show on your home screen.');
+    var other=allP.filter(function(x){return x.k!==ctx});if(mine.length===0&&other.length)add([ctx],2,'★','Your top priority right now is in '+other[0].b+': '+other[0].t+'.',other[0].k)}
   // movement -> art + work
   if(moved)add(['art','habits','home'],5,'🏃','You moved today — that energy carries into art + work. Good time for a drawing session.',ctx==='art'?null:'art');
   else add(['art','habits'],4,'🏃','A short walk or stretch first tends to unlock art + work energy.',ctx==='habits'?null:'habits');
@@ -1334,6 +1353,12 @@ function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
     var g=e.target.closest('[data-hgo]');if(g){cur=g.dataset.hgo;sub=cur==='habits'?'today':'';renderDrawer();$('#drawer').scrollTop=0}});
 }
 /* ============ drawer events ============ */
+
+/* ===== priority ===== */
+function priSort(items){return items.map(function(x,i){return [x,i]}).sort(function(a,b){var pa=a[0].pri&&!a[0].done?0:1,pb=b[0].pri&&!b[0].done?0:1;return pa-pb||a[1]-b[1]}).map(function(z){return z[0]})}
+function priItems(k){var out=[];(k?[k]:Object.keys(D.lists)).forEach(function(key){(D.lists[key]||[]).forEach(function(sct){sct.items.forEach(function(it){if(it.pri&&!it.done)out.push({k:key,b:bucketOf(key).name,t:it.t,it:it})})})});return out}
+var PRIORDER=['todo','tobuy','art','endeavors','hobbies','recipes','topics','tattoo','movies'];
+function topPri(){var all=priItems();all.sort(function(a,b){return PRIORDER.indexOf(a.k)-PRIORDER.indexOf(b.k)});return all[0]||null}
 function findItem(key,si,id){return D.lists[key][si].items.filter(function(x){return x.id===id})[0]}
 var imgTarget=null;
 $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-act]');if(!t||t.tagName==='FORM')return;var a=t.dataset.act;
@@ -1342,6 +1367,7 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='hsel'){hsel=t.dataset.id;renderDrawer();return}
   if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
   if(a==='wrapoff'){wrapOff=+t.dataset.off;if(cur!=='wrapped'){cur='wrapped';sub=''}renderDrawer();$('#drawer').scrollTop=0;return}
+  if(a==='pri'){var ip=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);if(ip.pri){delete ip.pri;delete ip.priOn}else{ip.pri=true;ip.priOn=ymd(TODAY)}save();renderDrawer();toast(ip.pri?'★ Marked as priority':'Priority removed');return}
   if(a==='tick'){var it=findItem(t.dataset.key,+t.dataset.si,t.dataset.id);it.done=!it.done;if(it.done)it.doneOn=ymd(TODAY);else delete it.doneOn;save();renderDrawer();if(it.done)toast('Nice ✓');return}
   if(a==='del'){var s=D.lists[t.dataset.key][+t.dataset.si];s.items=s.items.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
   if(a==='img'){imgTarget={key:t.dataset.key,si:+t.dataset.si,id:t.dataset.id};$('#filepick').click();return}
@@ -1381,10 +1407,10 @@ function openModal(h){$('#mpanel').innerHTML=h;$('#modal').classList.add('open')
 function closeModal(){$('#modal').classList.remove('open')}
 $('#modal').addEventListener('click',function(e){if(e.target.id==='modal'||e.target.dataset.act==='close')closeModal()});
 var DUMPABLE=['todo','tobuy','art','tattoo','recipes','hobbies','topics','movies'];
-$('#dumpBtn').addEventListener('click',function(){openModal('<h2>Brain dump</h2><p class="note" style="margin-top:0">One thought per line. Pick where it goes — you can move it later.</p><form id="dumpf"><textarea class="field" placeholder="buy more socks&#10;research bralettes"></textarea><div class="add"><select class="field">'+
+$('#dumpBtn').addEventListener('click',function(){openModal('<h2>Brain dump</h2><p class="note" style="margin-top:0">One thought per line. Start a line with ! to mark it ★ priority. Pick where it goes — you can move it later.</p><form id="dumpf"><textarea class="field" placeholder="buy more socks&#10;research bralettes"></textarea><div class="add"><select class="field">'+
   DUMPABLE.map(function(k){return '<option value="'+k+'">'+bucketOf(k).name+'</option>'}).join('')+'</select><button class="btn">Drop it in</button><button type="button" class="btn white" data-act="close">Cancel</button></div></form>');
   $('#dumpf').addEventListener('submit',function(e){e.preventDefault();var lines=$('#dumpf textarea').value.split('\n').map(function(s){return s.trim()}).filter(Boolean),k=$('#dumpf select').value;if(!lines.length)return;
-    lines.forEach(function(l){D.lists[k][0].items.push({id:uid(),t:l,done:false,addedOn:ymd(TODAY)})});D.dumps=D.dumps||[];D.dumps.push({d:ymd(TODAY),n:lines.length});save();renderHome();closeModal();toast(lines.length+' added to '+bucketOf(k).name)})});
+    lines.forEach(function(l){var pr=/^\s*(!|\*)\s*/.test(l);l=l.replace(/^\s*(!|\*)\s*/,'');if(!l)return;var o={id:uid(),t:l,done:false,addedOn:ymd(TODAY)};if(pr){o.pri=true;o.priOn=ymd(TODAY)}D.lists[k][0].items.push(o)});D.dumps=D.dumps||[];D.dumps.push({d:ymd(TODAY),n:lines.length});save();renderHome();closeModal();toast(lines.length+' added to '+bucketOf(k).name)})});
 $('#nextBtn').addEventListener('click',function(){var tips=helperTips('home');
   openModal('<h2>Where next?</h2><p class="note" style="margin-top:0">Most important first.</p>'+tips.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':'')+'</div>'}).join('')+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
   $('#mpanel').querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})})});
@@ -1504,6 +1530,7 @@ var sceneLoaded=null;
 function shortNext(){var n=nails(),u=upcoming();
   if(n.days<=2)return {t:n.days<=0?'Nails — due now':'Nails — '+nice(n.next),k:'nails'};
   if(u.length&&daysBetween(TODAY,parse(u[0].date))<=2)return {t:u[0].title,k:'upcoming'};
+  var tp=topPri();if(tp)return {t:tp.t,k:tp.k};
   var td=listItems('todo').filter(function(x){return !x.done})[0];
   if(td)return {t:td.t,k:'todo'};
   return {t:'Check off today’s habits',k:'habits'}}
