@@ -571,6 +571,59 @@ body.dopen .wrappill{display:none}
 
 .psym.on{background:var(--c,#ff8fab);color:#fff}
 [data-theme="lava"] .psym.on{background:#ff5ad9;color:#0a0612}
+
+/* ===== drawer cards: theme colors + fonts (pilot: haunted, strange, crayon) ===== */
+/* Haunted House — night-plum cards, candle-gold headings, cream text */
+[data-theme="haunted"] .dwrap .panel{background-color:#241d31;background-image:repeating-linear-gradient(0deg,transparent 0 17px,rgba(79,163,154,.07) 17px 18px),radial-gradient(120% 80% at 100% 0,rgba(242,183,51,.10),transparent 60%);color:#f7e3b5;border:2px solid #4fa39a;box-shadow:5px 5px 0 #000,0 0 0 1px #141218}
+[data-theme="haunted"] .dwrap .panel h2{font-family:'Chewy',cursive;font-weight:400;color:#f2b733;font-size:22px;letter-spacing:.02em;text-shadow:2px 2px 0 #a35fb5}
+[data-theme="haunted"] .dwrap .row{font-family:'Fredoka',sans-serif;font-weight:500;font-size:15px;border-top:2px dotted rgba(242,183,51,.28)}
+[data-theme="haunted"] .dwrap .row .t small,[data-theme="haunted"] .dwrap .note,[data-theme="haunted"] .dwrap .bigrow span{color:#c9b98f}
+[data-theme="haunted"] .dwrap .ck{background:#141218;border-color:#f2b733}
+[data-theme="haunted"] .dwrap .add input,[data-theme="haunted"] .dwrap .field{background:#141218;color:#f7e3b5;border-color:#4fa39a}
+[data-theme="haunted"] .dwrap .add input::placeholder,[data-theme="haunted"] .dwrap .field::placeholder{color:#8a7e62}
+[data-theme="haunted"] .dwrap .btn{background:#f2b733;color:#141218;border-color:#141218}
+[data-theme="haunted"] .dwrap .btn.white{background:transparent;color:#f7e3b5;border-color:#f7e3b5;box-shadow:none}
+[data-theme="haunted"] .dwrap .btn.pink{background:#f08cb8;color:#141218}
+[data-theme="haunted"] .dwrap .panel .chip{background:transparent;color:#f7e3b5;border-color:#f7e3b5;box-shadow:none}
+[data-theme="haunted"] .dwrap .panel .chip.on{background:#f2b733;color:#141218;border-color:#f2b733}
+[data-theme="haunted"] .dwrap .row.pri{background:linear-gradient(90deg,rgba(242,183,51,.18),transparent 70%)}
+[data-theme="haunted"] .dwrap .row .x{color:#c9b98f}
+[data-theme="haunted"] .dwrap .vcard{background:#141218;color:#f7e3b5;border-color:#a35fb5}
+[data-theme="haunted"] .dwrap .pbar{background:#141218;border-color:#4fa39a}
+[data-theme="haunted"] .dwrap .cal .hd{color:#f2b733}
+[data-theme="haunted"] .dwrap .big{text-shadow:2px 2px 0 #a35fb5}
+[data-theme="haunted"] .dwrap .panel svg text{fill:#f7e3b5}
+[data-theme="haunted"] .dwrap .item{color:#141218}
+[data-theme="haunted"] .dwrap .item .spec{color:#5a4a3a}
+
+/* Strange & Unusual — aged gray paper, ink rules, picture-frame border */
+[data-theme="strange"] .dwrap .panel{background-color:#e9e6de;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),linear-gradient(180deg,rgba(255,255,255,.35),rgba(0,0,0,.04));color:#121212;border:3px solid #0f0f0f;box-shadow:inset 0 0 0 4px #e9e6de,inset 0 0 0 5px #0f0f0f,6px 6px 0 #0f0f0f;border-radius:2px}
+[data-theme="strange"] .dwrap .panel h2{font-family:'Mystery Quest',cursive;font-weight:400;font-size:24px;letter-spacing:.02em;border-bottom:1px solid #0f0f0f;padding-bottom:6px;margin-bottom:8px}
+[data-theme="strange"] .dwrap .row{font-family:'IM Fell English',serif;font-size:16px;border-top:1px solid rgba(15,15,15,.35)}
+[data-theme="strange"] .dwrap .row .t small,[data-theme="strange"] .dwrap .note{font-family:'IM Fell English',serif;font-style:italic;font-weight:400;font-size:13px;color:#3a3a3a}
+[data-theme="strange"] .dwrap .bigrow span{font-family:'IM Fell English',serif;font-weight:400;font-size:15px;font-style:italic}
+[data-theme="strange"] .dwrap .add input,[data-theme="strange"] .dwrap .field{background:#f4f2ec;border:1.5px solid #0f0f0f;border-radius:2px;font-family:'IM Fell English',serif;font-size:15px}
+[data-theme="strange"] .dwrap .btn{background:#0f0f0f;color:#f2f0ea;border-color:#0f0f0f;border-radius:2px;box-shadow:3px 3px 0 #8c8c8c;font-family:'IM Fell English',serif;font-weight:400;font-size:14px}
+[data-theme="strange"] .dwrap .btn.white,[data-theme="strange"] .dwrap .btn.pink{background:#f4f2ec;color:#0f0f0f}
+[data-theme="strange"] .dwrap .panel .chip{border-radius:2px}
+[data-theme="strange"] .dwrap .vcard{background:#f4f2ec;border:1.5px solid #0f0f0f;border-radius:2px;font-family:'IM Fell English',serif}
+[data-theme="strange"] .dwrap .cal .d{border-radius:2px;border-width:1.5px;font-family:'IM Fell English',serif}
+[data-theme="strange"] .dwrap .cal .hd{font-family:'IM Fell English',serif;font-style:italic;font-weight:400}
+
+/* Crayon Quilt — each card a quilt patch in its drawer color, stitched edge, crayon handwriting */
+[data-theme="crayon"] .dwrap .panel{background-color:color-mix(in srgb,var(--c0,#ff3d9a) 22%,#fff8f0);background-image:repeating-linear-gradient(35deg,rgba(255,255,255,.35) 0 2px,transparent 2px 7px);border:3px solid #24206a;border-radius:8px;outline:2.5px dashed color-mix(in srgb,var(--c0,#ff3d9a) 80%,#24206a);outline-offset:-10px;box-shadow:6px 6px 0 var(--c0,var(--c))}
+[data-theme="crayon"] .dwrap .panel h2{font-family:'Gaegu',cursive;font-weight:700;font-size:28px;color:#24206a;line-height:1}
+[data-theme="crayon"] .dwrap .row{font-family:'Gaegu',cursive;font-weight:700;font-size:19px;line-height:1.15;border-top:2px dashed color-mix(in srgb,var(--c0,#ff3d9a) 60%,transparent)}
+[data-theme="crayon"] .dwrap .row .t small{font-family:'Nunito',sans-serif;font-size:12px}
+[data-theme="crayon"] .dwrap .bigrow span{font-family:'Gaegu',cursive;font-size:18px}
+[data-theme="crayon"] .dwrap .big{font-family:'Gaegu',cursive;font-size:42px}
+[data-theme="crayon"] .dwrap .add input,[data-theme="crayon"] .dwrap .field{background:#fffdf8;border-radius:10px;font-family:'Gaegu',cursive;font-weight:700;font-size:17px}
+[data-theme="crayon"] .dwrap .btn{font-family:'Gaegu',cursive;font-weight:700;font-size:17px;border-radius:10px;background:#ffe12a;transform:rotate(-1deg)}
+[data-theme="crayon"] .dwrap .btn.white{background:#fffdf8}
+[data-theme="crayon"] .dwrap .btn.pink{background:#ff8fc6}
+[data-theme="crayon"] .dwrap .panel .chip{font-family:'Gaegu',cursive;font-size:15px;text-transform:none;letter-spacing:0;border-radius:10px}
+[data-theme="crayon"] .dwrap .vcard{background:#fffdf8;border-radius:10px;font-family:'Gaegu',cursive;font-size:17px}
+[data-theme="crayon"] .dwrap .cal .d{border-radius:8px;font-family:'Gaegu',cursive;font-size:15px}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -1070,7 +1123,7 @@ function addDrawerArt0(el){if(dartOff)return;var a=DART[theme];if(!a||!SCENES[th
     if(c[4]==='iso'){el.insertAdjacentHTML('afterbegin',dartIso(c,340,H,'dart-h',true));var d0=el.firstElementChild;d0.style.top=(top+Math.max(0,(Math.min(175,lim)-parseFloat(d0.style.height))/2))+'px';return}
     var sc=Math.min(H/c[3],340/c[2]);
     el.insertAdjacentHTML('afterbegin',dartBox(c,sc,'dart-h'));var d=el.firstElementChild;d.style.top=(top+Math.max(0,(Math.min(175,lim)-c[3]*sc)/2))+'px'}}
-function renderDrawer(){var b=bucketOf(cur),h='';var el=$('#dwrap');el.style.setProperty('--c',cur==='wrapped'?pal(4,BUCKETS[4])[1]:pal(BUCKETS.indexOf(b),b)[1]);
+function renderDrawer(){var b=bucketOf(cur),h='';var el=$('#dwrap');try{var pc0=cur==='wrapped'?pal(4,BUCKETS[4]):pal(BUCKETS.indexOf(b),b);el.style.setProperty('--c0',pc0[0])}catch(e){}el.style.setProperty('--c',cur==='wrapped'?pal(4,BUCKETS[4])[1]:pal(BUCKETS.indexOf(b),b)[1]);
   if(cur==='wrapped'){el.innerHTML=drawWrapped(b);el.classList.remove('has-art');addDrawerArt(el);renderHelper();return}
   if(cur==='habits')h=drawHabits(b);else if(cur==='period')h=drawPeriod(b);else if(cur==='upcoming')h=drawUpcoming(b);
   else if(cur==='nails')h=drawNails(b);else if(cur==='endeavors')h=drawEndeavors(b);else h=drawList(b);
