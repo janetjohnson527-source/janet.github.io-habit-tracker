@@ -1283,16 +1283,25 @@ function picker(){return '<div class="tabs hpick" role="group" aria-label="Pick 
   D.habits.map(function(x){return '<button class="chip'+(hsel===x.id?' on':'')+'" data-act="hsel" data-id="'+x.id+'" style="'+(hsel===x.id?'background:'+hcol(x)+';color:'+txtOn(hcol(x)):'')+'"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+hcol(x)+';margin-right:5px;vertical-align:1px"></span>'+esc(x.name)+'</button>'}).join('')+'</div>'}
 function hasOn(id,d){return hDone(ymd(d)).indexOf(id)>-1}
 function weeksTarget(x,days){return x.weekly*Math.max(1,Math.floor(days/7))}
+
+/* running % for one habit across a range of days (bars or line) */
+function oneHabitChart(x,days,col,title){var wk=!!x.weekly,n=0,pts=[];
+  days.forEach(function(d,i){if(d>TODAY){pts.push({l:d.l,p:null,d:d});return}if(hasOn(x.id,d))n++;var el=i+1,den=wk?Math.max(1,el/7*x.weekly):el;pts.push({l:d.l,p:Math.min(100,Math.round(n/den*100)),on:hasOn(x.id,d)})});
+  var body=gview==='line'?lineChart(pts.map(function(q){return {l:q.l,p:q.p}}),col):
+    '<div class="bars" style="height:140px;gap:'+(pts.length>12?3:8)+'px">'+pts.map(function(q){return '<div><i style="height:'+(q.p||0)+'%;background:'+col+(q.on?'':';opacity:.55')+(pts.length>12?';border-width:1.5px;border-radius:4px 4px 0 0':'')+'"></i>'+q.l+(pts.length>12?'':'<br>'+(q.p===null?'—':q.p+'%'))+'</div>'}).join('')+'</div>';
+  return '<div class="gwrap"><div class="ghead"><b>'+title+'</b>'+gToggle()+'</div>'+body+'<p class="note">Running % as the '+(days.length>7?'month':'week')+' goes'+(gview==='line'?'':' — solid bars are days you did it')+'.</p></div>'}
 function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=hcol(x),wk=!!x.weekly;
   if(sub==='week'){var s=weekStart(TODAY),n=0,cells='';for(var i=0;i<7;i++){var d=addDays(s,i),on=hasOn(x.id,d);if(on)n++;
       cells+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:'+txtOn(col):'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
     var den=wk?x.weekly:7,p=Math.min(100,Math.round(n/den*100));
     h+='<div class="panel"><h2>'+esc(x.name)+' — week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+p+'%</span><span>'+n+' of '+den+(wk?' this week (3x target)':' days')+'</span></div><div class="pbar"><i style="width:'+p+'%;background:'+col+'"></i></div><div class="cal">'+cells+'</div>'+
+      oneHabitChart(x,[0,1,2,3,4,5,6].map(function(i){var d=addDays(s,i);d.l=DOW[d.getDay()];return d}),col,'Day by day')+
       '<p class="note">'+(wk?'Weekly habits are judged against their 3x target, not 7 days.':'% of the 7 days this week.')+'</p></div>'}
   else if(sub==='month'){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y,m+1,0).getDate(),n2=0;for(var dd=1;dd<=dim;dd++)if(hasOn(x.id,new Date(y,m,dd)))n2++;
     var den2=wk?weeksTarget(x,dim):dim,p2=Math.min(100,Math.round(n2/den2*100));
     h+='<div class="panel"><h2>'+esc(x.name)+': '+n2+(n2===1?' day':' days')+' in '+FM[m]+'</h2><div class="bigrow"><span class="big">'+monthPct(x).sp+'%</span><span>'+monthPct(x).sn+' of '+monthPct(x).sden+(wk?' sessions':' days')+' so far</span></div><div class="pbar"><i style="width:'+monthPct(x).sp+'%;background:'+col+'"></i></div>'+
       monthGrid(TODAY,function(d){var on=hasOn(x.id,d);return {cls:d>TODAY&&!on?' dim':'',style:on?'background:'+col+';color:'+txtOn(col):'',html:'<small>'+(on?'✓':'')+'</small>'}})+
+      oneHabitChart(x,(function(){var a=[];for(var q=1;q<=dim;q++){var d=new Date(y,m,q);d.l=(q===1||q%5===0)?String(q):'';a.push(d)}return a})(),col,'Through the month')+
       '<p class="note">Only '+esc(x.name)+' days are filled in. '+(wk?'% counts toward 3x a week.':'% is out of the days so far this month.')+'</p></div>'}
   else{var vals=[];for(var mm=0;mm<12;mm++){var yy=TODAY.getFullYear(),dm=new Date(yy,mm+1,0).getDate(),c=0,el=0;for(var d3=1;d3<=dm;d3++){var dt=new Date(yy,mm,d3);if(dt>TODAY)break;el++;if(hasOn(x.id,dt))c++}
       var den3=!el?0:(wk?Math.max(x.weekly,Math.round(el/7*x.weekly)):el);vals.push({c:c,p:den3?Math.min(100,Math.round(c/den3*100)):0,den:den3})}
@@ -1401,7 +1410,7 @@ function lineChart(pts,col){/* pts: [{l:label,p:0-100|null,s:sub}] */var W=640,H
   var seg=[],cur=[];pts.forEach(function(p,i){if(p.p===null||p.p===undefined){if(cur.length)seg.push(cur);cur=[]}else cur.push([x(i),y(p.p),p])});if(cur.length)seg.push(cur);
   var lines=seg.map(function(sg){var d=sg.map(function(q,j){return (j?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)}).join(' ');
     var area=sg.length>1?'<path d="'+d+' L'+sg[sg.length-1][0].toFixed(1)+' '+y(0)+' L'+sg[0][0].toFixed(1)+' '+y(0)+' Z" fill="'+col+'" opacity=".14"/>':'';
-    return area+'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>'+sg.map(function(q){return '<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="5" fill="'+col+'" stroke="var(--paper,#fff)" stroke-width="2"/><text x="'+q[0].toFixed(1)+'" y="'+(q[1]-11).toFixed(1)+'" text-anchor="middle" class="lc-v">'+q[2].p+'%</text>'}).join('')}).join('');
+    return area+'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>'+sg.map(function(q,j){var dense=n>12,lab=!dense||j===sg.length-1;return '<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="'+(dense?3:5)+'" fill="'+col+'" stroke="var(--paper,#fff)" stroke-width="'+(dense?1.5:2)+'"/>'+(lab?'<text x="'+q[0].toFixed(1)+'" y="'+(q[1]-11).toFixed(1)+'" text-anchor="middle" class="lc-v">'+q[2].p+'%</text>':'')}).join('')}).join('');
   var labs=pts.map(function(p,i){return '<text x="'+x(i).toFixed(1)+'" y="'+(H-B+20)+'" text-anchor="middle" class="lc-ax">'+p.l+'</text>'+(p.s?'<text x="'+x(i).toFixed(1)+'" y="'+(H-B+34)+'" text-anchor="middle" class="lc-ax lc-s">'+p.s+'</text>':'')}).join('');
   return '<svg class="lchart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Line chart">'+g+lines+labs+'</svg>'}
 function weekStats(){var s=weekStart(TODAY),of=dailyHabits().length||1,days=[],sum=0,el=0;for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d)),dn=dailyDone(ds),fut=d>TODAY,p=Math.round(dn/of*100);days.push({d:d,dn:dn,p:fut?null:p,ds:ds});if(!fut){sum+=p;el++}}
