@@ -811,6 +811,18 @@ body.dopen .wrappill{display:none}
 .cheerstrip .cs-go,.cheerstrip .cs-show{background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0}
 .cheerstrip .cs-x{margin-left:auto;background:none;border:0;color:inherit;opacity:.55;font:900 13px system-ui,sans-serif;cursor:pointer}
 .cheerstrip.mini{display:inline-flex;padding:3px 10px}
+
+/* ===== pill bar: grouped, finds a clear spot in each scene ===== */
+#pillbar{position:fixed;top:var(--pbt,14px);right:16px;left:auto;bottom:auto;z-index:56;display:flex;align-items:center;gap:8px;flex-direction:row}
+#pillbar.pl-left{left:16px;right:auto}#pillbar.pl-bottom{top:auto;bottom:var(--pbb,14px)}
+#pillbar .themepill,#pillbar .wrappill{position:static!important;right:auto!important;top:auto!important}
+#pillbar .tmenu{position:absolute!important;top:calc(100% + 8px)!important;right:0!important;left:auto}
+#pillbar.pl-left .tmenu{left:0;right:auto!important}#pillbar.pl-bottom .tmenu{top:auto!important;bottom:calc(100% + 8px)}
+#pillbar.compact .wrappill>span,#pillbar.compact #tname{display:none}
+#pillbar.compact .wrappill,#pillbar.compact .themepill{padding-left:9px!important;padding-right:9px!important}
+#pillbar.compact .themepill{padding:4px!important}
+body.dopen #pillbar{top:14px!important;bottom:auto!important;right:16px!important;left:auto!important}
+#sceneKey{top:var(--skt,14px)}#sceneKey.sk-bottom{top:auto;bottom:14px}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -962,7 +974,7 @@ body.dopen .wrappill{display:none}
 })();
 </script>
 
-<button type="button" class="wrappill cheerpill" id="cpill" aria-label="Cheers — wins and heads-ups">✦ <span>Cheers</span> <b id="cpcount" class="cpc">0</b></button><button type="button" class="wrappill starpill" id="spill" aria-label="Your stars — paste horoscopes">☾ <span>Stars</span></button><button type="button" class="wrappill" id="wpill" aria-label="Open your month, wrapped">✨ <span id="wpname">Wrapped</span></button><button type="button" class="themepill" id="tpill" aria-haspopup="true" aria-label="Change theme"><i></i><span id="tname">Folders</span></button><div class="tmenu" id="tmenu" role="menu"></div>
+<div id="pillbar"><button type="button" class="wrappill cheerpill" id="cpill" aria-label="Cheers — wins and heads-ups">✦ <span>Cheers</span> <b id="cpcount" class="cpc">0</b></button><button type="button" class="wrappill starpill" id="spill" aria-label="Your stars — paste horoscopes">☾ <span>Stars</span></button><button type="button" class="wrappill" id="wpill" aria-label="Open your month, wrapped">✨ <span id="wpname">Wrapped</span></button><button type="button" class="themepill" id="tpill" aria-haspopup="true" aria-label="Change theme"><i></i><span id="tname">Folders</span></button><div class="tmenu" id="tmenu" role="menu"></div></div>
 <div id="deco" aria-hidden="true"></div>
 
 <svg class="spk fo-only" aria-hidden="true" style="left:3%;top:40px" width="30" height="30" viewBox="-15 -15 30 30"><path class="tw" fill="#fff" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
@@ -1456,7 +1468,7 @@ function drawWrapped(b){var A=wrapAll(wrapOff),w=A.w,h=head(b,'Your month across
   return h}
 function wrapPill(){var el=$('#wpname'),bt=$('#wpill');if(!el)return;var ready=TODAY.getDate()<=7&&wrapAll(1).any;el.textContent=ready?FMN[wrapMonth(1).getMonth()]+' wrapped':'Wrapped';bt.classList.toggle('ready',ready);
   var tp=$('#tpill');if(tp){var r=tp.getBoundingClientRect();if(r.width)document.documentElement.style.setProperty('--wpr',(window.innerWidth-r.left+8)+'px');var wr=bt.getBoundingClientRect();if(wr.width)document.documentElement.style.setProperty('--spr',(window.innerWidth-r.left+8+wr.width+8)+'px');var sp0=$('#spill');if(sp0&&wr.width){var sr=sp0.getBoundingClientRect();document.documentElement.style.setProperty('--cpr',(window.innerWidth-r.left+8+wr.width+8+sr.width+8)+'px')}}
-  try{cheerPill()}catch(e){}
+  try{cheerPill()}catch(e){}setTimeout(placePills,30);
   var sp=$('#spill');if(sp){var an=astroNow();sp.classList.toggle('ready',!!(an.d||an.w||an.m))}}
 
 /* ===== charts: bars / line toggle ===== */
@@ -2136,6 +2148,27 @@ function layoutScene(Wu){var sc=SCENES[theme],inner=$('#sceneInner');if(!sc)retu
   if(Wu>641){try{spreadScene(Wu)}catch(e){inner.innerHTML=sc.body;Wu=640}}
   inner.style.width=Wu+'px';sceneWu=Wu;sceneWuFor=theme;
   inner.querySelectorAll('[data-live]').forEach(function(e){e.textContent=liveText(e)})}
+
+/* find clear spots for the pill bar + scene key so they never cover scene text */
+function sceneTextRects(){var R=[],root=$('#sceneInner');if(!root)return R;var tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.textContent.trim()?1:2}}),n;
+  while((n=tw.nextNode())){var el=n.parentElement;if(!el)continue;var cs=getComputedStyle(el);if(cs.visibility==='hidden'||+cs.opacity===0||cs.display==='none')continue;if(el.closest('svg')&&!el.closest('text'))continue;
+    var rg=document.createRange();rg.selectNodeContents(n);[].slice.call(rg.getClientRects()).forEach(function(r){if(r.width>1&&r.height>1)R.push(r)})}
+  [].slice.call(root.querySelectorAll('[data-k],[data-act]')).forEach(function(el){var r=el.getBoundingClientRect();if(r.width>1&&r.width<window.innerWidth*.6&&r.height<window.innerHeight*.5)R.push(r)});return R}
+function hits(box,R,pad){pad=pad||4;var n=0;R.forEach(function(r){if(box.l<r.right+pad&&r.left-pad<box.r&&box.t<r.bottom+pad&&r.top-pad<box.b)n++});return n}
+function placePills(){var pb=$('#pillbar');if(!pb)return;pb.classList.remove('pl-left','pl-bottom','compact');document.documentElement.style.setProperty('--pbt','14px');
+  var sk=$('#sceneKey');if(sk){sk.classList.remove('sk-bottom');document.documentElement.style.setProperty('--skt','14px')}
+  if(document.body.classList.contains('dopen')||!SCENES[theme]||!document.documentElement.classList.contains('scene-on'))return;
+  var R=sceneTextRects(),W=window.innerWidth,H=window.innerHeight;
+  function measure(compact){pb.classList.toggle('compact',compact);var r=pb.getBoundingClientRect();return {w:r.width,h:r.height}}
+  var best=null;
+  [false,true].forEach(function(cp){if(best&&best.n===0)return;var m=measure(cp);
+    for(var y=14;y<=H*0.32;y+=6){var box={l:W-16-m.w,r:W-16,t:y,b:y+m.h},n=hits(box,R);if(!best||n<best.n||(n===best.n&&false))best={n:n,cp:cp,y:y,side:'tr'};if(n===0)return}
+    [['tl',16],['br',0],['bl',0]].forEach(function(c){if(best&&best.n===0)return;var box=c[0]==='tl'?{l:16,r:16+m.w,t:14,b:14+m.h}:c[0]==='br'?{l:W-16-m.w,r:W-16,t:H-14-m.h,b:H-14}:{l:16,r:16+m.w,t:H-14-m.h,b:H-14};var n=hits(box,R);if(n<best.n)best={n:n,cp:cp,y:14,side:c[0]}})});
+  pb.classList.toggle('compact',best.cp);if(best.side==='tr')document.documentElement.style.setProperty('--pbt',best.y+'px');else{pb.classList.toggle('pl-left',best.side==='tl'||best.side==='bl');pb.classList.toggle('pl-bottom',best.side==='br'||best.side==='bl')}
+  if(sk&&getComputedStyle(sk).display!=='none'){var kr=sk.getBoundingClientRect(),PB=pb.getBoundingClientRect(),kb=null;
+    for(var y2=14;y2<=H*0.32;y2+=6){var bx={l:14,r:14+kr.width,t:y2,b:y2+kr.height},nn=hits(bx,R)+((bx.l<PB.right&&PB.left<bx.r&&bx.t<PB.bottom&&PB.top<bx.b)?5:0);if(!kb||nn<kb.n)kb={n:nn,y:y2};if(nn===0)break}
+    if(kb.n>0){var bb={l:14,r:14+kr.width,t:H-14-kr.height,b:H-14};if(hits(bb,R)<kb.n){sk.classList.add('sk-bottom');kb=null}}
+    if(kb)document.documentElement.style.setProperty('--skt',kb.y+'px')}}
 function fitScene(){var el=$('#sceneInner'),W=window.innerWidth,H=window.innerHeight;var s=Math.min(W/640,H/440),off=0;
   if(document.body.classList.contains('dopen')){var BH=Math.round(Math.min(220,Math.max(150,H*.24)));document.documentElement.style.setProperty('--bh',BH+'px');s=Math.min(BH/240,W/640);var vis=BH/s;off=Math.max(0,Math.min(Math.max(0,440-vis),(FOCUS[theme]||120)-vis/2));H=BH;
     el.style.transformOrigin='top center';el.style.transform='translateY('+(-off*s).toFixed(1)+'px) scale('+s+')'}
@@ -2146,7 +2179,7 @@ function fitScene(){var el=$('#sceneInner'),W=window.innerWidth,H=window.innerHe
   var sc=SCENES[theme];var g=$('#sceneGrain');g.style.display=theme==='haunted'?'block':'none';
   if(sc&&typeof sc.bg==='object'){var S=$('#scene').style;S.background='';S.backgroundColor=sc.bg.c;S.backgroundImage=sc.bg.i;S.backgroundSize=sc.bg.s.split(',').map(function(x){return /px/.test(x)?x.replace(/[\d.]+px/g,function(p){return (parseFloat(p)*s).toFixed(1)+'px'}):x}).join(',');S.backgroundPosition='center'}
   else if(sc&&sc.ground){var gt=off||document.body.classList.contains('dopen')?Math.round((sc.ground[0]-off)*s):Math.round((H-440*s)/2+sc.ground[0]*s);$('#scene').style.background='linear-gradient(to bottom,'+sc.bg+' 0 '+gt+'px,'+sc.ground[1]+' '+gt+'px 100%)'}else if(sc){$('#scene').style.background=sc.bg}
-  var w=$('#sceneWeb');w.style.display=theme==='haunted'?'block':'none';w.style.width=w.style.height=Math.round(160*s)+'px'}
+  var w=$('#sceneWeb');w.style.display=theme==='haunted'?'block':'none';w.style.width=w.style.height=Math.round(160*s)+'px';setTimeout(placePills,60)}
 function renderScene(){var sc=SCENES[theme];
   document.documentElement.classList.toggle('scene-on',!!sc);
   if(!sc){$('#sceneKey').style.display='none';return}
@@ -2171,7 +2204,7 @@ $('#sceneInner').addEventListener('click',function(e){var b=e.target.closest('[d
 });
 
 var saved='folders';try{saved=localStorage.getItem(TKEY)||'folders'}catch(e){}if(saved==='pixel')saved='lava';
-applyTheme(saved);
+applyTheme(saved);try{document.fonts.ready.then(function(){setTimeout(placePills,100)})}catch(e){}setTimeout(placePills,1500);
 </script>
 </body>
 </html>
