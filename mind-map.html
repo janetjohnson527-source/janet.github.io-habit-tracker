@@ -827,6 +827,7 @@ body.dopen #pillbar{top:14px!important;bottom:auto!important;right:16px!importan
 .dart.iso *,.dart-measure *{clip-path:none!important;-webkit-mask:none!important;mask:none!important}
 .dart.iso{-webkit-mask-image:none!important;mask-image:none!important}
 .bars .blab{display:block;line-height:1.25;min-height:1.25em;white-space:nowrap}
+.hnav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.hnav b{font-family:var(--fh,Poppins);font-size:17px;min-width:150px;text-align:center}.hnav .chip[disabled]{opacity:.35;cursor:default}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -1269,7 +1270,7 @@ $('#map').addEventListener('click',function(e){var b=e.target.closest('.folder')
 
 /* ============ drawers ============ */
 var cur=null,sub='today';
-function openDrawer(k,tab){document.body.classList.add('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=k;sub=tab||(k==='habits'?'today':'');hDay=TODAY;hEdit=false;hDelPending=null;pDate=null;renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
+function openDrawer(k,tab){document.body.classList.add('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=k;sub=tab||(k==='habits'?'today':'');hDay=TODAY;hEdit=false;hDelPending=null;hOff={week:0,month:0,year:0};pDate=null;renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
 function closeDrawer(){document.body.classList.remove('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=null;if($('#helper'))$('#helper').remove();$('#drawer').classList.remove('open');document.body.style.overflow='';renderHome();if(SCENES[theme])renderScene();setTimeout(wrapPill,0)}
 window.addEventListener('popstate',function(){if(cur)closeDrawer()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if(cur)history.back()}});
@@ -1364,7 +1365,7 @@ function oneHabitChart(x,days,col,title){var wk=!!x.weekly,n=0,pts=[];
   return '<div class="gwrap"><div class="ghead"><b>'+title+'</b>'+gToggle()+'</div>'+body+'<p class="note">Running % as the '+(days.length>7?'month':'week')+' goes'+(gview==='line'?'':' — solid bars are days you did it')+'.</p></div>'}
 function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=hcol(x),wk=!!x.weekly;
   if(sub==='week'){var s=weekStart(TODAY),n=0,cells='';for(var i=0;i<7;i++){var d=addDays(s,i),on=hasOn(x.id,d);if(on)n++;
-      cells+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:'+txtOn(col):'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
+      cells+='<div class="d'+(ymd(d)===ymd(REALTODAY||TODAY)?' today':'')+(d>TODAY?' dim':'')+'" style="'+(on?'background:'+col+';color:'+txtOn(col):'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(on?'✓ done':'○')+'</small></div>'}
     var den=wk?x.weekly:7,p=Math.min(100,Math.round(n/den*100));
     h+='<div class="panel"><h2>'+esc(x.name)+' — week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+p+'%</span><span>'+n+' of '+den+(wk?' this week (3x target)':' days')+'</span></div><div class="pbar"><i style="width:'+p+'%;background:'+col+'"></i></div><div class="cal">'+cells+'</div>'+
       oneHabitChart(x,[0,1,2,3,4,5,6].map(function(i){var d=addDays(s,i);d.l=DOW[d.getDay()];return d}),col,'Day by day')+
@@ -1489,10 +1490,19 @@ function lineChart(pts,col){/* pts: [{l:label,p:0-100|null,s:sub}] */var W=640,H
   return '<svg class="lchart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Line chart">'+g+lines+labs+'</svg>'}
 function weekStats(){var s=weekStart(TODAY),of=dailyHabits().length||1,days=[],sum=0,el=0;for(var i=0;i<7;i++){var d=addDays(s,i),ds=hDone(ymd(d)),dn=dailyDone(ds),fut=d>TODAY,p=Math.round(dn/of*100);days.push({d:d,dn:dn,p:fut?null:p,ds:ds});if(!fut){sum+=p;el++}}
   return {start:s,days:days,avg:el?Math.round(sum/el):0,left:days.filter(function(x){return x.p===null}).length,of:of}}
-function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
+
+/* ===== browse past weeks / months / years ===== */
+var REALTODAY=null,hOff={week:0,month:0,year:0};
+function hPeriod(sb,off,rt){if(sb==='week'){var s0=addDays(weekStart(rt),7*off);return {start:s0,end:addDays(s0,6),lab:(off===0?'This week':off===-1?'Last week':'Week of '+nice(s0))}}
+  if(sb==='month'){var f=new Date(rt.getFullYear(),rt.getMonth()+off,1);return {start:f,end:new Date(f.getFullYear(),f.getMonth()+1,0),lab:FMN[f.getMonth()]+' '+f.getFullYear()}}
+  var y=rt.getFullYear()+off;return {start:new Date(y,0,1),end:new Date(y,11,31),lab:String(y)}}
+function hNav(){if(!hOff.hasOwnProperty(sub))return '';var rt=REALTODAY||TODAY,o=hOff[sub],P=hPeriod(sub,o,rt),nm={week:'week',month:'month',year:'year'}[sub];
+  return '<div class="hnav"><button class="chip" data-act="hoff" data-d="-1" aria-label="previous '+nm+'">‹</button><b>'+P.lab+'</b><button class="chip" data-act="hoff" data-d="1" aria-label="next '+nm+'"'+(o>=0?' disabled':'')+'>›</button>'+(o<0?'<button class="chip on" data-act="hoff" data-d="0">Back to this '+nm+'</button>':'')+'</div>'}
+function drawHabits(b){var o0=hOff[sub];if(sub!=='today'&&o0){var rt=TODAY,P=hPeriod(sub,o0,rt);REALTODAY=rt;TODAY=P.end<rt?P.end:rt;try{return drawHabits0(b).replace(/ so far this week/g,' that week').replace(/ so far this month/g,' that month').replace(/ the days so far this month/g,' every day that month').replace(/ the days so far this week/g,' every day that week').replace(/ (sessions|days) so far/g,' $1').replace(/average so far/g,'average')}finally{TODAY=rt;REALTODAY=null}}return drawHabits0(b)}
+function drawHabits0(b){var tabs=[['today','Today'],['week','Week'],['month','Month'],['year','Year']];
   var h=head(b,'Tap a circle to log it. Voice updates from Muse show up here too ('+esc(repoStatus)+'). <button class="btn white" data-act="export" style="margin-left:6px">Back up my data</button>')+'<div class="tabs">'+tabs.map(function(t){return '<button class="chip'+(sub===t[0]?' on':'')+'" data-act="sub" data-sub="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var done=hDone(ymd(TODAY)),t=todayStats();
-  if(sub!=='today'){h+=picker();var one=hsel!=='all'&&habitById(hsel);if(one)return h+drawOneHabit(one)}
+  if(sub!=='today'){h+=picker()+hNav();var one=hsel!=='all'&&habitById(hsel);if(one)return h+drawOneHabit(one)}
   if(sub==='today'&&TODAY.getDate()<=7&&wrapData(1).has)h+=wrapBanner();
   if(sub==='today'){var hd=hDay||TODAY,isT=ymd(hd)===ymd(TODAY),dn=hDone(ymd(hd)),tn=dailyDone(dn),tof=dailyHabits().length;
     h+='<div class="cols"><div class="panel"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px"><button class="chip" data-act="hstep" data-n="-1" aria-label="previous day">←</button>'+
@@ -1506,10 +1516,10 @@ function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Mon
     '<p class="note">Weekly habits are judged against their 3x target, not 7 days.</p>'+
     '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div>'}
   else if(sub==='week'){var W=weekStats(),s=W.start;h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+W.avg+'%</span><span>of daily habits so far this week'+(W.left?' · '+W.left+' day'+(W.left===1?'':'s')+' left':' · week complete')+'</span></div><div class="pbar"><i style="width:'+W.avg+'%"></i></div><div class="cal">';
-    W.days.forEach(function(o){var d=o.d,ds=o.ds;h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(o.p===null?'—':'<b>'+o.p+'%</b> · '+o.dn+' of '+W.of)+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+hcol(x)+'"></i>'}).join('')+'</div></div>'});
+    W.days.forEach(function(o){var d=o.d,ds=o.ds;h+='<div class="d'+(ymd(d)===ymd(REALTODAY||TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(o.p===null?'—':'<b>'+o.p+'%</b> · '+o.dn+' of '+W.of)+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+hcol(x)+'"></i>'}).join('')+'</div></div>'});
     h+='</div><div class="gwrap"><div class="ghead"><b>Day by day</b>'+gToggle()+'</div>'+(gview==='line'?lineChart(W.days.map(function(o){return {l:DOW[o.d.getDay()],p:o.p}})):'<div class="bars" style="height:140px">'+W.days.map(function(o){return '<div><i style="height:'+(o.p||0)+'%"></i>'+DOW[o.d.getDay()]+'<br>'+(o.p===null?'—':o.p+'%')+'</div>'}).join('')+'</div>')+'</div>'+
       '<p class="note">Each dot is a habit you logged that day. % is out of your '+W.of+' daily habits.</p></div>'+weekByHabit()}
-  else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d)),dn=dailyDone(ds),of=dailyHabits().length||1;
+  else if(sub==='month'){if(!REALTODAY)h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d)),dn=dailyDone(ds),of=dailyHabits().length||1;
       return {cls:d>TODAY?' dim':'',style:dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'',html:'<small>'+(dn?dn+' done<br>'+Math.round(dn/of*100)+'%':'')+'</small>',attr:d<=TODAY?' data-act="hday" data-d="'+ymd(d)+'" role="button" title="Open this day" style="cursor:pointer;'+(dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'')+'"':''}})+'<p class="note">Tap any day to fix it. Darker green = more habits done that day. % is out of your '+dailyHabits().length+' daily habits (strength + walking pad are tracked weekly).</p></div>'+monthByHabit()}
   else{var vals=[];for(var m=0;m<12;m++){var tot=0,days=0,dim=new Date(TODAY.getFullYear(),m+1,0).getDate();for(var dd=1;dd<=dim;dd++){var dt=new Date(TODAY.getFullYear(),m,dd);if(dt>TODAY)break;days++;tot+=dailyHabits().filter(function(x){return hDone(ymd(dt)).indexOf(x.id)>-1}).length}
       vals.push(days?Math.round(tot/(days*dailyHabits().length)*100):0)}
@@ -1540,7 +1550,7 @@ function monthByHabit(){var FM=['January','February','March','April','May','June
 function monthGrid(ref,cell){var y=ref.getFullYear(),m=ref.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate();
   var h='<div class="cal">'+DOW.map(function(d){return '<div class="hd">'+d+'</div>'}).join('');
   for(var i=0;i<first.getDay();i++)h+='<div class="d empty"></div>';
-  for(var d=1;d<=n;d++){var dt=new Date(y,m,d),c=cell(dt);h+='<div class="d'+(ymd(dt)===ymd(TODAY)?' today':'')+(c.cls||'')+'"'+(c.attr||' style="'+(c.style||'')+'"')+'>'+d+(c.html||'')+'</div>'}
+  for(var d=1;d<=n;d++){var dt=new Date(y,m,d),c=cell(dt);h+='<div class="d'+(ymd(dt)===ymd(REALTODAY||TODAY)?' today':'')+(c.cls||'')+'"'+(c.attr||' style="'+(c.style||'')+'"')+'>'+d+(c.html||'')+'</div>'}
   return h+'</div>'}
 
 /* --- period --- */
@@ -1771,6 +1781,7 @@ var imgTarget=null;
 $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-act]');if(!t||t.tagName==='FORM')return;var a=t.dataset.act;
   if(a==='back'){history.back();return}
   if(a==='sub'){sub=t.dataset.sub;renderDrawer();return}
+  if(a==='hoff'){var dd=+t.dataset.d;if(dd===0)hOff[sub]=0;else hOff[sub]=Math.min(0,hOff[sub]+dd);renderDrawer();return}
   if(a==='gview'){gview=t.dataset.v;try{localStorage.setItem('janet-mind-map-gview',gview)}catch(e){}renderDrawer();return}
   if(a==='hsel'){hsel=t.dataset.id;renderDrawer();return}
   if(a==='go'){cur=t.dataset.k;renderDrawer();$('#drawer').scrollTop=0;return}
