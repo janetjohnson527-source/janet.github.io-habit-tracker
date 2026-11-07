@@ -773,6 +773,44 @@ body.dopen .wrappill{display:none}
 .astrocard.has{border-style:solid;background:rgba(155,108,240,.08)}
 .astrocard b{display:block;font-size:13px}.astrocard small{display:block;font-size:11.5px;font-weight:600;opacity:.8;margin-top:3px;line-height:1.35}
 #sceneInner [data-act="more"],#sceneInner [data-act="dump"],#sceneInner [data-act="where"]{position:relative;z-index:40}
+
+/* ===== top-right pills (theme / wrapped / stars / cheers) match each theme ===== */
+[data-theme="folders"]{--pbg:#fff3d1;--pfg:#3b1f1f;--pbd:2px solid #3b1f1f;--psh:2px 2px 0 #3b1f1f;--pff:'Poppins';--prad:999px;--ptt:none;--pls:0;--pdot:#ef4d3c}
+[data-theme="chromatic"]{--pbg:#faf8f4;--pfg:#141414;--pbd:1px solid #141414;--psh:none;--pff:'JetBrains Mono';--prad:999px;--ptt:uppercase;--pls:.06em;--pdot:#c64bd1}
+[data-theme="strange"]{--pbg:#e9e6de;--pfg:#0f0f0f;--pbd:1.5px solid #0f0f0f;--psh:2px 2px 0 #0f0f0f;--pff:'IM Fell English';--prad:2px;--ptt:none;--pls:0;--pdot:#0f0f0f}
+[data-theme="departure"]{--pbg:#f3e6cc;--pfg:#0f2c58;--pbd:1.5px solid #0f2c58;--psh:0 3px 8px rgba(0,0,0,.25);--pff:'JetBrains Mono';--prad:6px;--ptt:uppercase;--pls:.08em;--pdot:#d6402b}
+[data-theme="psych"]{--pbg:#f3e6cf;--pfg:#2a2420;--pbd:2px solid #2a2420;--psh:2px 2px 0 #e8402a;--pff:'Fredoka';--prad:999px;--ptt:none;--pls:0;--pdot:#e8402a}
+[data-theme="lava"]{--pbg:rgba(20,12,34,.85);--pfg:#f4ecff;--pbd:1px solid rgba(244,236,255,.4);--psh:0 0 14px rgba(255,90,217,.3);--pff:'Space Grotesk';--prad:999px;--ptt:none;--pls:0;--pdot:#ff5ad9}
+[data-theme="neo"]{--pbg:#ffffff;--pfg:#111111;--pbd:3px solid #111111;--psh:3px 3px 0 #111111;--pff:'Rubik';--prad:8px;--ptt:none;--pls:0;--pdot:#9bd12a}
+[data-theme="satellite"]{--pbg:#fde4e8;--pfg:#e8264a;--pbd:1.5px solid #e8264a;--psh:none;--pff:'Archivo Narrow';--prad:0;--ptt:uppercase;--pls:.08em;--pdot:#e8264a}
+[data-theme="patchwork"]{--pbg:#f6ecd8;--pfg:#2b2552;--pbd:2px solid #2b2552;--psh:2px 2px 0 #f07aa8;--pff:'IM Fell English SC';--prad:4px;--ptt:none;--pls:0;--pdot:#f07aa8}
+[data-theme="blackcat"]{--pbg:#fffdf8;--pfg:#111111;--pbd:2px solid #111111;--psh:none;--pff:'DM Mono';--prad:3px 7px 4px 6px;--ptt:none;--pls:0;--pdot:#111111}
+[data-theme="haunted"]{--pbg:#241d31;--pfg:#f7e3b5;--pbd:2px solid #f2b733;--psh:2px 2px 0 #000;--pff:'Fredoka';--prad:999px;--ptt:none;--pls:0;--pdot:#f2b733}
+[data-theme="checker"]{--pbg:#fff7ec;--pfg:#1b1714;--pbd:2px solid #1b1714;--psh:3px 3px 0 #3a6ee8;--pff:'Poppins';--prad:999px;--ptt:none;--pls:0;--pdot:#f5b800}
+[data-theme="pink"]{--pbg:#fff0f6;--pfg:#3a1d4a;--pbd:2px solid #3a1d4a;--psh:2px 2px 0 #ff3f8e;--pff:'Fredoka';--prad:999px;--ptt:none;--pls:0;--pdot:#ff3f8e}
+[data-theme="rainbow"]{--pbg:#161616;--pfg:#ffffff;--pbd:2px solid #ffffff;--psh:2px 2px 0 #ff7ac8;--pff:'Nunito';--prad:999px;--ptt:none;--pls:0;--pdot:#ffd21f}
+[data-theme="crayon"]{--pbg:#fffdf8;--pfg:#24206a;--pbd:2.5px solid #24206a;--psh:2px 2px 0 #ff3d9a;--pff:'Gaegu';--prad:10px;--ptt:none;--pls:0;--pdot:#ff3d9a}
+[data-theme="sampler"]{--pbg:#fbf3e3;--pfg:#1f4f5c;--pbd:3px solid #1f4f5c;--psh:none;--pff:'Pixelify Sans';--prad:0;--ptt:none;--pls:0;--pdot:#d9534f}
+[data-theme="folk"]{--pbg:#1d2c3a;--pfg:#f3e3c8;--pbd:2px solid #f59ac0;--psh:2px 2px 0 #000;--pff:'Grandstander';--prad:999px;--ptt:none;--pls:0;--pdot:#f5c23a}
+.themepill,.wrappill{background:var(--pbg,#fff)!important;color:var(--pfg,#3b1f1f)!important;border:var(--pbd,2px solid #3b1f1f)!important;box-shadow:var(--psh,2px 2px 0 #3b1f1f)!important;font-family:var(--pff,Poppins),system-ui,sans-serif!important;border-radius:var(--prad,999px)!important;text-transform:var(--ptt,none);letter-spacing:var(--pls,0);animation:none!important}
+.themepill i{border-color:var(--pfg,#3b1f1f)!important}
+.tmenu{background:var(--pbg,#fff)!important;color:var(--pfg,#3b1f1f)!important;border:var(--pbd,2.5px solid #3b1f1f)!important;font-family:var(--pff,Poppins),system-ui,sans-serif}
+.tmenu button{color:var(--pfg,#3b1f1f)!important;font-family:inherit!important}.tmenu button:hover,.tmenu button.on{background:color-mix(in srgb,var(--pfg,#3b1f1f) 12%,transparent)!important}
+.wrappill.ready::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--pdot,#ff3f8e);margin-left:2px;animation:pdot 1.8s ease-in-out infinite}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pdot,#ff3f8e) 60%,transparent)}50%{box-shadow:0 0 0 5px transparent}}
+.cheerpill .cpc{background:var(--pfg,#3b1f1f)!important;color:var(--pbg,#fff)!important}
+[data-theme="crayon"] .themepill,[data-theme="crayon"] .wrappill{font-size:14px!important;font-weight:700!important}
+[data-theme="sampler"] .themepill,[data-theme="sampler"] .wrappill{font-size:11px!important}
+
+.cheerstrip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:-6px 0 16px;padding:7px 10px;border:var(--pbd,2px solid var(--ink));border-radius:12px;background:var(--pbg,#fff);color:var(--pfg,var(--ink));box-shadow:var(--psh,none);font:600 12.5px/1.35 var(--pff,Poppins),system-ui,sans-serif;position:relative;z-index:1}
+.dwrap.has-art .cheerstrip{max-width:min(780px,calc(100% - 360px))}
+@media(max-width:900px){.dwrap.has-art .cheerstrip{max-width:none}}
+.cheerstrip .cs-lab{font-weight:900;letter-spacing:.04em;font-size:11.5px;opacity:.85}
+.cheerstrip .cs-item{display:inline-flex;align-items:center;gap:5px}
+.cheerstrip .cs-item+.cs-item::before{content:"·";opacity:.4;margin-right:5px}
+.cheerstrip .cs-go,.cheerstrip .cs-show{background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0}
+.cheerstrip .cs-x{margin-left:auto;background:none;border:0;color:inherit;opacity:.55;font:900 13px system-ui,sans-serif;cursor:pointer}
+.cheerstrip.mini{display:inline-flex;padding:3px 10px}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -1660,14 +1698,13 @@ function helperTips(ctx){
 function tipHTML(x){if(x.star)return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+' <button class="go" data-hstar="'+x.star.id+'">★ Star it</button> <button class="go" data-hskip="'+x.star.id+'" style="opacity:.7">not now</button></span></div>';var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a>':(x.go?' <button class="go" data-hgo="'+x.go+'">open →</button>':'');
   return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+link+'</span></div>'}
 function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
-  var tips=cheerTips(cur).slice(0,2);if(!tips.length)return;
-  var mini=false;try{mini=localStorage.getItem(HKEY)==='1'}catch(e){}
-  var el=document.createElement('aside');el.id='helper';el.className='helper'+(mini?' mini':'');el.setAttribute('aria-label','Helper');
-  el.innerHTML='<div class="hh"><span class="star">✦</span>'+(mini?'cheers · '+tips.length:'CHEERS')+'<button type="button" data-hmin aria-label="'+(mini?'expand':'minimize')+'">'+(mini?'+':'–')+'</button></div>'+tips.map(tipHTML).join('');
-  $('#drawer').appendChild(el);
-  el.addEventListener('click',function(e){var m=e.target.closest('[data-hmin]');if(m){try{localStorage.setItem(HKEY,mini?'0':'1')}catch(_){}renderHelper();return}
-    var st=e.target.closest('[data-hstar]');if(st){var c=priCands().filter(function(x){return x.id===st.dataset.hstar})[0];if(c){starCand(c);renderDrawer();toast('★ '+c.t)}return}
-    var sk=e.target.closest('[data-hskip]');if(sk){PRI_SKIP[sk.dataset.hskip]=1;renderHelper();return}
+  var tips=cheerTips(cur).slice(0,3);if(!tips.length)return;
+  var hidden=false;try{hidden=localStorage.getItem(HKEY)==='1'}catch(e){}
+  var el=document.createElement('div');el.id='helper';el.className='cheerstrip'+(hidden?' mini':'');el.setAttribute('aria-label','Cheers');
+  el.innerHTML=hidden?'<button type="button" class="cs-show" data-hmin>✦ Cheers · '+tips.length+'</button>':
+    '<span class="cs-lab">✦ Cheers</span>'+tips.map(function(x){return '<span class="cs-item"><span>'+x.ic+'</span>'+esc(x.txt)+(x.go&&x.go!==cur?' <button type="button" class="cs-go" data-hgo="'+x.go+'">open →</button>':'')+'</span>'}).join('')+'<button type="button" class="cs-x" data-hmin aria-label="hide cheers" title="Hide">✕</button>';
+  var w=$('#dwrap'),anchor=w.querySelector('.dsub');if(anchor)anchor.insertAdjacentElement('afterend',el);else w.appendChild(el);
+  el.addEventListener('click',function(e){if(e.target.closest('[data-hmin]')){try{localStorage.setItem(HKEY,hidden?'0':'1')}catch(_){}renderHelper();return}
     var g=e.target.closest('[data-hgo]');if(g){cur=g.dataset.hgo;sub=cur==='habits'?'today':'';renderDrawer();$('#drawer').scrollTop=0}});
 }
 /* ============ drawer events ============ */
