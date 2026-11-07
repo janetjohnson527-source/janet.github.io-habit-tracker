@@ -541,7 +541,9 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 [data-theme="lava"] .row.hedit input{background:rgba(255,255,255,.08)!important;color:#f4ecff!important}
 
 /* ===== wrapped ===== */
-.starpill{right:var(--spr,280px)!important}
+.starpill{right:var(--spr,280px)!important}.cheerpill{right:var(--cpr,380px)!important}
+.cheerpill .cpc{display:inline-block;min-width:16px;padding:0 4px;border-radius:999px;background:var(--ink,#3b1f1f);color:var(--paper,#fff);font-size:10px;line-height:16px;text-align:center}
+.cheerpill.ready{background:linear-gradient(90deg,#ffe08a,#b8f0c8)}
 .wrappill{position:fixed;top:14px;right:var(--wpr,170px);z-index:55;display:flex;align-items:center;gap:4px;background:#fff;color:#3b1f1f;border:2px solid #3b1f1f;border-radius:999px;padding:4px 11px;font:800 11px Poppins,system-ui,sans-serif;box-shadow:2px 2px 0 #3b1f1f;cursor:pointer}
 .wrappill.ready{background:linear-gradient(90deg,#ffe08a,#ffb0d6);animation:wpGlow 2.4s ease-in-out infinite}
 @keyframes wpGlow{0%,100%{box-shadow:2px 2px 0 #3b1f1f}50%{box-shadow:2px 2px 0 #3b1f1f,0 0 14px 3px rgba(255,95,168,.55)}}
@@ -922,7 +924,7 @@ body.dopen .wrappill{display:none}
 })();
 </script>
 
-<button type="button" class="wrappill starpill" id="spill" aria-label="Your stars — paste horoscopes">☾ <span>Stars</span></button><button type="button" class="wrappill" id="wpill" aria-label="Open your month, wrapped">✨ <span id="wpname">Wrapped</span></button><button type="button" class="themepill" id="tpill" aria-haspopup="true" aria-label="Change theme"><i></i><span id="tname">Folders</span></button><div class="tmenu" id="tmenu" role="menu"></div>
+<button type="button" class="wrappill cheerpill" id="cpill" aria-label="Cheers — wins and heads-ups">✦ <span>Cheers</span> <b id="cpcount" class="cpc">0</b></button><button type="button" class="wrappill starpill" id="spill" aria-label="Your stars — paste horoscopes">☾ <span>Stars</span></button><button type="button" class="wrappill" id="wpill" aria-label="Open your month, wrapped">✨ <span id="wpname">Wrapped</span></button><button type="button" class="themepill" id="tpill" aria-haspopup="true" aria-label="Change theme"><i></i><span id="tname">Folders</span></button><div class="tmenu" id="tmenu" role="menu"></div>
 <div id="deco" aria-hidden="true"></div>
 
 <svg class="spk fo-only" aria-hidden="true" style="left:3%;top:40px" width="30" height="30" viewBox="-15 -15 30 30"><path class="tw" fill="#fff" d="M0 -12 C1.5 -3,3 -1.5,12 0 C3 1.5,1.5 3,0 12 C-1.5 3,-3 1.5,-12 0 C-3 -1.5,-1.5 -3,0 -12 Z"/></svg>
@@ -1214,7 +1216,7 @@ $('#map').addEventListener('click',function(e){var b=e.target.closest('.folder')
 /* ============ drawers ============ */
 var cur=null,sub='today';
 function openDrawer(k,tab){document.body.classList.add('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=k;sub=tab||(k==='habits'?'today':'');hDay=TODAY;hEdit=false;hDelPending=null;pDate=null;renderDrawer();$('#drawer').classList.add('open');$('#drawer').scrollTop=0;document.body.style.overflow='hidden';history.pushState({d:k},'')}
-function closeDrawer(){document.body.classList.remove('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=null;if($('#helper'))$('#helper').remove();$('#drawer').classList.remove('open');document.body.style.overflow='';renderHome();if(SCENES[theme])renderScene()}
+function closeDrawer(){document.body.classList.remove('dopen');if(SCENES[theme])setTimeout(fitScene,0);cur=null;if($('#helper'))$('#helper').remove();$('#drawer').classList.remove('open');document.body.style.overflow='';renderHome();if(SCENES[theme])renderScene();setTimeout(wrapPill,0)}
 window.addEventListener('popstate',function(){if(cur)closeDrawer()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){if($('#modal').classList.contains('open'))closeModal();else if(cur)history.back()}});
 function head(b,subtxt){return '<button class="back" data-act="back">← Back to map</button><div class="dtitle" style="--c:'+(b===WRAPB?pal(4,BUCKETS[4]):pal(BUCKETS.indexOf(b),b))[1]+'"><h1>'+esc(b.name)+'</h1></div><p class="dsub">'+subtxt+'</p>'}
@@ -1415,7 +1417,8 @@ function drawWrapped(b){var A=wrapAll(wrapOff),w=A.w,h=head(b,'Your month across
   if(!w.cur||up.length)h+='<div class="panel"><h2>Coming up in '+A.nextName+'</h2>'+(up.length?up.map(function(r){return '<div class="row"><div class="t"><span>'+r[1]+'</span><small>'+nice(parse(r[0]))+'</small></div></div>'}).join(''):'<p class="note">Nothing on the calendar yet.</p>')+'</div>';
   return h}
 function wrapPill(){var el=$('#wpname'),bt=$('#wpill');if(!el)return;var ready=TODAY.getDate()<=7&&wrapAll(1).any;el.textContent=ready?FMN[wrapMonth(1).getMonth()]+' wrapped':'Wrapped';bt.classList.toggle('ready',ready);
-  var tp=$('#tpill');if(tp){var r=tp.getBoundingClientRect();if(r.width)document.documentElement.style.setProperty('--wpr',(window.innerWidth-r.left+8)+'px');var wr=bt.getBoundingClientRect();if(wr.width)document.documentElement.style.setProperty('--spr',(window.innerWidth-r.left+8+wr.width+8)+'px')}
+  var tp=$('#tpill');if(tp){var r=tp.getBoundingClientRect();if(r.width)document.documentElement.style.setProperty('--wpr',(window.innerWidth-r.left+8)+'px');var wr=bt.getBoundingClientRect();if(wr.width)document.documentElement.style.setProperty('--spr',(window.innerWidth-r.left+8+wr.width+8)+'px');var sp0=$('#spill');if(sp0&&wr.width){var sr=sp0.getBoundingClientRect();document.documentElement.style.setProperty('--cpr',(window.innerWidth-r.left+8+wr.width+8+sr.width+8)+'px')}}
+  try{cheerPill()}catch(e){}
   var sp=$('#spill');if(sp){var an=astroNow();sp.classList.toggle('ready',!!(an.d||an.w||an.m))}}
 
 /* ===== charts: bars / line toggle ===== */
@@ -1657,10 +1660,10 @@ function helperTips(ctx){
 function tipHTML(x){if(x.star)return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+' <button class="go" data-hstar="'+x.star.id+'">★ Star it</button> <button class="go" data-hskip="'+x.star.id+'" style="opacity:.7">not now</button></span></div>';var link=x.url?' <a href="'+esc(x.url)+'" target="_blank" rel="noopener">open ↗</a>':(x.go?' <button class="go" data-hgo="'+x.go+'">open →</button>':'');
   return '<div class="tip"><span class="ic">'+x.ic+'</span><span>'+esc(x.txt)+link+'</span></div>'}
 function renderHelper(){var old=$('#helper');if(old)old.remove();if(!cur)return;
-  var tips=helperTips(cur).slice(0,2);if(!tips.length)return;
+  var tips=cheerTips(cur).slice(0,2);if(!tips.length)return;
   var mini=false;try{mini=localStorage.getItem(HKEY)==='1'}catch(e){}
   var el=document.createElement('aside');el.id='helper';el.className='helper'+(mini?' mini':'');el.setAttribute('aria-label','Helper');
-  el.innerHTML='<div class="hh"><span class="star">✦</span>'+(mini?'helper · '+tips.length:'HELPER')+'<button type="button" data-hmin aria-label="'+(mini?'expand':'minimize')+'">'+(mini?'+':'–')+'</button></div>'+tips.map(tipHTML).join('');
+  el.innerHTML='<div class="hh"><span class="star">✦</span>'+(mini?'cheers · '+tips.length:'CHEERS')+'<button type="button" data-hmin aria-label="'+(mini?'expand':'minimize')+'">'+(mini?'+':'–')+'</button></div>'+tips.map(tipHTML).join('');
   $('#drawer').appendChild(el);
   el.addEventListener('click',function(e){var m=e.target.closest('[data-hmin]');if(m){try{localStorage.setItem(HKEY,mini?'0':'1')}catch(_){}renderHelper();return}
     var st=e.target.closest('[data-hstar]');if(st){var c=priCands().filter(function(x){return x.id===st.dataset.hstar})[0];if(c){starCand(c);renderDrawer();toast('★ '+c.t)}return}
@@ -1883,6 +1886,7 @@ function applyTheme(id){var t=THEMES.filter(function(x){return x.id===id})[0]||T
   setTimeout(wrapPill,0);
   $('#tmenu').innerHTML=THEMES.map(function(x){return '<button type="button" role="menuitem" class="'+(x.id===t.id?'on':'')+'" data-t="'+x.id+'"><i style="background:'+x.sw+'"></i>'+x.name+'</button>'}).join('');
 }
+$('#cpill').addEventListener('click',function(e){e.stopPropagation();openCheers()});
 $('#spill').addEventListener('click',function(e){e.stopPropagation();openStars()});
 $('#wpill').addEventListener('click',function(e){e.stopPropagation();wrapOff=wrapAll(1).any?1:0;openDrawer('wrapped')});
 $('#tpill').addEventListener('click',function(e){e.stopPropagation();$('#tmenu').classList.toggle('open')});
@@ -1924,6 +1928,20 @@ function openAstroEdit(t,fromStars){var lab={d:'Today’s horoscope',w:'This wee
   openModal('<h2>✨ '+lab+'</h2><p class="note" style="margin-top:0">Paste it in — the plan picks up themes like rest, money, home or fresh starts and nudges matching tasks.</p><form id="astrof"><textarea class="field" rows="9" placeholder="Paste your horoscope here…">'+esc(cur)+'</textarea><div class="add"><button class="btn">Save</button>'+(cur?'<button type="button" class="btn white" id="astroclr">Clear</button>':'')+'<button type="button" class="btn white" data-act="close">Cancel</button></div></form>');
   $('#astrof').addEventListener('submit',function(e){e.preventDefault();var v=$('#astrof textarea').value.trim();if(v)astroSet(t,v);else delete astro()[t][astroKey(t)];save();toast('✨ Saved');wrapPill();fromStars?openStars():openPlan()});
   var c=$('#astroclr');if(c)c.addEventListener('click',function(){delete astro()[t][astroKey(t)];save();wrapPill();fromStars?openStars():openPlan()})}
+
+/* ===== Cheers (wins + heads-ups) vs Next up (ideas) ===== */
+var CHEER_WIN=['💪','🌟','🔥','📈','🌅'],CHEER_NEAR=['🏁','✅','🌱'],CHEER_HEADS=['📅','💅','🎟️','🩸','🔮','📝'];
+function cheerKind(x){if(x.star)return null;var hl=/^(\d+) daily habits left/.exec(x.txt);if(hl&&+hl[1]>4)return null;if(x.ic==='✨')return /^Your stars/.test(x.txt)?null:/Perfect day/.test(x.txt)?'win':'near';
+  if(CHEER_WIN.indexOf(x.ic)>-1)return 'win';if(CHEER_NEAR.indexOf(x.ic)>-1)return 'near';if(CHEER_HEADS.indexOf(x.ic)>-1)return 'heads';return null}
+function cheerTips(ctx){var t=[];try{t=helperTips(ctx)}catch(e){}return t.filter(function(x){return cheerKind(x)})}
+function ideaTips(ctx){var t=[];try{t=helperTips(ctx)}catch(e){}return t.filter(function(x){return !cheerKind(x)})}
+function cheerPill(){var b=$('#cpill');if(!b)return;var c=cheerTips('home'),wins=c.filter(function(x){return cheerKind(x)==='win'}).length;$('#cpcount').textContent=c.length;b.classList.toggle('ready',wins>0);b.style.display=c.length?'':'none'}
+function openCheers(){var c=cheerTips('home'),G={win:['🎉 Wins',[]],near:['🏁 Almost there',[]],heads:['👀 Heads up',[]]};c.forEach(function(x){G[cheerKind(x)][1].push(x)});
+  var h='<h2>✦ Cheers</h2><p class="note" style="margin-top:0">How you’re doing, and what’s coming up.</p>';
+  ['win','near','heads'].forEach(function(k){var L=G[k][1];if(!L.length)return;h+='<h3 class="planh">'+G[k][0]+'</h3>'+L.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':'')+'</div>'}).join('')});
+  if(!c.length)h+='<p class="note">Nothing new right now — log a few habits and the wins show up here.</p>';
+  openModal(h+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
+  $('#mpanel').querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})})}
 /* ===== today's plan: priorities + energy + moon + retrograde + schedule ===== */
 var MERC_RX=[['2026-02-26','2026-03-20'],['2026-06-29','2026-07-23'],['2026-10-24','2026-11-13'],['2027-02-09','2027-03-03'],['2027-06-10','2027-07-04'],['2027-10-07','2027-10-28']];
 function mercRx(){var d=ymd(TODAY);for(var i=0;i<MERC_RX.length;i++){if(d>=MERC_RX[i][0]&&d<=MERC_RX[i][1])return {end:parse(MERC_RX[i][1])}}return null}
@@ -1963,14 +1981,17 @@ function todayPlan(){var p=period(),ph=p.phase,low=ph==='mens'||ph==='lut',hi=ph
   u.forEach(function(e){var dd=daysBetween(TODAY,parse(e.date));heads.push({ic:'🎟️',t:e.title+' '+(dd===0?'today':dd===1?'tomorrow':'in 2 days'),go:'upcoming'})});
   if(!n.off&&n.days<=2)heads.push({ic:'💅',t:n.days<0?'Nails '+(-n.days)+' days overdue':n.days===0?'Nails due today':'Nails due in '+n.days+' days',go:'nails'});
   var t=todayStats();if(t.of-t.n>0)heads.push({ic:'✅',t:(t.of-t.n)+' daily habits left today',go:'habits'});
-  return {picks:picks,ctx:ctx,heads:heads}}
-function openPlan(){var P=todayPlan(),h='<h2>Today’s ideas</h2><p class="note" style="margin-top:0">'+nice(TODAY)+' — suggestions based on your priorities, energy, the moon, your stars and your schedule. Take what helps.</p>';
+  var lowPick=items.filter(function(o){var K=o.k==='tobuy'?{errand:true}:taskKind(o.t+' '+o.note);return !K.big&&picks.indexOf(o)<0})[0]||null,upPick=items.filter(function(o){var K=taskKind(o.t+' '+o.note);return o.k!=='tobuy'&&K.big&&picks.indexOf(o)<0})[0]||null;
+  return {picks:picks,ctx:ctx,heads:heads,low:lowPick,up:upPick}}
+function openPlan(){var P=todayPlan(),h='<h2>✦ Next up</h2><p class="note" style="margin-top:0">'+nice(TODAY)+' — ideas based on your priorities, energy, the moon, your stars and your schedule. Take what helps.</p>';
   h+='<h3 class="planh" style="margin-top:6px">The vibe today</h3><div class="planctx">'+P.ctx.map(function(c){return '<div><span>'+c.ic+'</span><b>'+esc(c.t)+'</b><small>'+esc(c.d)+'</small></div>'}).join('')+'</div>';
   var AN=astroNow(),ATh=astroThemes();h+='<h3 class="planh">✨ Your stars</h3><div class="astrorow">'+[['d','Today'],['w','This week'],['m','This month']].map(function(x){var tx=AN[x[0]];return '<button class="astrocard'+(tx?' has':'')+'" data-astro="'+x[0]+'"><b>'+x[1]+'</b><small>'+(tx?esc(astroSnip(tx,120)):'+ paste horoscope')+'</small></button>'}).join('')+'</div>'+(ATh.length?'<p class="note" style="margin:4px 0 0">Themes picked up: '+ATh.map(function(t){return t.lab}).join(', ')+'</p>':'');
-  h+='<h3 class="planh">Ideas for today</h3>'+(P.picks.length?P.picks.map(function(o,i){return '<div class="row"><span style="font-size:18px">✦</span><div class="t"><span>'+(o.pri?'★ ':'')+esc(o.t)+'</span><small>'+esc(o.b)+(o.why.length?' · '+esc(o.why.slice(0,2).join(', ')):'')+'</small></div>'+(o.pri?'':'<button class="btn white" data-pstar="'+o.id+'" data-k="'+o.k+'" data-si="'+o.si+'">★</button>')+'<button class="btn" data-go="'+o.k+'">Open</button></div>'}).join(''):'<p class="note">Nothing pressing — star a few things and they’ll show up here.</p>');
-  if(P.heads.length)h+='<h3 class="planh">Heads up</h3>'+P.heads.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.t)+'</span></div><button class="btn white" data-go="'+x.go+'">Open</button></div>'}).join('');
-  var more=helperTips('home').filter(function(x){return !/^(Nails|Top priority)/.test(x.txt)&&x.go!=='upcoming'&&x.go!=='habits'&&!/daily habits left/.test(x.txt)}).slice(0,4);
-  if(more.length)h+='<h3 class="planh">More ideas</h3>'+more.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.star?'<button class="btn white" data-mstar="'+x.star.id+'">★ Star it</button>':x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':'')+'</div>'}).join('');
+  h+='<h3 class="planh">Ideas for right now</h3>'+(P.picks.length?P.picks.map(function(o,i){return '<div class="row"><span style="font-size:18px">✦</span><div class="t"><span>'+(o.pri?'★ ':'')+esc(o.t)+'</span><small>'+esc(o.b)+(o.why.length?' · '+esc(o.why.slice(0,2).join(', ')):'')+'</small></div>'+(o.pri?'':'<button class="btn white" data-pstar="'+o.id+'" data-k="'+o.k+'" data-si="'+o.si+'">★</button>')+'<button class="btn" data-go="'+o.k+'">Open</button></div>'}).join(''):'<p class="note">Nothing pressing — star a few things and they’ll show up here.</p>');
+  function pickRow(o,lab){return '<div class="row"><span style="font-size:18px">'+lab+'</span><div class="t"><span>'+(o.pri?'★ ':'')+esc(o.t)+'</span><small>'+esc(o.b)+(o.why.length?' · '+esc(o.why.slice(0,2).join(', ')):'')+'</small></div><button class="btn" data-go="'+o.k+'">Open</button></div>'}
+  if(P.low||P.up)h+='<h3 class="planh">Fits your energy</h3>'+(P.low?pickRow(P.low,'🌙'):'').replace('<small>','<small>If you’re low today · ')+(P.up?pickRow(P.up,'⚡'):'').replace('<small>','<small>If you’re up for more · ');
+  var cs=priCands().slice(0,2);if(cs.length)h+='<h3 class="planh">Worth starring</h3>'+cs.map(function(c){return '<div class="row"><span style="font-size:18px">☆</span><div class="t"><span>'+esc(c.t)+'</span><small>'+esc(c.b)+' · '+esc(c.why.slice(0,2).join(', '))+'</small></div><button class="btn white" data-mstar="'+c.id+'">★ Star it</button></div>'}).join('');
+  var more=ideaTips('home').filter(function(x){return !x.star&&!/^Top priority/.test(x.txt)}).slice(0,4);
+  if(more.length)h+='<h3 class="planh">More ideas</h3>'+more.map(function(x){return '<div class="row"><span style="font-size:18px">'+x.ic+'</span><div class="t"><span>'+esc(x.txt)+'</span></div>'+(x.go?'<button class="btn white" data-go="'+x.go+'">Open</button>':x.url?'<a class="btn white" style="text-decoration:none;color:var(--ink)" href="'+esc(x.url)+'" target="_blank" rel="noopener">Open ↗</a>':'')+'</div>'}).join('');
   openModal(h+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');
   var mp=$('#mpanel');mp.querySelectorAll('[data-astro]').forEach(function(bt){bt.addEventListener('click',function(){openAstroEdit(bt.dataset.astro)})});mp.querySelectorAll('[data-go]').forEach(function(bt){bt.addEventListener('click',function(){closeModal();openDrawer(bt.dataset.go)})});
   mp.querySelectorAll('[data-pstar]').forEach(function(bt){bt.addEventListener('click',function(){var it=findItem(bt.dataset.k,+bt.dataset.si,bt.dataset.pstar);if(it){it.pri=true;it.priOn=ymd(TODAY);save();toast('★ '+it.t);bt.outerHTML='<span class="note" style="margin:0">★</span>';renderHome();if(SCENES[theme])renderScene()}})});
@@ -2104,7 +2125,7 @@ $('#sceneKey').addEventListener('click',function(e){var b=e.target.closest('[dat
 $('#sceneInner').addEventListener('click',function(e){var b=e.target.closest('[data-k],[data-act]');if(!b)return;
   var k=b.dataset.k,a=b.dataset.act;
   if(k){if(k==='money'){window.open(D.moneyUrl,'_blank','noopener');return}openDrawer(k);return}
-  if(a==='next'){openDrawer(shortNext().k);return}
+  if(a==='next'){openPlan();return}
   if(a==='dump'){$('#dumpBtn').click();return}
   if(a==='where'){$('#nextBtn').click();return}
   if(a==='wins'){var w=winsList();openModal('<h2>Wins ★</h2>'+(w.length?w.map(function(x){return '<div class="row"><span>✓</span><div class="t"><span>'+esc(x[1])+'</span><small>'+esc(x[0])+'</small></div></div>'}).join(''):'<p class="note">Nothing checked off yet — your wins show up here.</p>')+'<div class="add"><button class="btn white" data-act="close">Close</button></div>');return}
