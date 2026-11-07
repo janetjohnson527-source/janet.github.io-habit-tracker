@@ -826,6 +826,7 @@ body.dopen #pillbar{top:14px!important;bottom:auto!important;right:16px!importan
 .dart.iso,.dart.iso *{overflow:visible!important}
 .dart.iso *,.dart-measure *{clip-path:none!important;-webkit-mask:none!important;mask:none!important}
 .dart.iso{-webkit-mask-image:none!important;mask-image:none!important}
+.bars .blab{display:block;line-height:1.25;min-height:1.25em;white-space:nowrap}
 /* ===== themed drawer pieces ===== */
 .btn,.btn.white{color:#3b1f1f}
 .btn.teal{color:#fff}
@@ -1359,7 +1360,7 @@ function weeksTarget(x,days){return x.weekly*Math.max(1,Math.floor(days/7))}
 function oneHabitChart(x,days,col,title){var wk=!!x.weekly,n=0,pts=[];
   days.forEach(function(d,i){if(d>TODAY){pts.push({l:d.l,p:null,d:d});return}if(hasOn(x.id,d))n++;var el=i+1,den=wk?Math.max(1,el/7*x.weekly):el;pts.push({l:d.l,p:Math.min(100,Math.round(n/den*100)),on:hasOn(x.id,d)})});
   var body=gview==='line'?lineChart(pts.map(function(q){return {l:q.l,p:q.p}}),col):
-    '<div class="bars" style="height:140px;gap:'+(pts.length>12?3:8)+'px">'+pts.map(function(q){return '<div><i style="height:'+(q.p||0)+'%;background:'+col+(q.on?'':';opacity:.55')+(pts.length>12?';border-width:1.5px;border-radius:4px 4px 0 0':'')+'"></i>'+q.l+(pts.length>12?'':'<br>'+(q.p===null?'—':q.p+'%'))+'</div>'}).join('')+'</div>';
+    '<div class="bars" style="height:140px;gap:'+(pts.length>12?3:8)+'px">'+pts.map(function(q){return '<div><i style="height:'+(q.p||0)+'%;background:'+col+(q.on?'':';opacity:.55')+(pts.length>12?';border-width:1.5px;border-radius:4px 4px 0 0':'')+'"></i>'+'<span class="blab">'+(q.l||'&nbsp;')+'</span>'+(pts.length>12?'':'<span class="blab">'+(q.p===null?'—':q.p+'%')+'</span>')+'</div>'}).join('')+'</div>';
   return '<div class="gwrap"><div class="ghead"><b>'+title+'</b>'+gToggle()+'</div>'+body+'<p class="note">Running % as the '+(days.length>7?'month':'week')+' goes'+(gview==='line'?'':' — solid bars are days you did it')+'.</p></div>'}
 function drawOneHabit(x){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],h='',col=hcol(x),wk=!!x.weekly;
   if(sub==='week'){var s=weekStart(TODAY),n=0,cells='';for(var i=0;i<7;i++){var d=addDays(s,i),on=hasOn(x.id,d);if(on)n++;
@@ -1507,7 +1508,7 @@ function drawHabits(b){var tabs=[['today','Today'],['week','Week'],['month','Mon
   else if(sub==='week'){var W=weekStats(),s=W.start;h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+W.avg+'%</span><span>of daily habits so far this week'+(W.left?' · '+W.left+' day'+(W.left===1?'':'s')+' left':' · week complete')+'</span></div><div class="pbar"><i style="width:'+W.avg+'%"></i></div><div class="cal">';
     W.days.forEach(function(o){var d=o.d,ds=o.ds;h+='<div class="d'+(ymd(d)===ymd(TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(o.p===null?'—':'<b>'+o.p+'%</b> · '+o.dn+' of '+W.of)+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+hcol(x)+'"></i>'}).join('')+'</div></div>'});
     h+='</div><div class="gwrap"><div class="ghead"><b>Day by day</b>'+gToggle()+'</div>'+(gview==='line'?lineChart(W.days.map(function(o){return {l:DOW[o.d.getDay()],p:o.p}})):'<div class="bars" style="height:140px">'+W.days.map(function(o){return '<div><i style="height:'+(o.p||0)+'%"></i>'+DOW[o.d.getDay()]+'<br>'+(o.p===null?'—':o.p+'%')+'</div>'}).join('')+'</div>')+'</div>'+
-      '<p class="note">Each dot is a habit you logged that day. % is out of your '+W.of+' daily habits.</p></div>'}
+      '<p class="note">Each dot is a habit you logged that day. % is out of your '+W.of+' daily habits.</p></div>'+weekByHabit()}
   else if(sub==='month'){h+=wrapBanner();h+='<div class="panel"><h2>'+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+'</h2>'+monthGrid(TODAY,function(d){var ds=hDone(ymd(d)),dn=dailyDone(ds),of=dailyHabits().length||1;
       return {cls:d>TODAY?' dim':'',style:dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'',html:'<small>'+(dn?dn+' done<br>'+Math.round(dn/of*100)+'%':'')+'</small>',attr:d<=TODAY?' data-act="hday" data-d="'+ymd(d)+'" role="button" title="Open this day" style="cursor:pointer;'+(dn?'background:color-mix(in srgb,#1fb59a '+Math.round(dn/of*90)+'%,#fff)':'')+'"':''}})+'<p class="note">Tap any day to fix it. Darker green = more habits done that day. % is out of your '+dailyHabits().length+' daily habits (strength + walking pad are tracked weekly).</p></div>'+monthByHabit()}
   else{var vals=[];for(var m=0;m<12;m++){var tot=0,days=0,dim=new Date(TODAY.getFullYear(),m+1,0).getDate();for(var dd=1;dd<=dim;dd++){var dt=new Date(TODAY.getFullYear(),m,dd);if(dt>TODAY)break;days++;tot+=dailyHabits().filter(function(x){return hDone(ymd(dt)).indexOf(x.id)>-1}).length}
@@ -1518,6 +1519,16 @@ function monthPct(x){var y=TODAY.getFullYear(),m=TODAY.getMonth(),dim=new Date(y
   var den=x.weekly?weeksTarget(x,dim):dim,el=TODAY.getDate(),sn=0;for(var e=1;e<=el;e++)if(hasOn(x.id,new Date(y,m,e)))sn++;
   var sden=x.weekly?Math.max(x.weekly,Math.round(el/7*x.weekly)):el;
   return {n:n,den:den,p:Math.min(100,Math.round(n/den*100)),sn:sn,sden:sden,sp:Math.min(100,Math.round(sn/sden*100)),el:el}}
+
+function weekByHabit(){var s0=weekStart(TODAY),el=Math.min(7,daysBetween(s0,TODAY)+1);
+  var rows=D.habits.map(function(x,i){var n=0;for(var k=0;k<el;k++)if(hasOn(x.id,addDays(s0,k)))n++;var den=x.weekly?x.weekly:el;return {x:x,n:n,den:den,p:Math.min(100,Math.round(n/den*100)),i:i}}).sort(function(a,b){return b.p-a.p||b.n-a.n||a.i-b.i});
+  var avg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.p},0)/rows.length):0;
+  return '<div class="panel"><h2>This week — % by habit</h2><div class="bigrow"><span class="big">'+avg+'%</span><span>average so far</span></div>'+
+    rows.map(function(o){var x=o.x;return '<button class="row mrow" data-act="hsel" data-id="'+x.id+'" style="width:100%;text-align:left;background:none;border:0;border-bottom:1.5px dashed rgba(0,0,0,.15);padding:6px 0;cursor:pointer;display:block;color:inherit;font:inherit">'+
+      '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><span style="font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+hcol(x)+';margin-right:6px"></span>'+esc(x.name)+'</span>'+
+      '<span style="font-weight:800;white-space:nowrap">'+o.p+'% <small style="font-weight:600;opacity:.75">· '+o.n+' of '+o.den+(x.weekly?' sessions':' days')+'</small></span></div>'+
+      '<div class="pbar" style="margin:5px 0 2px;height:9px"><i style="width:'+o.p+'%;background:'+hcol(x)+'"></i></div></button>'}).join('')+
+    '<p class="note">Out of the days so far this week. Strength + walking pad count toward 3x a week. Tap a habit to see its own week.</p></div>'}
 function monthByHabit(){var FM=['January','February','March','April','May','June','July','August','September','October','November','December'],rows=D.habits.map(function(x,i){return {x:x,r:monthPct(x),i:i}}).sort(function(a,b){return b.r.sp-a.r.sp||b.r.sn-a.r.sn||a.i-b.i}),
   avg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.p},0)/rows.length):0,savg=rows.length?Math.round(rows.reduce(function(a,o){return a+o.r.sp},0)/rows.length):0,el=TODAY.getDate();
   return '<div class="panel"><h2>'+FM[TODAY.getMonth()]+' — % by habit</h2><div class="bigrow"><span class="big">'+savg+'%</span><span>average so far</span></div>'+
