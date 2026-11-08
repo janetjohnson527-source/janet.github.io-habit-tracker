@@ -100,18 +100,19 @@ body.dopen .wrap,body.dopen .key{visibility:hidden}
 .row .t{flex:1}
 .row .t small{display:block;color:var(--muted);font-weight:600;font-size:12px}
 .aprog{margin-top:8px;font-size:13px}
-.aprog>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;padding:3px 10px;border:2px solid var(--ink);border-radius:999px;background:var(--paper)}
+.aprog>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;padding:3px 10px;border:2px solid currentColor;border-radius:999px;background:transparent;color:inherit}
+.aprog>summary:hover{background:color-mix(in srgb,currentColor 10%,transparent)}
 .aprog>summary::-webkit-details-marker{display:none}
 .aprog>summary::before{content:'▸';transition:transform .15s}.aprog[open]>summary::before{transform:rotate(90deg)}
-.alast{display:block;margin-top:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.dwrap .row .t .alast,.alast{display:block;margin-top:6px;font-size:12px;font-weight:600;color:inherit;opacity:.8}
 .abar{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11.5px;font-weight:700}
-.abar .pbar{flex:1;max-width:220px;height:10px;margin:0;border-width:2px}
+.abar .pbar{flex:1;max-width:220px;height:10px;margin:0;border-width:2px;border-color:currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
 .abar .pbar i{display:block;height:100%;background:var(--c,var(--teal))}
-.abox{margin-top:10px;padding:10px 12px;border:2px dashed rgba(0,0,0,.22);border-radius:12px;background:rgba(255,255,255,.55)}
+.abox{margin-top:10px;padding:10px 12px;border:2px dashed color-mix(in srgb,currentColor 35%,transparent);border-radius:12px;background:color-mix(in srgb,currentColor 5%,transparent);color:inherit}
 .abox h4{margin:2px 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.abox form{display:flex;gap:6px;margin:4px 0 8px}.abox form input{flex:1;min-width:0;padding:6px 10px;border:2px solid var(--ink);border-radius:999px;font:inherit;font-size:13px;background:#fff;color:#1b1714}
-.abox form .btn{padding:5px 12px;font-size:12px}
-.alog{display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:13px}.alog b{flex:none;font-size:11px;min-width:46px;opacity:.75}.alog span{flex:1}
+.abox form.add{margin:4px 0 8px}.abox form.add input{flex:1;min-width:0;font-size:13px}
+.abox form.add .btn{padding:5px 12px;font-size:12px}
+.alog{display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:13px}.alog b{flex:none;font-size:11px;min-width:46px;opacity:.8}.alog span{flex:1}
 .astep{display:flex;gap:8px;align-items:center;padding:3px 0;font-size:13px}.astep.done span{text-decoration:line-through;opacity:.6}.astep span{flex:0 1 auto}
 .astep .ck,.alog .x,.astep .x{transform:scale(.8)}
 .amore{background:none;border:0;padding:2px 0;font:inherit;font-size:12px;font-weight:700;text-decoration:underline;cursor:pointer;color:inherit}
@@ -1365,11 +1366,11 @@ function artProg(si,it){var L=(it.log||[]).slice().sort(function(a,b){return a.d
   var bar=S.length?'<div class="abar"><div class="pbar"><i style="width:'+Math.round(nd/S.length*100)+'%"></i></div>'+nd+' of '+S.length+' done</div>':'';
   var last=L.length?'<span class="alast">Last update · '+(L[0].d===ymd(TODAY)?'today':nice(parse(L[0].d)))+' — '+esc(L[0].t)+'</span>':'';
   var showAll=artAll[it.id],LL=showAll?L:L.slice(0,4);
-  var box='<div class="abox"><h4>Progress notes</h4><form data-act="alog" '+A+'><input placeholder="What did you do? e.g. finished 2 cards" aria-label="progress note"><button class="btn">Log it</button></form>'+
+  var box='<div class="abox"><h4>Progress notes</h4><form class="add" data-act="alog" '+A+'><input placeholder="What did you do? e.g. finished 2 cards" aria-label="progress note"><button class="btn">Log it</button></form>'+
     (L.length?LL.map(function(l){return '<div class="alog"><b>'+(l.d===ymd(TODAY)?'Today':MON[parse(l.d).getMonth()]+' '+parse(l.d).getDate())+'</b><span>'+esc(l.t)+'</span><button class="x" data-act="aldel" '+A+' data-lid="'+l.id+'" aria-label="remove note">✕</button></div>'}).join('')+(L.length>4?'<button class="amore" data-act="alall" '+A+'>'+(showAll?'Show fewer':'Show all '+L.length+' notes')+'</button>':''):'<p class="note" style="margin:0 0 4px">No notes yet — log little wins as you go.</p>')+
     '<h4 style="margin-top:12px">Checklist <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.7">(optional)</span></h4>'+
     S.map(function(x){return '<div class="astep'+(x.done?' done':'')+'"><button class="ck'+(x.done?' on':'')+'" data-act="astick" '+A+' data-sid="'+x.id+'" aria-label="done"'+(x.done?' style="background:'+tAccent()+';color:'+txtOn(tAccent())+'"':'')+'>'+(x.done?'✓':'')+'</button><span>'+esc(x.t)+'</span>'+(x.done&&x.doneOn?'<small style="opacity:.7;font-size:11px;font-weight:700">'+MON[parse(x.doneOn).getMonth()]+' '+parse(x.doneOn).getDate()+'</small>':'')+'<button class="x" data-act="asdel" '+A+' data-sid="'+x.id+'" aria-label="remove step">✕</button></div>'}).join('')+
-    '<form data-act="astep" '+A+'><input placeholder="Add a step, e.g. Card: The Fool" aria-label="new step"><button class="btn white">Add step</button></form></div>';
+    '<form class="add" data-act="astep" '+A+'><input placeholder="Add a step, e.g. Card: The Fool" aria-label="new step"><button class="btn">Add step</button></form></div>';
   var cnt=(L.length?L.length+' note'+(L.length===1?'':'s'):'')+(L.length&&S.length?' · ':'')+(S.length?nd+'/'+S.length+' steps':'');
   return bar+last+'<details class="aprog" data-aid="'+it.id+'"'+(artOpen[it.id]?' open':'')+'><summary>Progress'+(cnt?' · '+cnt:'')+'</summary>'+box+'</details>'}
 function artItem(si,id){return findItem('art',+si,id)}
