@@ -100,8 +100,7 @@ body.dopen .wrap,body.dopen .key{visibility:hidden}
 .row .t{flex:1}
 .row .t small{display:block;color:var(--muted);font-weight:600;font-size:12px}
 .aprog{margin-top:8px;font-size:13px}
-.aprog>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;padding:3px 10px;border:2px solid currentColor;border-radius:999px;background:transparent;color:inherit}
-.aprog>summary:hover{background:color-mix(in srgb,currentColor 10%,transparent)}
+.aprog>summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 12px;line-height:1.2}
 .aprog>summary::-webkit-details-marker{display:none}
 .aprog>summary::before{content:'▸';transition:transform .15s}.aprog[open]>summary::before{transform:rotate(90deg)}
 .dwrap .row .t .alast,.alast{display:block;margin-top:6px;font-size:12px;font-weight:600;color:inherit;opacity:.8}
@@ -1372,7 +1371,7 @@ function artProg(si,it){var L=(it.log||[]).slice().sort(function(a,b){return a.d
     S.map(function(x){return '<div class="astep'+(x.done?' done':'')+'"><button class="ck'+(x.done?' on':'')+'" data-act="astick" '+A+' data-sid="'+x.id+'" aria-label="done"'+(x.done?' style="background:'+tAccent()+';color:'+txtOn(tAccent())+'"':'')+'>'+(x.done?'✓':'')+'</button><span>'+esc(x.t)+'</span>'+(x.done&&x.doneOn?'<small style="opacity:.7;font-size:11px;font-weight:700">'+MON[parse(x.doneOn).getMonth()]+' '+parse(x.doneOn).getDate()+'</small>':'')+'<button class="x" data-act="asdel" '+A+' data-sid="'+x.id+'" aria-label="remove step">✕</button></div>'}).join('')+
     '<form class="add" data-act="astep" '+A+'><input placeholder="Add a step, e.g. Card: The Fool" aria-label="new step"><button class="btn">Add step</button></form></div>';
   var cnt=(L.length?L.length+' note'+(L.length===1?'':'s'):'')+(L.length&&S.length?' · ':'')+(S.length?nd+'/'+S.length+' steps':'');
-  return bar+last+'<details class="aprog" data-aid="'+it.id+'"'+(artOpen[it.id]?' open':'')+'><summary>Progress'+(cnt?' · '+cnt:'')+'</summary>'+box+'</details>'}
+  return bar+last+'<details class="aprog" data-aid="'+it.id+'"'+(artOpen[it.id]?' open':'')+'><summary class="btn">Progress'+(cnt?' · '+cnt:'')+'</summary>'+box+'</details>'}
 function artItem(si,id){return findItem('art',+si,id)}
 function artWeek(){var ws=ymd(weekStart(TODAY)),out={notes:0,steps:0,by:[]};(D.lists.art||[]).forEach(function(sct){sct.items.forEach(function(it){var n=(it.log||[]).filter(function(l){return l.d>=ws}).length,st=(it.steps||[]).filter(function(x){return x.done&&x.doneOn>=ws}).length;out.notes+=n;out.steps+=st;if(n||st)out.by.push({it:it,n:n,st:st})})});return out}
 function artMonth(pre){var out=[];(D.lists.art||[]).forEach(function(sct){sct.items.forEach(function(it){var L=(it.log||[]).filter(function(l){return l.d.slice(0,7)===pre}),st=(it.steps||[]).filter(function(x){return x.done&&x.doneOn&&x.doneOn.slice(0,7)===pre});if(L.length||st.length)out.push({t:it.t,L:L,st:st})})});return out}
