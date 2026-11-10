@@ -18,6 +18,13 @@
     },
     "2026-11-06": {
       "stretch": true
+    },
+    "2026-11-09": {
+      "nospend": true,
+      "teeth": true,
+      "shower": true,
+      "zoloft": true,
+      "collagen": true
     }
   }
 }
