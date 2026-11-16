@@ -23,7 +23,7 @@ Do not edit `mind-map.html` to log habits.
 
 | id | habit |
 |---|---|
-| water | Daily water goal |
+| water | Daily water goal (3 mason jars on the page — `true` fills all 3) |
 | vit | Vitamins |
 | stretch | Stretching |
 | shower | Showering |
