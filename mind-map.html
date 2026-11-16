@@ -1063,6 +1063,9 @@ function defaults(){return {
     {id:uid(),date:'2026-11-08',title:'Teeth Marks Recording',when:'noon · Bank St.'},
     {id:uid(),date:'2026-11-09',title:'Bass Drum of Death',when:'Rumba'},
     {id:uid(),date:'2026-11-14',title:"Fall Cookout at Alli & Cody's",when:''},
+    {id:uid(),date:'2026-12-04',title:'King Serpent',when:'6:00 PM · Used Kids Records, 2500 Summit St, Columbus, OH'},
+    {id:uid(),date:'2026-12-05',title:'Bwoods Karaoke',when:''},
+    {id:uid(),date:'2026-12-28',title:'Good Rev Show',when:'Rumba'}
   ],
   lists:{
     art:[{name:'Initiatives',items:L([
@@ -1123,6 +1126,7 @@ var D;
 try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){D=null}
 if(!D)D=defaults();
 if(D.events){var _before=D.events.length;D.events=D.events.filter(function(e){return !(e.title==='Flight to Greenville'&&e.date==='2026-11-18')&&!(e.title==='Back in Columbus'&&e.date==='2026-11-22')});if(D.events.length!==_before){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}
+if(D.events){function addEv(ev){if(!D.events.some(function(x){return x.title===ev.title&&x.date===ev.date})){D.events.push(ev);try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}addEv({id:uid(),date:'2026-12-04',title:'King Serpent',when:'6:00 PM · Used Kids Records, 2500 Summit St, Columbus, OH'});addEv({id:uid(),date:'2026-12-05',title:'Bwoods Karaoke',when:''});addEv({id:uid(),date:'2026-12-28',title:'Good Rev Show',when:'Rumba'});}
 if(D.habits && !D.habits.some(function(h){return h.id==='lymph'}) && (D.removedHabits||[]).indexOf('lymph')<0){D.habits.splice(13,0,{id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='collagen'}) && (D.removedHabits||[]).indexOf('collagen')<0){D.habits.splice(14,0,{id:'collagen',name:'Collagen',color:'#ffb38a'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='posture'}) && (D.removedHabits||[]).indexOf('posture')<0){var si=D.habits.findIndex(function(h){return h.id==='strength'});D.habits.splice(si<0?D.habits.length:si,0,{id:'posture',name:'Posture exercises',color:'#e0aaff'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
