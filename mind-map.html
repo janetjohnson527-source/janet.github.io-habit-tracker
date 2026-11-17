@@ -79,9 +79,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tw{animation:tw 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes tw{0%,100%{transform:scale(.7)}50%{transform:scale(1.15)}}
 /* ===== water jars ===== */
-.row.wrow{flex-wrap:wrap}
-.jars{display:flex;gap:10px;margin-left:auto;align-items:flex-end;padding:2px 4px}
-.jarb{background:none;border:0;padding:0;cursor:pointer;position:relative;width:46px;height:62px;transition:transform .15s}
+.colstack{display:flex;flex-direction:column;gap:20px;min-width:0}.colstack>.panel{margin:0}
+.wpanel .jars{display:flex;gap:22px;justify-content:center;align-items:flex-end;padding:10px 0 4px}
+.wpanel .jmsg2{text-align:center;font-weight:700;margin:6px 0 0;font-size:15px}
+.jarb{background:none;border:0;padding:0;cursor:pointer;position:relative;width:78px;height:105px;transition:transform .15s}
 .jarb:hover{transform:translateY(-3px) rotate(-4deg)}.jarb:active{transform:scale(.92)}
 .jarb:focus-visible{outline:3px solid var(--c,#2f9be8);outline-offset:3px;border-radius:10px}
 .jarb svg{width:100%;height:100%;overflow:visible;display:block;filter:drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 0 1px rgba(255,255,255,.7))}
@@ -94,8 +95,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 @keyframes jbub{0%{opacity:0;transform:translateY(0)}15%{opacity:.9}100%{opacity:0;transform:translateY(-30px)}}
 .jarb.pop{animation:jpop .6s cubic-bezier(.3,1.6,.5,1)}
 @keyframes jpop{0%{transform:scale(1)}30%{transform:scale(1.18,.86) translateY(4px)}60%{transform:scale(.94,1.08) translateY(-6px)}100%{transform:none}}
-.jarb .jnum{font:800 9px/1 system-ui,sans-serif;fill:#5a6b78;opacity:1}
-.jarb.full .jnum{fill:#fff;opacity:.95}
+.jarb .jnum{font:800 9px/1 system-ui,sans-serif;opacity:.55}
+.jarb.full .jnum{fill:#fff!important;opacity:.95}
 .jarb .jcheck{opacity:0;transform:scale(.3);transform-origin:50% 50%;transform-box:fill-box;transition:all .35s .35s cubic-bezier(.3,1.6,.5,1)}
 .jarb.full .jcheck{opacity:1;transform:none}
 .jmsg{flex-basis:100%;font-size:12px;font-weight:700;margin:2px 0 0 0;opacity:.85}
@@ -1490,23 +1491,34 @@ function drawWrap(){var w=wrapData(wrapOff),last=wrapData(1),prev=wrapData(wrapO
 var WGOAL=3,jarSeq=0;
 function waterN(d){var w=(D.water||{})[d];if(w==null)return isDone(d,'water')?WGOAL:0;return Math.min(WGOAL,w)}
 function waterMsg(n){return ['No jars yet — first one’s the hardest 💧','1 jar down — nice start!','2 jars down — one more to go!','All 3 jars done — so hydrated! 💧✨'][Math.min(n,3)]}
-function jarSVG(i,full,lid){var id='jc'+(++jarSeq);
+function jarSVG(i,full){var id='jc'+(++jarSeq),P=jarPal(),lid=P[0],ink=P[5];
   return '<svg viewBox="0 0 46 62" aria-hidden="true"><defs><clipPath id="'+id+'"><path d="M10.5 19 Q8 21 8 25 V53 Q8 58 13 58 H33 Q38 58 38 53 V25 Q38 21 35.5 19 Z"/></clipPath>'+
-    '<linearGradient id="'+id+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdcff"/><stop offset="1" stop-color="#2a8de0"/></linearGradient></defs>'+
-    '<path d="M10.5 19 Q8 21 8 25 V53 Q8 58 13 58 H33 Q38 58 38 53 V25 Q38 21 35.5 19 Z" fill="rgba(255,255,255,.55)"/>'+
+    '<linearGradient id="'+id+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+P[2]+'"/><stop offset="1" stop-color="'+P[3]+'"/></linearGradient></defs>'+
+    '<path d="M10.5 19 Q8 21 8 25 V53 Q8 58 13 58 H33 Q38 58 38 53 V25 Q38 21 35.5 19 Z" fill="'+P[4]+'"/>'+
     '<g clip-path="url(#'+id+')"><g class="jw"><rect x="0" y="22" width="46" height="40" fill="url(#'+id+'g)"/>'+
-      '<path class="wave" d="M0 23 q5.5 -3 11 0 t11 0 t11 0 t11 0 t11 0 t11 0 V27 H0Z" fill="#b9ebff" opacity=".85"/>'+
+      '<path class="wave" d="M0 23 q5.5 -3 11 0 t11 0 t11 0 t11 0 t11 0 t11 0 V27 H0Z" fill="'+P[2]+'" opacity=".9"/><path class="wave" d="M0 23 q5.5 -3 11 0 t11 0 t11 0 t11 0 t11 0 t11 0" fill="none" stroke="#fff" stroke-width="1" opacity=".6"/>'+
       '<circle class="bub" cx="16" cy="52" r="1.6" fill="#fff"/><circle class="bub b2" cx="27" cy="54" r="1.2" fill="#fff"/><circle class="bub b3" cx="21" cy="50" r="1" fill="#fff"/></g></g>'+
-    '<path d="M10.5 19 Q8 21 8 25 V53 Q8 58 13 58 H33 Q38 58 38 53 V25 Q38 21 35.5 19 Z" fill="none" stroke="#1b1714" stroke-width="2.2" stroke-linejoin="round"/>'+
+    '<path d="M10.5 19 Q8 21 8 25 V53 Q8 58 13 58 H33 Q38 58 38 53 V25 Q38 21 35.5 19 Z" fill="none" stroke="'+ink+'" stroke-width="2.2" stroke-linejoin="round"/>'+
     '<path d="M12.5 27 V48" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/><path d="M12.5 51 V53" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>'+
-    '<rect x="11" y="15" width="24" height="5" rx="1.5" fill="#d9e6ee" stroke="#1b1714" stroke-width="2"/>'+
-    '<rect x="9" y="5" width="28" height="11" rx="2.5" fill="'+lid+'" stroke="#1b1714" stroke-width="2.2"/>'+
-    '<path d="M13 8.5 V12.5 M17.5 8.5 V12.5 M22 8.5 V12.5 M26.5 8.5 V12.5 M31 8.5 V12.5" stroke="#1b1714" stroke-width="1.2" opacity=".35"/>'+
-    '<text class="jnum" x="23" y="44" text-anchor="middle">'+i+'</text>'+
-    '<g class="jcheck"><circle cx="38" cy="10" r="7" fill="#2fbf71" stroke="#1b1714" stroke-width="1.8"/><path d="M34.8 10.2 L37.2 12.6 L41.4 7.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg>'}
-function waterRow(x,on){var d=ymd(hDay||TODAY),n=waterN(d),lid=hcol(x),j='';
-  for(var i=1;i<=WGOAL;i++)j+='<button class="jarb'+(i<=n?' full':'')+'" data-act="jar" data-n="'+i+'" title="Jar '+i+(i<=n?' — done! (click to undo)':' — click when you finish it')+'" aria-label="Water jar '+i+(i<=n?', done':'')+'">'+jarSVG(i,i<=n,lid)+'</button>';
-  return '<div class="row wrow"><button class="ck'+(on?' on':'')+'" style="--hc:'+hcol(x)+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+' <small style="display:inline;font-weight:700">· '+n+' of '+WGOAL+' jars</small></span><small class="jmsg2">'+waterMsg(n)+'</small></div><div class="jars">'+j+'</div></div>'}
+    '<rect x="11" y="15" width="24" height="5" rx="1.5" fill="'+P[1]+'" stroke="'+ink+'" stroke-width="2"/>'+
+    '<rect x="9" y="5" width="28" height="11" rx="2.5" fill="'+lid+'" stroke="'+ink+'" stroke-width="2.2"/>'+
+    '<path d="M13 8.5 V12.5 M17.5 8.5 V12.5 M22 8.5 V12.5 M26.5 8.5 V12.5 M31 8.5 V12.5" stroke="'+(lid==='#111111'||lid==='#141218'?'#fff':ink)+'" stroke-width="1.2" opacity=".45"/>'+
+    '<text class="jnum" x="23" y="44" text-anchor="middle" style="fill:'+ink+'">'+i+'</text>'+
+    '<g class="jcheck"><circle cx="38" cy="10" r="7" fill="#2fbf71" stroke="'+ink+'" stroke-width="1.8"/><path d="M34.8 10.2 L37.2 12.6 L41.4 7.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg>'}
+var JART={/* lid, lid2 (stripes/bands), water top, water bottom, glass, outline */
+  chromatic:['#ff5fa8','#ffd23f','#9fe3ff','#3d6bff','rgba(255,255,255,.6)','#1b1714'],folders:['#f2b733','#e2523b','#a8e4ff','#2f8fdc','#fffaf0','#2b2118'],
+  strange:['#111111','#ffffff','#e3f4ff','#6aa8d0','#ffffff','#111111'],departure:['#d6402e','#f4efe4','#a6dcff','#1f5fbf','#fbf7ee','#1d2b44'],
+  psych:['#e8742a','#f2c14e','#b5efe2','#2a9d8f','#fff3dc','#4a2a14'],lava:['#ff3fa4','#ffb347','#ffb8ec','#a14bff','rgba(255,255,255,.18)','#ffe9ff'],
+  neo:['#c8ff3a','#111111','#a7f0ff','#3a6bff','#ffffff','#111111'],satellite:['#ff4f7b','#ffd1dc','#c7eeff','#4a9cff','#fff5f8','#3a1626'],
+  patchwork:['#e85d9a','#f2b733','#bfe8ff','#4a9fe0','#fff8ee','#3b2a20'],blackcat:['#141218','#f3ece0','#d6ecf6','#5b8fb0','#fbf7ee','#141218'],
+  haunted:['#4fa39a','#f7e3b5','#c6f7d8','#38b48a','rgba(247,227,181,.16)','#f7e3b5'],checker:['#2f6bea','#ff5fa8','#ffe08a','#ff9a1f','#fbf6ea','#1b1714'],
+  pink:['#ff6fa8','#ffffff','#ffd3e6','#ff7fb4','#fff6fa','#5a2440'],rainbow:['#ffcf3a','#ff5fa8','#9ef0ff','#8f5bff','rgba(255,255,255,.16)','#fff3c4'],
+  crayon:['#ef4d3c','#f5c518','#b0e6ff','#2e86de','#fffdf6','#2a2a2a'],sampler:['#c8553d','#f3e3c3','#c7e6ea','#4f8fa0','#fbf3e2','#3a2a1e'],
+  folk:['#e0b23a','#d6402e','#b4dcff','#3d5bd9','rgba(255,255,255,.14)','#f4e6c8']};
+function jarPal(){return JART[theme]||JART.chromatic}
+function waterPanel(isT,hd){var d=ymd(hd),n=waterN(d),j='';
+  for(var i=1;i<=WGOAL;i++)j+='<button class="jarb'+(i<=n?' full':'')+'" data-act="jar" data-n="'+i+'" title="Jar '+i+(i<=n?' — done! (click to undo)':' — click when you finish it')+'" aria-label="Water jar '+i+(i<=n?', done':'')+'">'+jarSVG(i,i<=n)+'</button>';
+  return '<div class="panel wpanel"><h2>💧 Water jars'+(isT?'':' · '+nice(hd))+'</h2><div class="jars">'+j+'</div><p class="jmsg2">'+waterMsg(n)+'</p><p class="note" style="margin:4px 0 0">Click a jar when you finish it. All '+WGOAL+' checks off your water goal.</p></div>'}
 function setWater(d,n){D.water=D.water||{};D.water[d]=n;var want=n>=WGOAL,was=isDone(d,'water'),chg=false;if(want!==was){toggleHabit(d,'water');chg=true}save();return chg}
 function jarBurst(el){var r=el.getBoundingClientRect();for(var k=0;k<14;k++){var s=document.createElement('span');s.className='jdrop';s.textContent=['💧','💦','✨','🫧'][k%4];
   s.style.left=(r.left+r.width/2-9)+'px';s.style.top=(r.top+r.height/3)+'px';var ang=Math.PI*(1.05+k/14*0.9)+ (Math.random()-.5)*.3,dist=60+Math.random()*60;
@@ -1515,7 +1527,7 @@ var hDay=null,hEdit=false,hDelPending=null;
 function hRow(x,on,small){if(hEdit)return '<form class="row hedit" data-act="hrename" data-id="'+x.id+'" style="gap:8px;align-items:center"><span class="ck" style="--hc:'+hcol(x)+';border-style:dashed;pointer-events:none"></span>'+
     '<input value="'+esc(x.name)+'" aria-label="habit name" style="flex:1;min-width:0;font:inherit;padding:6px 10px;border:2px solid var(--ink);border-radius:10px;background:#fff;color:#222">'+
     '<button class="btn white" style="white-space:nowrap">Save</button><button type="button" class="btn'+(hDelPending===x.id?' pink':' white')+'" data-act="hdel" data-id="'+x.id+'" style="white-space:nowrap">'+(hDelPending===x.id?'Tap again to remove':'Remove')+'</button></form>';
-  if(x.id==='water'&&!x.weekly)return waterRow(x,on);
+  if(x.id==='water'&&!x.weekly&&!small){var wn1=waterN(ymd(hDay||TODAY));small=wn1+' of '+WGOAL+' jars'+(wn1>=WGOAL?' 💧':'')}
   return '<div class="row"><button class="ck'+(on?' on':'')+'" style="--hc:'+hcol(x)+'" data-act="habit" data-id="'+x.id+'">'+(on?'✓':'')+'</button><div class="t"><span>'+esc(x.name)+'</span>'+(small?'<small>'+small+'</small>':'')+'</div></div>'}
 
 /* ===== Wrapped: a month in review for the whole mind map ===== */
@@ -1612,10 +1624,10 @@ function drawHabits0(b){var tabs=[['today','Today'],['week','Week'],['month','Mo
       '<div class="bigrow"><span class="big">'+tn+'</span><span>of '+tof+' daily done</span></div><div class="pbar"><i style="width:'+(tof?tn/tof*100:0)+'%"></i></div>'+
       dailyHabits().map(function(x){return hRow(x,dn.indexOf(x.id)>-1,'')}).join('')+
       '<div style="margin-top:10px"><button class="btn white" data-act="hedit">'+(hEdit?'Done editing':'✎ Edit habits')+'</button></div></div>'+
-    '<div class="panel"><h2>'+(isT?'This week':'Week of '+nice(weekStart(hd)))+' — 3x habits</h2>'+D.habits.filter(function(x){return x.weekly}).map(function(x){var c=weeklyCount(x,hd);
+    '<div class="colstack">'+(D.habits.some(function(x){return x.id==='water'&&!x.weekly})?waterPanel(isT,hd):'')+'<div class="panel"><h2>'+(isT?'This week':'Week of '+nice(weekStart(hd)))+' — 3x habits</h2>'+D.habits.filter(function(x){return x.weekly}).map(function(x){var c=weeklyCount(x,hd);
       return hRow(x,dn.indexOf(x.id)>-1,c+' of '+x.weekly+(isT?' this week':' that week')+' · '+Math.min(100,Math.round(c/x.weekly*100))+'%')}).join('')+
     '<p class="note">Weekly habits are judged against their 3x target, not 7 days.</p>'+
-    '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div>'}
+    '<form class="add" data-act="addhabit"><input placeholder="Add a daily habit…" aria-label="new habit"><button class="btn">Add</button></form></div></div></div>'}
   else if(sub==='week'){var W=weekStats(),s=W.start;h+='<div class="panel"><h2>Week of '+nice(s)+'</h2><div class="bigrow"><span class="big">'+W.avg+'%</span><span>of daily habits so far this week'+(W.left?' · '+W.left+' day'+(W.left===1?'':'s')+' left':' · week complete')+'</span></div><div class="pbar"><i style="width:'+W.avg+'%"></i></div><div class="cal">';
     W.days.forEach(function(o){var d=o.d,ds=o.ds;h+='<div class="d'+(ymd(d)===ymd(REALTODAY||TODAY)?' today':'')+(d>TODAY?' dim':'')+'">'+DOW[d.getDay()]+' '+d.getDate()+'<small>'+(o.p===null?'—':'<b>'+o.p+'%</b> · '+o.dn+' of '+W.of)+(weeklyDone(ds)?' +'+weeklyDone(ds)+' weekly':'')+'</small><div class="dots">'+D.habits.filter(function(x){return ds.indexOf(x.id)>-1}).map(function(x){return '<i style="background:'+hcol(x)+'"></i>'}).join('')+'</div></div>'});
     h+='</div><div class="gwrap"><div class="ghead"><b>Day by day</b>'+gToggle()+'</div>'+(gview==='line'?lineChart(W.days.map(function(o){return {l:DOW[o.d.getDay()],p:o.p}})):'<div class="bars" style="height:140px">'+W.days.map(function(o){return '<div><i style="height:'+(o.p||0)+'%"></i>'+DOW[o.d.getDay()]+'<br>'+(o.p===null?'—':o.p+'%')+'</div>'}).join('')+'</div>')+'</div>'+
@@ -1904,12 +1916,11 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='img'){imgTarget={key:t.dataset.key,si:+t.dataset.si,id:t.dataset.id};$('#filepick').click();return}
   if(a==='fimg'){imgTarget={f:t.dataset.id};$('#filepick').click();return}
   if(a==='fstat'){D.fashion.forEach(function(f){if(f.id===t.dataset.id){if(t.dataset.s==='have'&&f.status!=='have')f.haveOn=ymd(TODAY);if(t.dataset.s!=='have')delete f.haveOn;f.status=t.dataset.s}});save();renderDrawer();return}
-  if(a==='jar'){var jd=ymd(hDay||TODAY),cur=waterN(jd),i=+t.dataset.n,nn=i<=cur?(i===cur?i-1:i):i,row=t.closest('.wrow');
+  if(a==='jar'){var jd=ymd(hDay||TODAY),cur=waterN(jd),i=+t.dataset.n,nn=i<=cur?(i===cur?i-1:i):i,row=t.closest('.wpanel');
     var chg=setWater(jd,nn);[].forEach.call(row.querySelectorAll('.jarb'),function(b){var k=+b.dataset.n;b.classList.toggle('full',k<=nn);b.setAttribute('aria-label','Water jar '+k+(k<=nn?', done':''))});
-    t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop');var sm=row.querySelector('.t span small');if(sm)sm.textContent='· '+nn+' of '+WGOAL+' jars';var mg=row.querySelector('.jmsg2');if(mg)mg.textContent=waterMsg(nn);
-    var ck=row.querySelector('.ck');if(ck){ck.classList.toggle('on',nn>=WGOAL);ck.textContent=nn>=WGOAL?'✓':''}
+    t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop');var mg=row.querySelector('.jmsg2');if(mg)mg.textContent=waterMsg(nn);
     if(nn>cur&&nn>=WGOAL){setTimeout(function(){jarBurst(t)},380);toast('All 3 jars done — so hydrated! 💧✨')}else if(nn>cur)toast(waterMsg(nn));
-    if(chg)setTimeout(renderDrawer,1300);return}
+    setTimeout(renderDrawer,chg?1300:850);return}
   if(a==='habit'&&t.dataset.id==='water'&&!(D.habits.filter(function(h){return h.id==='water'})[0]||{}).weekly){var wd=ymd(hDay||TODAY),wn=waterN(wd)>=WGOAL?0:WGOAL;setWater(wd,wn);renderDrawer();if(wn)toast('All 3 jars done — so hydrated! 💧✨');return}
   if(a==='habit'){var hd0=hDay||TODAY,on=toggleHabit(ymd(hd0),t.dataset.id);renderDrawer();if(on)toast(ymd(hd0)===ymd(TODAY)?'Logged ✓':'Logged for '+nice(hd0)+' ✓');return}
   if(a==='hstep'){var nd=addDays(hDay||TODAY,+t.dataset.n);if(nd>TODAY)nd=TODAY;hDay=nd;renderDrawer();return}
