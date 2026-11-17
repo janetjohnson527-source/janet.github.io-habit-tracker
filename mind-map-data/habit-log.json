@@ -29,6 +29,14 @@
     "2026-11-13": {
       "shower": true,
       "mouth": true
+    },
+    "2026-11-17": {
+      "zoloft": true,
+      "shower": true,
+      "floss": true,
+      "mouth": true,
+      "teeth": true,
+      "clean": true
     }
   }
 }
