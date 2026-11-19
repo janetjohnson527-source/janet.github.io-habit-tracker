@@ -37,6 +37,10 @@
       "mouth": true,
       "teeth": true,
       "clean": true
+    },
+    "2026-11-19": {
+      "zoloft": true,
+      "nopick": true
     }
   }
 }
