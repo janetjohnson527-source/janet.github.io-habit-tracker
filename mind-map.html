@@ -591,6 +591,17 @@ html:not([data-theme="folders"]) .fo-only{display:none}
 @keyframes wpGlow{0%,100%{box-shadow:2px 2px 0 #3b1f1f}50%{box-shadow:2px 2px 0 #3b1f1f,0 0 14px 3px rgba(255,95,168,.55)}}
 body.dopen .wrappill{display:none}
 .starcards{display:grid;gap:10px;margin-top:10px}.starcard{border:2px solid var(--ink);border-radius:12px;padding:10px 12px}.starcard p{margin:6px 0 0;font-size:13px;line-height:1.45;white-space:pre-wrap}
+.ltsec{margin-top:16px;padding-top:12px;border-top:2px dashed color-mix(in srgb,currentColor 30%,transparent)}
+.ltlist{display:grid;gap:8px;margin-top:8px;max-height:46vh;overflow:auto;padding-right:4px}
+.ltcard{border:2px solid currentColor;border-radius:12px;padding:9px 12px;margin-top:8px}.ltlist .ltcard{margin-top:0}.ltcard.dim{opacity:.5}
+.lthead{display:flex;justify-content:space-between;align-items:center;gap:8px}.lthead b{font-size:14px}
+.ltcard small{display:block;font-size:12px;opacity:.8;margin-top:2px}.ltcard p{margin:5px 0 0;font-size:13px;line-height:1.4}
+.ltbadge{flex:none;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;border:1.5px solid currentColor;white-space:nowrap;opacity:.85}
+.ltbadge.near,.ltbadge.lt-needs{background:var(--c,#ffd21f);color:#1b1714;border-color:#1b1714;opacity:1}
+.lttags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.lttags span{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.lttags.pick .chip{font-size:11px;padding:3px 10px}
+.ltdates{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 2px}.ltdates label{font-size:12px;font-weight:700;display:flex;gap:6px;align-items:center}.ltdates input{font:inherit;font-size:12px;padding:3px 6px;border:2px solid #1b1714;border-radius:8px;background:#fff;color:#1b1714}
+.ltquote{font-style:italic;font-weight:600;margin:8px 0 4px;padding-left:10px;border-left:3px solid var(--c,currentColor)}
 .starpill.ready{background:linear-gradient(90deg,#d9c8ff,#ffd0e4)}
 [data-theme="lava"] .wrappill{background:rgba(20,12,34,.85);color:#f4ecff;border:1px solid rgba(244,236,255,.35);box-shadow:0 0 14px rgba(255,90,217,.25)}
 .wcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:16px}
@@ -1580,7 +1591,7 @@ function drawWrapped(b){var A=wrapAll(wrapOff),w=A.w,h=head(b,'Your month across
 function wrapPill(){var el=$('#wpname'),bt=$('#wpill');if(!el)return;var ready=TODAY.getDate()<=7&&wrapAll(1).any;el.textContent=ready?FMN[wrapMonth(1).getMonth()]+' wrapped':'Wrapped';bt.classList.toggle('ready',ready);
   var tp=$('#tpill');if(tp){var r=tp.getBoundingClientRect();if(r.width)document.documentElement.style.setProperty('--wpr',(window.innerWidth-r.left+8)+'px');var wr=bt.getBoundingClientRect();if(wr.width)document.documentElement.style.setProperty('--spr',(window.innerWidth-r.left+8+wr.width+8)+'px');var sp0=$('#spill');if(sp0&&wr.width){var sr=sp0.getBoundingClientRect();document.documentElement.style.setProperty('--cpr',(window.innerWidth-r.left+8+wr.width+8+sr.width+8)+'px')}}
   try{cheerPill()}catch(e){}setTimeout(placePills,30);
-  var sp=$('#spill');if(sp){var an=astroNow();sp.classList.toggle('ready',!!(an.d||an.w||an.m))}}
+  var sp=$('#spill');if(sp){var an=astroNow(),ltk=[];try{ltk=ltKeysAhead(3)}catch(e){}sp.classList.toggle('ready',!!(an.d||an.w||an.m||ltk.length))}}
 
 /* ===== charts: bars / line toggle ===== */
 var gview='bars';try{gview=localStorage.getItem('janet-mind-map-gview')||'bars'}catch(e){}
@@ -1735,7 +1746,8 @@ function drawPeriod(b){var p=period(),ph=PH[p.phase];
 function drawUpcoming(b){var u=upcoming();
   var h=head(b,'Your shared calendar with Jeremy stays on its own site — this is a quick look plus a link.')+
   '<div class="cols"><div class="panel"><h2>Coming up</h2>'+(u.length?u.map(function(e){var d=parse(e.date),n=daysBetween(TODAY,d);return '<div class="row"><span class="phase" style="background:var(--c);margin:0;min-width:70px;text-align:center">'+(n===0?'Today':n+'d')+'</span><div class="t"><span>'+esc(e.title)+'</span><small>'+nice(d)+(e.when?' · '+esc(e.when):'')+'</small></div><button class="x" data-act="delev" data-id="'+e.id+'">✕</button></div>'}).join(''):'<p class="note">Nothing coming up.</p>')+
-  '<form class="add" data-act="addev"><input type="date" style="flex:none;width:150px" aria-label="date"><input placeholder="What + where" aria-label="event"><button class="btn">Add</button></form></div>'+
+  '<form class="add" data-act="addev"><input type="date" style="flex:none;width:150px" aria-label="date"><input placeholder="What + where" aria-label="event"><button class="btn">Add</button></form>'+
+  (function(){var ks=ltKeysAhead(60);if(!ks.length)return '';return '<h3 class="planh" style="margin-top:16px">☾ Star dates</h3>'+ks.map(function(k){return '<div class="row ltrow"><span class="phase" style="margin:0;min-width:70px;text-align:center;background:transparent;border:2px dashed currentColor">'+(k.dd===0?'Today':k.dd+'d')+'</span><div class="t"><span>'+esc(k.t.charAt(0).toUpperCase()+k.t.slice(1))+'</span><small>'+nice(parse(k.d))+(k.it.note?' · '+esc(ltFirst(k.it.note)):'')+'</small></div></div>'}).join('')+'<p class="note">From your long transits in Stars. These don’t change your Next up.</p>'})()+'</div>'+
   '<div class="panel"><h2>Shared calendar</h2><p style="font-size:14px">The full calendar lives at its own site.</p><a class="btn teal" style="display:inline-block;text-decoration:none" href="'+esc(D.calendarUrl)+'" target="_blank" rel="noopener">Open shared calendar ↗</a></div></div>';
   return h}
 
@@ -1816,6 +1828,7 @@ function helperTips(ctx){
     if(dow>=2&&prevAvg>0&&W2.avg>prevAvg+5)add(['habits'],5,'📈','This week is running '+(W2.avg-prevAvg)+' points ahead of last week.');
     if(dow===0&&W2.avg<prevAvg&&prevAvg>0)add(['habits'],3,'🌅','New week, fresh start.');}catch(e){}
   try{var ath=astroThemes();if(ath.length)add(['home'],4,'✨','Your stars point to '+ath.slice(0,2).map(function(t){return t.lab}).join(' + ')+' — see Ideas for matching tasks.')}catch(e){}
+  try{var lt=ltTip();if(lt)add(['home'],lt.pr,lt.ic,lt.txt);var LLg=ltLong();if(LLg&&LLg.take&&Math.floor(TODAY.getTime()/864e5)%3===0)add(['home'],3,'💫','Through-line: '+ltFirst(LLg.take).replace(/^./,function(c){return c.toUpperCase()})+'.')}catch(e){}
   // movement -> art + work
   if(moved)add(['art','habits','home'],5,'🏃','You moved today — that energy carries into art + work. Good time for a drawing session.',ctx==='art'?null:'art');
   else add(['art','habits'],4,'🏃','A short walk or stretch first tends to unlock art + work energy.',ctx==='habits'?null:'habits');
@@ -2125,20 +2138,97 @@ var ASTRO_THEMES=[
 function astroThemes(){var A=astroNow(),txt=[A.d,A.w,A.m].join(' ');if(!txt.trim())return [];return ASTRO_THEMES.filter(function(t){return t.re.test(txt)})}
 function astroSnip(tx,n){tx=tx.replace(/\s+/g,' ').trim();return tx.length>n?tx.slice(0,n).replace(/\s+\S*$/,'')+'…':tx}
 
+/* ===== long transits: a separate, background layer (pasted once, read everywhere) ===== */
+var LT_PLAN=['North Node','South Node','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Sun','Moon'],LT_FAST={Sun:1,Moon:1,Mercury:1,Venus:1,Mars:1};
+var LT_SIGNS='Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces';
+var LT_HOUSE={1:['start'],2:['money'],3:['social'],4:['home'],5:['create'],6:['body','work'],7:['social'],8:['money','clear'],9:['start'],10:['work'],11:['social'],12:['rest','clear']};
+var LT_HLAB={1:'self',2:'money',3:'communication',4:'home',5:'creativity + play',6:'routines + health',7:'partnerships',8:'shared resources',9:'learning',10:'career',11:'community',12:'rest + endings'};
+var LT_M='(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?';
+function ltMon(s){return 'janfebmaraprmayjunjulaugsepoctnovdec'.indexOf(s.slice(0,3).toLowerCase())/3}
+function ltYmd(y,m,d){return y+'-'+('0'+(m+1)).slice(-2)+'-'+('0'+d).slice(-2)}
+function ltParse(raw){var out={items:[],overlap:'',take:'',pasted:ymd(TODAY),raw:raw},lines=raw.split(/\n+/).map(function(x){return x.trim()}).filter(Boolean);
+  lines.forEach(function(L){
+    if(/^long transits/i.test(L)){var m0=new RegExp(LT_M+' (\\d{1,2}), (\\d{4})').exec(L);if(m0)out.pasted=ltYmd(+m0[3],ltMon(m0[1]),+m0[2]);return}
+    if(/^(the )?overlap:/i.test(L)){out.overlap=L.replace(/^(the )?overlap:\s*/i,'');return}
+    if(/^take-?away:/i.test(L)){out.take=L.replace(/^take-?away:\s*/i,'');return}
+    var sp=L.split(/\s+[—–]\s+|\s+-\s+/);if(sp.length<2)return;var name=sp[0].trim(),body=sp.slice(1).join(' — ');
+    var it={id:'',name:name,planet:'',sign:'',start:null,end:null,houses:[],tags:[],note:'',keys:[]};
+    var best=1e9;LT_PLAN.forEach(function(pl){var i=name.indexOf(pl);if(i<0)i=body.indexOf(pl)+1000;if(i>=0&&i<best&&!(i>=1000&&body.indexOf(pl)<0)){best=i;it.planet=pl}});
+    var sg=new RegExp('in ('+LT_SIGNS+')').exec(name)||new RegExp('in ('+LT_SIGNS+')').exec(body);if(sg)it.sign=sg[1];
+    var span=null,yP=+out.pasted.slice(0,4);
+    var r=new RegExp(LT_M+' (\\d{1,2})(?:, (\\d{4}))?\\s*[–-]\\s*(?:'+LT_M+' )?(\\d{1,2}),? (\\d{4})').exec(body);
+    if(r){var m2=r[4]?ltMon(r[4]):ltMon(r[1]),y2=+r[6],m1=ltMon(r[1]),y1=r[3]?+r[3]:(m1>m2?y2-1:y2);it.start=ltYmd(y1,m1,+r[2]);it.end=ltYmd(y2,m2,+r[5]);span=[r.index,r.index+r[0].length]}
+    else{var th=new RegExp('(?:through|until|till) '+LT_M+' (\\d{1,2}),? (\\d{4})','i').exec(body);if(th&&!/retrograde\s+until/i.test(body.slice(Math.max(0,th.index-12),th.index+6))){it.end=ltYmd(+th[3],ltMon(th[1]),+th[2]);span=[th.index,th.index+th[0].length]}}
+    var re=new RegExp(LT_M+' (\\d{1,2})(?:, (\\d{4}))?','g'),mm;
+    while((mm=re.exec(body))){if(span&&mm.index>=span[0]&&mm.index<span[1])continue;var pre=body.slice(Math.max(0,mm.index-28),mm.index).toLowerCase(),y=mm[3]?+mm[3]:yP,d=ltYmd(y,ltMon(mm[1]),+mm[2]);
+      if(!mm[3]&&daysBetween(parse(d),parse(out.pasted))>150)d=ltYmd(y+1,ltMon(mm[1]),+mm[2]);
+      var t=/retrograde\s+until\s*$/.test(pre)?'turns direct':/stations?\s+retrograde\s*$/.test(pre)?'turns retrograde':/station(s|ed)?\s+direct\s*$/.test(pre)?'turns direct':/cazimi\s*$/.test(pre)?'cazimi (a power day)':/ends?(\s+\w{3,9})?\s*$/.test(pre)?null:'key date';
+      if(/ends?(\s+\w{3,9})?\s*$/.test(pre)){if(!it.end)it.end=d;continue}if(t)it.keys.push({d:d,t:t})}
+    var hm=/(\d{1,2})(?:st|nd|rd|th)?(?:\s*\/\s*(\d{1,2})(?:st|nd|rd|th)?)?\s+houses?/i.exec(body);if(hm){it.houses.push(+hm[1]);if(hm[2])it.houses.push(+hm[2])}
+    it.note=body.split(/(?<=[.;])\s+/).filter(function(x){return !new RegExp(LT_M+' \\d').test(x)&&!/^(ends|stationed|stations|cazimi|retrograde)/i.test(x)&&!/\bhouses?\b/i.test(x)}).join(' ').trim();
+    var tg=[];it.houses.forEach(function(h){(LT_HOUSE[h]||[]).forEach(function(k){if(tg.indexOf(k)<0)tg.push(k)})});
+    ASTRO_THEMES.forEach(function(T){if(T.k!=='rest'&&T.re.test(it.note)&&tg.indexOf(T.k)<0)tg.push(T.k)});it.tags=tg.slice(0,3);
+    it.id=(it.planet||name).toLowerCase().replace(/[^a-z]+/g,'')+(it.sign||'').toLowerCase();out.items.push(it)});
+  return out}
+function ltLong(){var L=astro().long;return L&&L.items?L:null}
+function ltEndLab(it){if(/node/i.test(it.planet))return 'Nodes change signs';if(/return/i.test(it.name))return it.name+' ends';return it.planet&&it.sign?it.planet+' leaves '+it.sign:it.name+' ends'}
+function ltAllKeys(it){var k=(it.keys||[]).map(function(x){return {d:x.d,t:(it.planet||it.name)+' '+x.t,it:it}});if(it.end)k.push({d:it.end,t:ltEndLab(it),it:it,end:true});return k}
+function ltStatus(it){var td=ymd(TODAY),L=ltLong(),st=it.start||(L?L.pasted:td);if(!it.end)return {s:'needs',lab:'needs dates'};if(it.end<td)return {s:'ended',lab:'ended'};if(st>td)return {s:'soon',lab:'starts '+nice(parse(st))};
+  var near=null,next=null;ltAllKeys(it).forEach(function(k){var dd=daysBetween(TODAY,parse(k.d));if(Math.abs(dd)<=3&&(!near||Math.abs(dd)<Math.abs(near.dd)))near={k:k,dd:dd};if(dd>=0&&(!next||dd<next.dd))next={k:k,dd:dd}});
+  return {s:'active',near:near,next:next,lab:near?'key date '+(near.dd===0?'today':near.dd>0?'in '+near.dd+'d':near.dd*-1+'d ago'):next&&next.dd<=14?(next.k.end?'ends ':'')+'in '+next.dd+'d':LT_FAST[it.planet]?'active':'background'}}
+function ltDate(d){var x=parse(d);return MON[x.getMonth()].slice(0,3)+' '+x.getDate()+(x.getFullYear()!==TODAY.getFullYear()?', '+x.getFullYear():'')}
+function ltWhen(dd,d){return dd===0?'today':dd===1?'tomorrow':dd<7?DOW[parse(d).getDay()]:ltDate(d)}
+function longLayer(){var L=ltLong(),out={th:{},act:[]};if(!L)return out;var rd={};try{astroThemes().forEach(function(t){rd[t.k]=1})}catch(e){}
+  L.items.forEach(function(it){var st=ltStatus(it);if(st.s!=='active')return;out.act.push({it:it,st:st});var fast=!!LT_FAST[it.planet],w=fast||st.near?1:0.25;
+    (it.tags||[]).forEach(function(k){if(k==='rest'&&!fast&&!st.near)return;var ww=Math.min(1,w+(rd[k]?0.5:0));if(!out.th[k]||ww>out.th[k].w)out.th[k]={w:ww,it:it,st:st,agree:!!rd[k]}})});
+  return out}
+function ltKeysAhead(days){var L=ltLong(),out=[],seen={};if(!L)return out;L.items.forEach(function(it){if(it.planet==='Moon')return;if(it.end&&it.end<ymd(TODAY))return;ltAllKeys(it).forEach(function(k){var dd=daysBetween(TODAY,parse(k.d));if(dd<0||dd>days||seen[k.d+k.t])return;seen[k.d+k.t]=1;out.push({d:k.d,t:k.t,dd:dd,it:it})})});
+  return out.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0})}
+function ltYou(s){return (s||'').replace(/\bherself\b/gi,'yourself').replace(/\b(annoys|makes|lets|helps|tells|gives|asks|for|to|with|keeps|wants) her\b/gi,'$1 you').replace(/\bher(?=\s*[,.;!?]|$)/gi,'you').replace(/\bher\b/gi,'your').replace(/\bshe\b/gi,'you').replace(/\bshe's\b/gi,'you’re')}
+function ltFirst(s){s=ltYou(s);var m=/^[^.;]+/.exec(s);return m?m[0].trim():s}
+function ltTip(){var L=ltLong();if(!L)return null;var act=longLayer().act;if(!act.length)return null;
+  var ks=ltKeysAhead(7).filter(function(k){return k.it.end>=ymd(TODAY)});if(ks.length){var k=ks[0],nt=ltFirst(k.it.note);return {ic:k.dd<=3?'🔮':'🪐',txt:k.t.charAt(0).toUpperCase()+k.t.slice(1)+' '+ltWhen(k.dd,k.d)+(nt?' — '+nt.charAt(0).toLowerCase()+nt.slice(1)+'.':'.'),pr:k.dd<=3?5:3}}
+  var dayN=Math.floor(TODAY.getTime()/864e5),o=act[dayN%act.length],nt2=ltFirst(o.it.note);return {ic:'🪐',txt:o.it.name+(nt2?': '+nt2+'.':' is in the background.'),pr:2}}
+function ltTags(it){return (it.tags||[]).map(function(k){var T=ASTRO_THEMES.filter(function(x){return x.k===k})[0];return T?T.lab:k})}
+function ltCard(it){var st=ltStatus(it),hs=(it.houses||[]).map(function(h){return h+(h===1?'st':h===2?'nd':h===3?'rd':'th')+' ('+LT_HLAB[h]+')'}).join(' / ');
+  return '<div class="ltcard'+(st.s==='ended'?' dim':'')+'"><div class="lthead"><b>'+esc(it.name)+'</b><span class="ltbadge lt-'+st.s+(st.near?' near':'')+'">'+esc(st.lab)+'</span></div>'+
+    '<small>'+(it.end?(it.start?ltDate(it.start)+' – ':'through ')+ltDate(it.end):'⚠ couldn’t read the dates — tap Review to add them')+(hs?' · '+hs:'')+'</small>'+
+    (it.note?'<p>'+esc(ltYou(it.note))+'</p>':'')+(it.tags&&it.tags.length?'<div class="lttags">'+ltTags(it).map(function(t){return '<span>'+esc(t)+'</span>'}).join('')+'</div>':'')+'</div>'}
+function openLongPaste(){var L=ltLong();
+  openModal('<h2>🪐 Long transits</h2><p class="note" style="margin-top:0">Paste the whole list from your astrology app. You’ll get to check each one before it saves. A new paste replaces the old list.</p><form id="ltf"><textarea class="field" rows="12" placeholder="Saturn in Aries — through Apr 12, 2028, 7th house…">'+esc(L?L.raw:'')+'</textarea><div class="add"><button class="btn">Read it →</button>'+(L?'<button type="button" class="btn white" id="ltclr">Clear all</button>':'')+'<button type="button" class="btn white" data-act="close">Cancel</button></div></form>');
+  $('#ltf').addEventListener('submit',function(e){e.preventDefault();var v=$('#ltf textarea').value.trim();if(!v)return;var P=ltParse(v);if(!P.items.length){toast('Couldn’t find any transits in that paste');return}openLongReview(P)});
+  var c=$('#ltclr');if(c)c.addEventListener('click',function(){delete astro().long;save();wrapPill();openStars()})}
+function openLongReview(P){var TH=ASTRO_THEMES;
+  var h='<h2>🪐 Check your long transits</h2><p class="note" style="margin-top:0">Found '+P.items.length+'. Fix any dates and pick which life areas each one nudges (tap to turn on/off). Slow planets stay in the background except near their key dates.</p>'+
+    P.items.map(function(it,i){return '<div class="ltcard" data-i="'+i+'"><div class="lthead"><b>'+esc(it.name)+'</b>'+(it.end?'':'<span class="ltbadge lt-needs">needs dates</span>')+'</div>'+
+      '<div class="ltdates"><label>Start <input type="date" data-f="start" value="'+(it.start||'')+'"></label><label>End <input type="date" data-f="end" value="'+(it.end||'')+'"></label></div>'+
+      (it.keys.length?'<small>Key dates: '+it.keys.map(function(k){return ltDate(k.d)+' '+esc(k.t)}).join(' · ')+'</small>':'')+
+      '<div class="lttags pick">'+TH.map(function(T){return '<button type="button" class="chip'+(it.tags.indexOf(T.k)>-1?' on':'')+'" data-tag="'+T.k+'">'+esc(T.lab)+'</button>'}).join('')+'</div></div>'}).join('')+
+    (P.overlap||P.take?'<p class="note">'+(P.overlap?'<b>Overlap:</b> '+esc(P.overlap)+'<br>':'')+(P.take?'<b>Takeaway:</b> '+esc(P.take):'')+'</p>':'')+
+    '<div class="add"><button class="btn" id="ltsave">Save transits</button><button class="btn white" id="ltback">← Back to paste</button></div>';
+  openModal(h);var mp=$('#mpanel');
+  mp.querySelectorAll('[data-tag]').forEach(function(b){b.addEventListener('click',function(){b.classList.toggle('on')})});
+  $('#ltback').addEventListener('click',function(){openLongPaste();$('#ltf textarea').value=P.raw});
+  $('#ltsave').addEventListener('click',function(){mp.querySelectorAll('.ltcard[data-i]').forEach(function(c){var it=P.items[+c.dataset.i];c.querySelectorAll('input[data-f]').forEach(function(inp){it[inp.dataset.f]=inp.value||null});it.tags=[].map.call(c.querySelectorAll('[data-tag].on'),function(b){return b.dataset.tag})});
+    astro().long=P;save();wrapPill();toast('🪐 Long transits saved');openStars()})}
 function openStars(){var AN=astroNow(),ATh=astroThemes(),mo=moon(),rx=mercRx();
   var h='<h2>☾ Your stars</h2><p class="note" style="margin-top:0">Paste your daily, weekly or monthly horoscope. Today’s ideas pick up the themes.</p>'+
    '<div class="planctx"><div><span>'+mo.ic+'</span><b>'+mo.n+'</b><small>'+mo.tip+'</small></div>'+(rx?'<div><span>☿</span><b>Mercury retrograde</b><small>until '+nice(rx.end)+' — double-check plans, finish before starting</small></div>':'')+'</div>'+
    '<div class="starcards">'+[['d','Today'],['w','This week'],['m','This month']].map(function(x){var tx=AN[x[0]];return '<div class="starcard"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+x[1]+'</b><button class="btn white" data-sedit="'+x[0]+'">'+(tx?'Edit':'+ Paste')+'</button></div>'+(tx?'<p>'+esc(tx)+'</p>':'<p class="note">Nothing yet.</p>')+'</div>'}).join('')+'</div>'+
    (ATh.length?'<p class="note">Themes picked up: '+ATh.map(function(t){return t.lab}).join(', ')+'</p>':'')+
+   (function(){var L=ltLong(),hh='<div class="ltsec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 class="planh" style="margin:0">🪐 Long transits</h3><span style="display:flex;gap:6px">'+(L?'<button class="btn white" id="ltrev">Review</button>':'')+'<button class="btn white" id="ltpaste">'+(L?'New paste':'+ Paste')+'</button></span></div>';
+     if(!L)return hh+'<p class="note">Paste the months-to-years transits from your astrology app. They sit in the background and only speak up near their key dates.</p></div>';
+     var live=L.items.filter(function(it){return ltStatus(it).s!=='ended'}),ks=ltKeysAhead(30);
+     return hh+(L.take?'<p class="ltquote">“'+esc(ltYou(L.take).replace(/^./,function(c){return c.toUpperCase()}))+'”</p>':'')+(ks.length?'<p class="note" style="margin:6px 0">Coming up: '+ks.slice(0,4).map(function(k){return esc(k.t)+' '+ltWhen(k.dd,k.d)}).join(' · ')+'</p>':'')+'<div class="ltlist">'+live.map(ltCard).join('')+'</div>'+(L.overlap?'<p class="note"><b>Overlap:</b> '+esc(ltYou(L.overlap))+'</p>':'')+'<p class="note" style="margin-top:4px">From your '+nice(parse(L.pasted))+' paste. Ended ones drop off on their own.</p></div>'})()+
    '<div class="add"><button class="btn" id="sideas">See today’s ideas →</button><button class="btn white" data-act="close">Close</button></div>';
-  openModal(h);$('#mpanel').querySelectorAll('[data-sedit]').forEach(function(bt){bt.addEventListener('click',function(){openAstroEdit(bt.dataset.sedit,true)})});$('#sideas').addEventListener('click',function(){openPlan()})}
+  openModal(h);$('#mpanel').querySelectorAll('[data-sedit]').forEach(function(bt){bt.addEventListener('click',function(){openAstroEdit(bt.dataset.sedit,true)})});$('#sideas').addEventListener('click',function(){openPlan()});var lp=$('#ltpaste');if(lp)lp.addEventListener('click',openLongPaste);var lr=$('#ltrev');if(lr)lr.addEventListener('click',function(){openLongReview(JSON.parse(JSON.stringify(ltLong())))})}
 function openAstroEdit(t,fromStars){var lab={d:'Today’s horoscope',w:'This week’s horoscope',m:'This month’s horoscope'}[t],cur=astro()[t][astroKey(t)]||'';
   openModal('<h2>✨ '+lab+'</h2><p class="note" style="margin-top:0">Paste it in — the plan picks up themes like rest, money, home or fresh starts and nudges matching tasks.</p><form id="astrof"><textarea class="field" rows="9" placeholder="Paste your horoscope here…">'+esc(cur)+'</textarea><div class="add"><button class="btn">Save</button>'+(cur?'<button type="button" class="btn white" id="astroclr">Clear</button>':'')+'<button type="button" class="btn white" data-act="close">Cancel</button></div></form>');
   $('#astrof').addEventListener('submit',function(e){e.preventDefault();var v=$('#astrof textarea').value.trim();if(v)astroSet(t,v);else delete astro()[t][astroKey(t)];save();toast('✨ Saved');wrapPill();fromStars?openStars():openPlan()});
   var c=$('#astroclr');if(c)c.addEventListener('click',function(){delete astro()[t][astroKey(t)];save();wrapPill();fromStars?openStars():openPlan()})}
 
 /* ===== Cheers (wins + heads-ups) vs Next up (ideas) ===== */
-var CHEER_WIN=['💪','🌟','🔥','📈','🌅','🎨','💧'],CHEER_NEAR=['🏁','✅','🌱'],CHEER_HEADS=['📅','💅','🎟️','🩸','🔮','📝'];
+var CHEER_WIN=['💪','🌟','🔥','📈','🌅','🎨','💧','💫'],CHEER_NEAR=['🏁','✅','🌱'],CHEER_HEADS=['📅','💅','🎟️','🩸','🔮','📝'];
 function cheerKind(x){if(x.star)return null;var hl=/^(\d+) daily habits left/.exec(x.txt);if(hl&&+hl[1]>4)return null;if(x.ic==='✨')return /^Your stars/.test(x.txt)?null:/Perfect day/.test(x.txt)?'win':'near';
   if(CHEER_WIN.indexOf(x.ic)>-1)return 'win';if(CHEER_NEAR.indexOf(x.ic)>-1)return 'near';if(CHEER_HEADS.indexOf(x.ic)>-1)return 'heads';return null}
 function cheerTips(ctx){var t=[];try{t=helperTips(ctx)}catch(e){}return t.filter(function(x){return cheerKind(x)})}
@@ -2166,7 +2256,7 @@ function taskKind(t){t=t.toLowerCase();return {
   big:/purge|organi[sz]e|clean|fix|build|backfill|rebrand|deep|repair|install|re-organize|put up/.test(t),
   errand:/buy|pick up|kroger|pharmacy|store|order|shot|appointment/.test(t)}}
 function todayPlan(){var p=period(),ph=p.phase,low=ph==='mens'||ph==='lut',hi=ph==='foll'||ph==='ovu',mo=moon(),rx=mercRx(),wd=TODAY.getDay(),weekend=wd===0||wd===6,cands=priCands(),cmap={};cands.forEach(function(c){cmap[c.id]=c});
-  var AT=astroThemes(),rest=AT.some(function(t){return t.k==='rest'});var items=[];['todo','art','tobuy','hobbies','endeavors'].forEach(function(k){(D.lists[k]||[]).forEach(function(sct,si){sct.items.forEach(function(it){if(it.done||PRI_SKIP[it.id])return;items.push({k:k,si:si,id:it.id,t:it.t,note:it.note||'',pri:!!it.pri,b:bucketOf(k).name})})})});
+  var AT=astroThemes(),rest=AT.some(function(t){return t.k==='rest'}),LL=longLayer();var items=[];['todo','art','tobuy','hobbies','endeavors'].forEach(function(k){(D.lists[k]||[]).forEach(function(sct,si){sct.items.forEach(function(it){if(it.done||PRI_SKIP[it.id])return;items.push({k:k,si:si,id:it.id,t:it.t,note:it.note||'',pri:!!it.pri,b:bucketOf(k).name})})})});
   items.forEach(function(o){var K=o.k==='tobuy'?{errand:true}:taskKind(o.t+' '+o.note),sc=0,why=[];
     if(o.pri){sc+=6;why.push('your ★ priority')}
     var c=cmap[o.id];if(c){sc+=Math.min(5,c.sc);why=why.concat(c.why.slice(0,1))}
@@ -2177,6 +2267,8 @@ function todayPlan(){var p=period(),ph=p.phase,low=ph==='mens'||ph==='lut',hi=ph
     if((mo.k==='new'||mo.k==='wax')&&K.start){sc+=2;why.push(mo.n.toLowerCase()+' — good for starting')}
     if(rx&&(K.clear||K.fix)){sc+=1;why.push('Mercury retrograde favors re-doing + fixing')}
     AT.forEach(function(th){if(th.fit(K,o)){sc+=2;why.push('your horoscope mentions '+th.lab)}});
+    var lb=null;Object.keys(LL.th).forEach(function(k){var T=ASTRO_THEMES.filter(function(x){return x.k===k})[0],v=LL.th[k];if(T&&T.fit(K,o)&&(!lb||v.w>lb.w))lb=v});
+    if(lb){sc+=lb.w;if(lb.w>=1)why.push('long transit: '+lb.it.name+(lb.st.near?' ('+lb.st.near.k.t.toLowerCase()+' '+ltWhen(Math.max(0,lb.st.near.dd),lb.st.near.k.d)+')':''))}
     if(weekend&&K.big){sc+=2;why.push('it’s the weekend — time for a bigger one')}
     if(!weekend&&K.big&&!o.pri){sc-=1}
     if(!weekend&&(K.errand||o.t.length<26)){sc+=1;if(!why.length)why.push('quick enough for after work')}
@@ -2193,7 +2285,10 @@ function todayPlan(){var p=period(),ph=p.phase,low=ph==='mens'||ph==='lut',hi=ph
   return {picks:picks,ctx:ctx,heads:heads,low:lowPick,up:upPick}}
 function openPlan(){var P=todayPlan(),h='<h2>✦ Next up</h2><p class="note" style="margin-top:0">'+nice(TODAY)+' — ideas based on your priorities, energy, the moon, your stars and your schedule. Take what helps.</p>';
   var cu=upcoming().filter(function(e){return daysBetween(TODAY,parse(e.date))<=14}).slice(0,4);
-  h+='<h3 class="planh" style="margin-top:6px">Coming up</h3>'+(cu.length?cu.map(function(e){return '<div class="row"><span style="font-size:18px">📅</span><div class="t"><span>'+esc(e.title)+'</span><small>'+evWhen(e)+(e.when?' · '+esc(e.when):'')+'</small></div><button class="btn white" data-go="upcoming">Open</button></div>'}).join(''):'<p class="note">Nothing on the calendar in the next two weeks.</p>');
+  var cuL=cu.map(function(e){return {d:e.date,h:'<div class="row"><span style="font-size:18px">📅</span><div class="t"><span>'+esc(e.title)+'</span><small>'+evWhen(e)+(e.when?' · '+esc(e.when):'')+'</small></div><button class="btn white" data-go="upcoming">Open</button></div>'}});
+  ltKeysAhead(14).slice(0,3).forEach(function(k){cuL.push({d:k.d,h:'<div class="row ltrow"><span style="font-size:18px">☾</span><div class="t"><span>'+esc(k.t.charAt(0).toUpperCase()+k.t.slice(1))+'</span><small>'+ltWhen(k.dd,k.d).replace(/^./,function(c){return c.toUpperCase()})+' · star date'+(k.it.note?' · '+esc(ltFirst(k.it.note)):'')+'</small></div></div>'})});
+  cuL.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0});
+  h+='<h3 class="planh" style="margin-top:6px">Coming up</h3>'+(cuL.length?cuL.map(function(x){return x.h}).join(''):'<p class="note">Nothing on the calendar in the next two weeks.</p>');
   h+='<h3 class="planh">The vibe today</h3><div class="planctx">'+P.ctx.map(function(c){return '<div><span>'+c.ic+'</span><b>'+esc(c.t)+'</b><small>'+esc(c.d)+'</small></div>'}).join('')+'</div>';
   var AN=astroNow(),ATh=astroThemes();h+='<h3 class="planh">✨ Your stars</h3><div class="astrorow">'+[['d','Today'],['w','This week'],['m','This month']].map(function(x){var tx=AN[x[0]];return '<button class="astrocard'+(tx?' has':'')+'" data-astro="'+x[0]+'"><b>'+x[1]+'</b><small>'+(tx?esc(astroSnip(tx,120)):'+ paste horoscope')+'</small></button>'}).join('')+'</div>'+(ATh.length?'<p class="note" style="margin:4px 0 0">Themes picked up: '+ATh.map(function(t){return t.lab}).join(', ')+'</p>':'');
   h+='<h3 class="planh">Ideas for right now</h3>'+(P.picks.length?P.picks.map(function(o,i){return '<div class="row"><span style="font-size:18px">✦</span><div class="t"><span>'+(o.pri?'★ ':'')+esc(o.t)+'</span><small>'+esc(o.b)+(o.why.length?' · '+esc(o.why.slice(0,2).join(', ')):'')+'</small></div>'+(o.pri?'':'<button class="btn white" data-pstar="'+o.id+'" data-k="'+o.k+'" data-si="'+o.si+'">★</button>')+'<button class="btn" data-go="'+o.k+'">Open</button></div>'}).join(''):'<p class="note">Nothing pressing — star a few things and they’ll show up here.</p>');
