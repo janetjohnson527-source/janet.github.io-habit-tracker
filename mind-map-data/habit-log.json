@@ -41,6 +41,11 @@
     "2026-11-19": {
       "zoloft": true,
       "nopick": true
+    },
+    "2026-11-20": {
+      "water": true,
+      "nopick": true,
+      "nospend": true
     }
   }
 }
