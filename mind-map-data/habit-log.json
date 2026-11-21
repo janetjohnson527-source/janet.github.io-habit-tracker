@@ -45,7 +45,10 @@
     "2026-11-20": {
       "water": true,
       "nopick": true,
-      "nospend": true
+      "nospend": true,
+      "shower": true,
+      "zoloft": true,
+      "mouth": true
     }
   }
 }
