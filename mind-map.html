@@ -601,7 +601,10 @@ body.dopen .wrappill{display:none}
 .lttags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.lttags span{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,currentColor 12%,transparent)}
 .lttags.pick .chip{font-size:11px;padding:3px 10px}
 .ltdates{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 2px}.ltdates label{font-size:12px;font-weight:700;display:flex;gap:6px;align-items:center}.ltdates input{font:inherit;font-size:12px;padding:3px 6px;border:2px solid #1b1714;border-radius:8px;background:#fff;color:#1b1714}
-.ltquote{font-style:italic;font-weight:600;margin:8px 0 4px;padding-left:10px;border-left:3px solid var(--c,currentColor)}
+.sthead{margin:2px 0 12px;padding:10px 14px;border-left:4px solid var(--c,currentColor);background:color-mix(in srgb,currentColor 6%,transparent);border-radius:0 12px 12px 0}
+.sthead small{display:block;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;opacity:.7}
+.sthead p{margin:4px 0 0;font-size:17px;line-height:1.35;font-weight:700;font-style:italic}
+.ltquote{font-style:italic;font-weight:600;margin:4px 0 4px;padding-left:10px;border-left:3px solid var(--c,currentColor)}
 .starpill.ready{background:linear-gradient(90deg,#d9c8ff,#ffd0e4)}
 [data-theme="lava"] .wrappill{background:rgba(20,12,34,.85);color:#f4ecff;border:1px solid rgba(244,236,255,.35);box-shadow:0 0 14px rgba(255,90,217,.25)}
 .wcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:16px}
@@ -1830,7 +1833,7 @@ function helperTips(ctx){
     if(dow>=2&&prevAvg>0&&W2.avg>prevAvg+5)add(['habits'],5,'📈','This week is running '+(W2.avg-prevAvg)+' points ahead of last week.');
     if(dow===0&&W2.avg<prevAvg&&prevAvg>0)add(['habits'],3,'🌅','New week, fresh start.');}catch(e){}
   try{var ath=astroThemes();if(ath.length)add(['home'],4,'✨','Your stars point to '+ath.slice(0,2).map(function(t){return t.lab}).join(' + ')+' — see Ideas for matching tasks.')}catch(e){}
-  try{var lt=ltTip();if(lt)add(['home'],lt.pr,lt.ic,lt.txt);var LLg=ltLong();if(LLg&&LLg.take&&Math.floor(TODAY.getTime()/864e5)%3===0)add(['home'],3,'💫','Through-line: '+ltFirst(LLg.take).replace(/^./,function(c){return c.toUpperCase()})+'.')}catch(e){}
+  try{var lt=ltTip();if(lt)add(['home'],lt.pr,lt.ic,lt.txt);var HLc=starHeadline();if(HLc&&(HLc.src!=='lt'||Math.floor(TODAY.getTime()/864e5)%3===0))add(['home'],3,'💫',(HLc.src==='w'?'This week’s headline':HLc.src==='m'?'This month’s headline':HLc.src==='d'?'Today’s headline':'Big-picture headline')+': '+HLc.t)}catch(e){}
   // movement -> art + work
   if(moved)add(['art','habits','home'],5,'🏃','You moved today — that energy carries into art + work. Good time for a drawing session.',ctx==='art'?null:'art');
   else add(['art','habits'],4,'🏃','A short walk or stretch first tends to unlock art + work energy.',ctx==='habits'?null:'habits');
@@ -2215,15 +2218,26 @@ function openLongReview(P){var TH=ASTRO_THEMES;
   $('#ltback').addEventListener('click',function(){openLongPaste();$('#ltf textarea').value=P.raw});
   $('#ltsave').addEventListener('click',function(){mp.querySelectorAll('.ltcard[data-i]').forEach(function(c){var it=P.items[+c.dataset.i];c.querySelectorAll('input[data-f]').forEach(function(inp){it[inp.dataset.f]=inp.value||null});it.tags=[].map.call(c.querySelectorAll('[data-tag].on'),function(b){return b.dataset.tag})});
     astro().long=P;save();wrapPill();toast('🪐 Long transits saved');openStars()})}
+/* ===== Stars headline: the through-line from the freshest reading (week → month → today → long transits) ===== */
+function starPick(tx){if(!tx)return '';var lines=tx.split(/\n+/).map(function(x){return x.trim()}).filter(Boolean),m=null;
+  var r0=/(?:^|[\s.!?])(take-?away|through-?line|headline|bottom line|tl;?dr|the gist)\s*[:\-–—]\s*([^\n]+)/i.exec(tx)||/^(theme|in short)\s*[:\-–—]\s*([^\n]+)/im.exec(tx);if(r0)m=r0[2];
+  if(!m){var flat=tx.replace(/\s+/g,' ').trim(),sent=flat.match(/[^.!?]+[.!?]+/g)||[flat];m=sent[0];if(m.length<40&&sent[1])m+=' '+sent[1]}
+  m=ltYou(m.trim());if(m.length>170)m=m.slice(0,168).replace(/\s+\S*$/,'')+'…';return m.charAt(0).toUpperCase()+m.slice(1)}
+function starHeadline(){var AN=astroNow(),ws=weekStart(TODAY),we=addDays(ws,6),L=null;try{L=ltLong()}catch(e){}
+  if(AN.w)return {t:starPick(AN.w),lab:'This week’s headline · '+ltDate(ymd(ws))+'–'+(ws.getMonth()===we.getMonth()?we.getDate():ltDate(ymd(we)))+' · from your weekly reading',src:'w'};
+  if(AN.m)return {t:starPick(AN.m),lab:'This month’s headline · '+FMN[TODAY.getMonth()]+' · from your monthly reading',src:'m'};
+  if(AN.d)return {t:starPick(AN.d),lab:'Today’s headline · from your daily reading',src:'d'};
+  if(L&&L.take)return {t:starPick('Takeaway: '+L.take),lab:'Big-picture headline · from your '+ltDate(L.pasted)+' long transits (paste a weekly reading to update it)',src:'lt'};
+  return null}
 function openStars(){var AN=astroNow(),ATh=astroThemes(),mo=moon(),rx=mercRx();
-  var h='<h2>☾ Your stars</h2><p class="note" style="margin-top:0">Paste your daily, weekly or monthly horoscope. Today’s ideas pick up the themes.</p>'+
+  var HL=starHeadline();var h='<h2>☾ Your stars</h2>'+(HL?'<div class="sthead"><small>'+esc(HL.lab)+'</small><p>“'+esc(HL.t)+'”</p></div>':'')+'<p class="note" style="margin-top:0">Paste your daily, weekly or monthly horoscope. Today’s ideas pick up the themes.</p>'+
    '<div class="planctx"><div><span>'+mo.ic+'</span><b>'+mo.n+'</b><small>'+mo.tip+'</small></div>'+(rx?'<div><span>☿</span><b>Mercury retrograde</b><small>until '+nice(rx.end)+' — double-check plans, finish before starting</small></div>':'')+'</div>'+
    '<div class="starcards">'+[['d','Today'],['w','This week'],['m','This month']].map(function(x){var tx=AN[x[0]];return '<div class="starcard"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+x[1]+'</b><button class="btn white" data-sedit="'+x[0]+'">'+(tx?'Edit':'+ Paste')+'</button></div>'+(tx?'<p>'+esc(tx)+'</p>':'<p class="note">Nothing yet.</p>')+'</div>'}).join('')+'</div>'+
    (ATh.length?'<p class="note">Themes picked up: '+ATh.map(function(t){return t.lab}).join(', ')+'</p>':'')+
    (function(){var L=ltLong(),hh='<div class="ltsec"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 class="planh" style="margin:0">🪐 Long transits</h3><span style="display:flex;gap:6px">'+(L?'<button class="btn white" id="ltrev">Review</button>':'')+'<button class="btn white" id="ltpaste">'+(L?'New paste':'+ Paste')+'</button></span></div>';
      if(!L)return hh+'<p class="note">Paste the months-to-years transits from your astrology app. They sit in the background and only speak up near their key dates.</p></div>';
      var live=L.items.filter(function(it){return ltStatus(it).s!=='ended'}),ks=ltKeysAhead(30);
-     return hh+(L.take?'<p class="ltquote">“'+esc(ltYou(L.take).replace(/^./,function(c){return c.toUpperCase()}))+'”</p>':'')+(ks.length?'<p class="note" style="margin:6px 0">Coming up: '+ks.slice(0,4).map(function(k){return esc(k.t)+' '+ltWhen(k.dd,k.d)}).join(' · ')+'</p>':'')+'<div class="ltlist">'+live.map(ltCard).join('')+'</div>'+(L.overlap?'<p class="note"><b>Overlap:</b> '+esc(ltYou(L.overlap))+'</p>':'')+'<p class="note" style="margin-top:4px">From your '+nice(parse(L.pasted))+' paste. Ended ones drop off on their own.</p></div>'})()+
+     return hh+''+(ks.length?'<p class="note" style="margin:6px 0">Coming up: '+ks.slice(0,4).map(function(k){return esc(k.t)+' '+ltWhen(k.dd,k.d)}).join(' · ')+'</p>':'')+'<div class="ltlist">'+live.map(ltCard).join('')+'</div>'+(L.overlap?'<p class="note"><b>Overlap:</b> '+esc(ltYou(L.overlap))+'</p>':'')+'<p class="note" style="margin-top:4px">From your '+nice(parse(L.pasted))+' paste. Ended ones drop off on their own.</p></div>'})()+
    '<div class="add"><button class="btn" id="sideas">See today’s ideas →</button><button class="btn white" data-act="close">Close</button></div>';
   openModal(h);$('#mpanel').querySelectorAll('[data-sedit]').forEach(function(bt){bt.addEventListener('click',function(){openAstroEdit(bt.dataset.sedit,true)})});$('#sideas').addEventListener('click',function(){openPlan()});var lp=$('#ltpaste');if(lp)lp.addEventListener('click',openLongPaste);var lr=$('#ltrev');if(lr)lr.addEventListener('click',function(){openLongReview(JSON.parse(JSON.stringify(ltLong())))})}
 function openAstroEdit(t,fromStars){var lab={d:'Today’s horoscope',w:'This week’s horoscope',m:'This month’s horoscope'}[t],cur=astro()[t][astroKey(t)]||'';
