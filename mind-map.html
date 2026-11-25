@@ -171,6 +171,12 @@ textarea.field{border-radius:14px;min-height:110px;resize:vertical;width:100%}
 .cal .d.today{box-shadow:inset 0 0 0 3px var(--ink)}
 .cal .d.empty{border:0;background:none}
 .cal .d.dim{opacity:.4}
+.upcal .cal .d{min-height:78px;cursor:pointer;transition:transform .12s}.upcal .cal .d:not(.empty):hover{transform:translateY(-2px)}
+.upcal .cal .d .ev{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;font-weight:700;padding:2px 6px;margin-top:4px;border-radius:6px;line-height:1.3}
+.upcal .cal .d .ucstar{background:transparent;border:1.5px dashed currentColor;font-weight:600;opacity:.85}
+.upcal .hnav{display:flex;gap:6px}.upcal .hnav .btn{padding:4px 12px}
+.ucleg{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-1px}.ucleg.star{border:1.5px dashed currentColor}
+form.flash{animation:upflash .9s}@keyframes upflash{0%,100%{transform:none}30%{transform:scale(1.02)}}
 .dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px}.dots i{width:8px;height:8px;border-radius:50%}
 .ev{display:inline-block;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:1px 7px;font-size:10px;font-weight:800;margin-top:3px}
 .bars{display:flex;gap:8px;align-items:flex-end;height:170px;margin-top:10px}
@@ -1169,6 +1175,8 @@ if(!D)D=defaults();
 if(D.events){var _before=D.events.length;D.events=D.events.filter(function(e){return !(e.title==='Flight to Greenville'&&e.date==='2026-11-18')&&!(e.title==='Back in Columbus'&&e.date==='2026-11-22')});if(D.events.length!==_before){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}
 if(D.events){function addEv(ev){if(!D.events.some(function(x){return x.title===ev.title&&x.date===ev.date})){D.events.push(ev);try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}addEv({id:uid(),date:'2026-12-04',title:'King Serpent',when:'6:00 PM · Used Kids Records, 2500 Summit St, Columbus, OH'});addEv({id:uid(),date:'2026-12-05',title:'Bwoods Karaoke',when:''});addEv({id:uid(),date:'2026-12-28',title:'Good Rev Show',when:'Rumba'});addEv({id:uid(),date:'2026-11-27',title:'Darkwave show',when:'Cafe Bourbon Street · with Jeremy, Alli, and Cody'});}
 if(D.events){var _de=D.events.find(function(x){return x.title==='Darkwave show'&&x.date==='2026-11-27'});if(_de){_de.title='Shadowbeat w/ DJ Adam Scoppa + Melani Paganie';_de.when='9:00 PM · Cafe Bourbon Street · with Jeremy, Alli, and Cody';try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}
+/* tidy: drop exact duplicate events (same title + date) */
+if(D.events){var _seen={},_n=D.events.length;D.events=D.events.filter(function(x){var k=x.date+'|'+x.title;if(_seen[k])return false;_seen[k]=1;return true});if(D.events.length!==_n){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}}
 if(D.habits && !D.habits.some(function(h){return h.id==='lymph'}) && (D.removedHabits||[]).indexOf('lymph')<0){D.habits.splice(13,0,{id:'lymph',name:'Lymphatic drainage',color:'#7fd8b8'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='collagen'}) && (D.removedHabits||[]).indexOf('collagen')<0){D.habits.splice(14,0,{id:'collagen',name:'Collagen',color:'#ffb38a'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 if(D.habits && !D.habits.some(function(h){return h.id==='posture'}) && (D.removedHabits||[]).indexOf('posture')<0){var si=D.habits.findIndex(function(h){return h.id==='strength'});D.habits.splice(si<0?D.habits.length:si,0,{id:'posture',name:'Posture exercises',color:'#e0aaff'});try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
@@ -1748,8 +1756,17 @@ function drawPeriod(b){var p=period(),ph=PH[p.phase];
   return h}
 
 /* --- upcoming --- */
+var upOff=0;
+function upCal(){var ref=new Date(TODAY.getFullYear(),TODAY.getMonth()+upOff,1),acc=tAccent(),ink=txtOn(acc),star={};
+  try{var L=ltLong();if(L)L.items.forEach(function(it){if(it.planet==='Moon')return;ltAllKeys(it).forEach(function(k){(star[k.d]=star[k.d]||[]).push(k.t)})})}catch(e){}
+  var cal=monthGrid(ref,function(d){var ds=ymd(d),ev=D.events.filter(function(e){return e.date===ds}),st=star[ds]||[],past=d<TODAY&&ds!==ymd(TODAY);
+    var html=ev.map(function(e){return '<span class="ev ucev" style="background:'+acc+';color:'+ink+'" title="'+esc(e.title+(e.when?' · '+e.when:''))+'">'+esc(e.title)+'</span>'}).join('')+
+      st.map(function(t){return '<span class="ev ucstar" title="'+esc(t)+'">☾ '+esc(t.replace(/cazimi.*/i,'cazimi').replace(/^./,function(c){return c.toUpperCase()}))+'</span>'}).join('');
+    return {cls:(past?' dim':'')+(ev.length?' hasev':''),attr:' data-act="upday" data-date="'+ds+'" title="'+nice(d)+(ev.length||st.length?' — '+ev.map(function(e){return e.title}).concat(st).join(' · '):' — click to add an event')+'"',html:html}});
+  return '<div class="panel upcal"><div class="ghead"><h2 style="margin:0">'+FMN[ref.getMonth()]+' '+ref.getFullYear()+'</h2><span class="hnav"><button class="btn white" data-act="upoff" data-d="-1" aria-label="previous month">‹</button>'+(upOff?'<button class="btn white" data-act="upoff" data-d="0">Today</button>':'')+'<button class="btn white" data-act="upoff" data-d="1" aria-label="next month">›</button></span></div>'+cal+
+    '<p class="note" style="margin-top:8px"><span class="ucleg" style="background:'+acc+'"></span> your plans &nbsp; <span class="ucleg star"></span> ☾ star dates from your long transits &nbsp;·&nbsp; click a day to add something</p></div>'}
 function drawUpcoming(b){var u=upcoming();
-  var h=head(b,'Your shared calendar with Jeremy stays on its own site — this is a quick look plus a link.')+
+  var h=head(b,'Your shared calendar with Jeremy stays on its own site — this is a quick look plus a link.')+upCal()+
   '<div class="cols"><div class="panel"><h2>Coming up</h2>'+(u.length?u.map(function(e){var d=parse(e.date),n=daysBetween(TODAY,d);return '<div class="row"><span class="phase" style="background:var(--c);margin:0;min-width:70px;text-align:center">'+(n===0?'Today':n+'d')+'</span><div class="t"><span>'+esc(e.title)+'</span><small>'+nice(d)+(e.when?' · '+esc(e.when):'')+'</small></div><button class="x" data-act="delev" data-id="'+e.id+'">✕</button></div>'}).join(''):'<p class="note">Nothing coming up.</p>')+
   '<form class="add" data-act="addev"><input type="date" style="flex:none;width:150px" aria-label="date"><input placeholder="What + where" aria-label="event"><button class="btn">Add</button></form>'+
   (function(){var ks=ltKeysAhead(60);if(!ks.length)return '';return '<h3 class="planh" style="margin-top:16px">☾ Star dates</h3>'+ks.map(function(k){return '<div class="row ltrow"><span class="phase" style="margin:0;min-width:70px;text-align:center;background:transparent;border:2px dashed currentColor">'+(k.dd===0?'Today':k.dd+'d')+'</span><div class="t"><span>'+esc(k.t.charAt(0).toUpperCase()+k.t.slice(1))+'</span><small>'+nice(parse(k.d))+(k.it.note?' · '+esc(ltFirst(k.it.note)):'')+'</small></div></div>'}).join('')+'<p class="note">From your long transits in Stars. These don’t change your Next up.</p>'})()+'</div>'+
@@ -1962,6 +1979,8 @@ $('#dwrap').addEventListener('click',function(e){var t=e.target.closest('[data-a
   if(a==='nailsoff'){D.nails.off=ymd(TODAY);D.nails.offLog=D.nails.offLog||[];if(D.nails.offLog.indexOf(D.nails.off)<0)D.nails.offLog.push(D.nails.off);save();renderDrawer();toast('Countdown paused — enjoy the break');return}
   if(a==='nailsunoff'){if(D.nails.offLog)D.nails.offLog=D.nails.offLog.filter(function(x){return x!==D.nails.off});delete D.nails.off;save();renderDrawer();toast('Countdown back on');return}
   if(a==='nailsdone'){delete D.nails.off;D.nails.last=ymd(TODAY);nailLog(D.nails.last);save();renderDrawer();toast('Next nails: '+nice(nails().next));return}
+  if(a==='upoff'){upOff=+t.dataset.d===0?0:upOff+(+t.dataset.d);renderDrawer();return}
+  if(a==='upday'){var fi=$('#dwrap form[data-act="addev"]');if(fi){var ii=fi.querySelectorAll('input');ii[0].value=t.dataset.date;fi.scrollIntoView({block:'center',behavior:'smooth'});setTimeout(function(){ii[1].focus()},250);fi.classList.add('flash');setTimeout(function(){fi.classList.remove('flash')},900)}return}
   if(a==='delev'){D.events=D.events.filter(function(x){return x.id!==t.dataset.id});save();renderDrawer();return}
 });
 $('#dwrap').addEventListener('toggle',function(e){var d=e.target;if(d&&d.classList&&d.classList.contains('aprog')){if(d.open)artOpen[d.dataset.aid]=1;else delete artOpen[d.dataset.aid]}},true);
