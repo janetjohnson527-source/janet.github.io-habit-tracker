@@ -55,6 +55,11 @@
     },
     "2026-11-24": {
       "water": true
+    },
+    "2026-11-25": {
+      "walk": true,
+      "nopick": true,
+      "nospend": true
     }
   }
 }
